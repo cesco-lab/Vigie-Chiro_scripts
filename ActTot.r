@@ -1,10 +1,10 @@
 library(data.table)
-SED="C:/Users/Yves Bas/Documents/Tadarida/SelExportDonnees.r"
-EPD="C:/Users/Yves Bas/Documents/Tadarida/extr_PF_DataLP.r"
-EPA="C:/Users/Yves Bas/Documents/Tadarida/extr_PF_ActNuit.r"
+SED="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/SelExportDonnees.r"
+EPD="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/extr_PF_DataLP.r"
+EPA="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/extr_PF_ActNuit.r"
 
 #PP=c("55","56","57","58","59","5a","5b")
-PP=c("5a","5b")
+PP=c("5b")
 
 
 args="Valid"
