@@ -1,21 +1,56 @@
 library(data.table)
 library(ggplot2)
 library(reshape2)
+library(raster)
+#library(rgdal)
+library(rgeos)
+
 Particip=fread("C:/wamp64/www/p_export.csv",encoding="UTF-8")
-SiteLoc=fread("C:/wamp64/www/sites_localites.txt",encoding="UTF-8")
+#SiteLoc=fread("C:/wamp64/www/sites_localites.txt",encoding="UTF-8")
+SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
+
+SelDep=T
+Dep=c("24","33","40","47","64")
+Sys.time()
+FranceD= shapefile("C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp")
+Sys.time()
+
+
+if(SelDep)
+{
+  FranceD=subset(FranceD,FranceD$DépARTEM0 %in% Dep)
+}
+
+SiteLoc0=SiteLoc
+coordinates(SiteLoc) <- c("longitude", "latitude")
+proj4string(SiteLoc) <- CRS("+init=epsg:4326") # WGS 84
+FranceWGS84=spTransform(FranceD,CRS(proj4string(SiteLoc)))
+#SiteLoc=crop(SiteLoc,extent(FranceWGS84))
+#SiteLoc=gIntersection(SiteLoc,FranceWGS84,byid=T)
+SiteLoc=raster::intersect(SiteLoc,FranceWGS84)
+
+
+
+
+
 
 Particip=as.data.frame(Particip)
 Annee=substr(Particip$date_debut,7,10)
+
+#dirty way to get the protocol type 
 Protocole=substr(Particip$site,13,nchar(Particip$site)-7)
-Proto3=c("Routier","Routier","Routier","Pedestre","Point Fixe")
+Proto3=c("Routier","Routier","Routier","Pedestre","Point Fixe") 
 Proto33=as.numeric(as.factor(Protocole))
 Proto333=Proto3[Proto33]
 Particip$Proto333=Proto333
 Particip$Annee=Annee
 
-table(Annee)
+Particip=subset(Particip,Particip$site %in% SiteLoc$site)
+
+
+table(Particip$Annee)
 ListSiteAnnee=aggregate(Particip$participation,
-                        by=list(Annee,Particip$site),FUN=length)
+                        by=list(Particip$Annee,Particip$site),FUN=length)
 NbSiteAnnee=aggregate(ListSiteAnnee$Group.2,
                       by=list(ListSiteAnnee$Group.1),FUN=length)
 NbPartAnneeProt=dcast(data=Particip,Annee~Proto333,fun.aggregate=length)
