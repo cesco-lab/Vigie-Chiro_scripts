@@ -1,31 +1,52 @@
 library(data.table)
-PredictAct="./Tadarida/Predict_Act.r"
-PredictDM="./Tadarida/Predict_DM.r"
-PredictPresence="./Tadarida/Predict_Presence.r"
+PredictAct="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/Predict_Act.r"
+PredictDM="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/Predict_DM.r"
+PredictPresence="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/Predict_Presence.r"
 
-Interpole="./Tadarida/Interpole.r"
+Interpole="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/Interpole.r"
 
 args=vector()
-args[4]="SpeciesList.csv"
+#args[4]="SpeciesList.csv"
+args[4]="SpeciesList_bird2018-12-21.csv"
+#args[13]=c("TURPHI")
+args[2]="GI_SysGrid_France_Lat41.45_51.61_Long-5.9_9.73"
+args[3]="01/11/2018" #date of prediction
+#args[5]=90 #Threshold
+args[5]=NA #Threshold
 
-args[2]="GI_RandPts__30_34_755000_766000_6297000_6308000_1000_Lat41.45_51.61_Long-5.9_9.73"
-args[3]="02/09/2018" #date of prediction
-args[5]=50 #Threshold
-args[7]="FranceD__30_34_755000_766000_6297000_6308000.shp"
-args[8]=200 #raster pixel size?
+#args[7]="FranceD__12_30_34_48.shp"
+args[7]="France_dep_L93.shp"
+args[8]=10000 #raster pixel size?
 args[9]=F #DM
 args[10]=T #Act
 args[12]=F #Presence
 args[11]=40 #number of coordinates projections (must be a division of 360)
 
-SpeciesList=fread(args[4])
+if(!is.na(args[5]))
+{
+  Suffix=paste0("_Seuil",args[5],".learner")  
+    }else{
+      Suffix=paste0("NA.learner")  
+      
+    }
+  
+Prefix="./VigieChiro/ModPred/ModRF"
+    
 
+#if(!is.na(args[4]))
+#{
+SpeciesList=fread(args[4])
+#}else{
+#  Species=args[13]
+#  SpeciesList=data.frame(Esp=Species)
+#}
 ListSp=SpeciesList$Esp
 
 for (h in 1:length(ListSp))
 {
   args[1]=ListSp[h]
-ModRF_file=paste0("./VigieChiro/ModPred/ModRFDecMin_",ListSp[h],"_Seuil",args[5],".learner")  
+ModRF_file=paste0(Prefix,"DecMin_",ListSp[h],Suffix)  
+
 if(file.exists(ModRF_file))
 {
   
@@ -40,8 +61,10 @@ if(args[9]==T)
   }
 }
   }
-  ModRF_file=paste0("./VigieChiro/ModPred/ModRFActLog_",ListSp[h],"_Seuil",args[5],".learner")  
-  if(file.exists(ModRF_file))
+  
+ModRF_file=paste0(Prefix,"ActLog_",ListSp[h],Suffix)  
+
+if(file.exists(ModRF_file))
   {
     
   
@@ -53,7 +76,7 @@ if(args[9]==T)
   source(Interpole)
   }
   }else{
-    ModRF_file=paste0("./VigieChiro/ModPred/ModRFPresence_",ListSp[h],"_Seuil",args[5],".learner")  
+    ModRF_file=paste0(Prefix,"Presence_",ListSp[h],Suffix)  
     if(file.exists(ModRF_file))
     {
       if(args[12])
