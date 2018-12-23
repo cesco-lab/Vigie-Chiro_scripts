@@ -3,18 +3,24 @@ library(data.table)
 #bien renommer les chemins en fonction de l'ordi utilisé
 #et vérifier les versions (date, import complet ou non)
 
+LatMin=0
+LatMax=90
+LongMin=-180
+LongMax=180
+
+
 #table "données"
-DataTot=fread("C:/wamp64/www/export180227.txt")
+DataTot=fread("C:/wamp64/www/export_180903.txt")
 Sys.time()
 DataRP=subset(DataTot,substr(DataTot$donnee,1,3)=="Cir")
 Sys.time()
 rm(DataTot)
 
 #table "participations"
-Particip=fread("C:/Program Files (x86)/EasyPHP-DevServer-14.1VC11/data/localweb/p_export.txt",encoding="UTF-8")
+Particip=fread("C:/wamp64/www/p_export.csv",encoding="UTF-8")
 Particip=as.data.frame(Particip)
 #table "localités"
-SiteLoc=fread("C:/Program Files (x86)/EasyPHP-DevServer-14.1VC11/data/localweb/sites_localites.txt",sep="\t")
+SiteLoc=fread("C:/wamp64/www/sites_localites.txt",sep="\t")
 SiteLocRP=subset(SiteLoc,SiteLoc$protocole!="POINT_FIXE")
 #aggrégation au tronçon
 SiteLocRP$Tron=sapply(SiteLocRP$nom,FUN=function(x) if(nchar(x)>2){substr(x,3,nchar(x)-2)}else{x})
@@ -25,10 +31,6 @@ SiteLocRP_TronU=subset(SiteLocRP,SiteLocRP$Secteur=="3")
 
 
 
-LatMin=0
-LatMax=90
-LongMin=-180
-LongMax=180
 
 microdroitRP<-function(x)
 {
