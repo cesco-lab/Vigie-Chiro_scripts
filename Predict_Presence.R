@@ -18,9 +18,14 @@ CoordSIG=subset(CoordSIG,is.na(CoordSIG$SpAltiS)==F)
 
 
 CoordSIG$SpGite=0
+
+if(exists("DateG"))
+{
+  CoordSIG$SpFDate=DateG
+}else{
 CoordSIG$SpFDate=yday(as.Date(args[3]
                               ,format="%d/%m/%Y"))
-
+}
 CoordSIG$Group.1=CoordSIG$Group.1.x
 CoordSIG$Group.2=CoordSIG$Group.2.x
 CoordSIG$Group.1.x=NULL
@@ -71,8 +76,15 @@ Coord=subset(Coord,select=c("Group.1","Group.2","pred","err"))
 
 #print(spplot(DataSaison,zcol="pred",main=ListSp[i]))  
 
+if(exists("DateG"))
+{
+  Mois=g
+}else{
+  Mois=substr(args[3],4,5)
+}
+
 FilName=paste0("./VigieChiro/ModPred/"
-       ,args[1],"_Presence_",substr(args[3],4,5),"_"
+       ,args[1],"_Presence_",Mois,"_"
        ,args[2])
 
 fwrite(Coord,paste0(FilName,".csv"))
