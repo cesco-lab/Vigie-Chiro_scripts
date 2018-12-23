@@ -22,7 +22,12 @@ op <- options(digits.secs=3)
 dist=F #obsolete probably
 
 #args="RandPts__09_11_66_556000_665000_6125000_6202000_3000" #coordinates
-args="RandPts__12_30_34_48_2000"
+#args="RandPts__12_30_34_48_2000"
+#args="coordWGS84_ALL"
+args="carre_stoc_1000_1500"
+
+
+
 args[2]="C:/Users/Yves Bas/Documents/SIG/Bioclim_5m/" #where bioclim TIFF files are
 #récupération des coordonnées dont il faut extraire le SIG
 CoordCPL3=fread(paste0("./VigieChiro/GIS/",args[1],".csv"))
@@ -542,7 +547,7 @@ Sys.time()
 #données bioclim
 ListTifiles=list.files(args[2],full.names=T)
 
-for (i in 2:length(ListTifiles)) #0.1 sec / points
+for (i in 1:length(ListTifiles)) #0.1 sec / points
 {
   Bioc1=raster(ListTifiles[i])
   Sys.time()
