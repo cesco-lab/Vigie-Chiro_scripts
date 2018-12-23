@@ -8,8 +8,10 @@ library(spdep)
 #args[3]="15/06/2018" #date of prediction
 #args[5]=50
 #args[11]=40 #number of coordinates projections (must be a division of 360)
+#ModRF_file=paste0("./VigieChiro/ModPred/ModRFActLog_",args[1],"_Seuil",args[5],".learner")
 
-load(paste0("./VigieChiro/ModPred/ModRFActLog_",args[1],"_Seuil",args[5],".learner"))
+#load(paste0("./VigieChiro/ModPred/ModRFActLog_",args[1],"_Seuil",args[5],".learner"))
+load(ModRF_file)
 Sys.time()
 CoordSIG=fread(paste0("./VigieChiro/GIS/",args[2],".csv"))
 Sys.time()
