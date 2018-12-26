@@ -2,12 +2,12 @@ library(data.table)
 library(climateExtract)
 library(ncdf4)
 FAct="SpNuit2_Seuil50_DataLP_PF_exportTot.csv"  
-FTempMean="C:/Users/Yves Bas/Downloads/tg_0.25deg_reg_v17.0.nc"
-AnneeDerniere=2018
-
-SpNuit=fread(FAct)
+#FTempMean="C:/Users/Yves Bas/Downloads/tg_0.25deg_reg_v17.0.nc"
+#AnneeDerniere=2018
 Particip=fread("C:/wamp64/www/p_export.csv")
 SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
+
+SpNuit=fread(FAct)
 
 ListPart=levels(as.factor(SpNuit$participation))
 
@@ -23,7 +23,8 @@ nlevels(as.factor(test))
 LLU=unique(cbind(Long25,Lat25))
 LLDU=unique(cbind(Long25,Lat25,SpNuit_SLP$Nuit))
 
-LLDU=subset(LLDU,substr(LLDU[,3],1,4)!=AnneeDerniere)
+#LLDU=subset(LLDU,substr(LLDU[,3],1,4)!=AnneeDerniere)
+LLDU=subset(LLDU,substr(LLDU[,3],1,4)!=substr(Sys.time(),1,4))
 
 LLUdf=data.frame(site_id=c(1:nrow(LLU)),longitude=LLU[,1],latitude=LLU[,2])
 
