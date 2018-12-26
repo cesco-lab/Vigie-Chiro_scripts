@@ -20,7 +20,7 @@ FranceD= shapefile("C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France
 
 #récupération des données participation
 Particip=fread("C:/wamp64/www/p_export.csv")
-  #récupération des localités
+#récupération des localités
 SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
 
 #liste des coordonnées existantes dans ce jeu de données
@@ -28,8 +28,8 @@ ListPar=levels(as.factor(DataCPL3$participation))
 SelPar=subset(Particip,Particip$participation %in% ListPar)
 SelParSL=merge(SiteLoc,SelPar,by.x=c("site","nom"),by.y=c("site","point"))
 CoordCPL3=aggregate(SelParSL$participation
-                ,by=c(list(SelParSL$longitude),list(SelParSL$latitude),list(SelParSL$participation))
-                ,FUN=length)
+                    ,by=c(list(SelParSL$longitude),list(SelParSL$latitude),list(SelParSL$participation))
+                    ,FUN=length)
 
 Sys.time()
 ListSpref=match(DataCPL3$espece,refPF$Espece)
