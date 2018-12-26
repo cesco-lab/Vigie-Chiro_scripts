@@ -20,7 +20,7 @@ Sys.time()
 testH=match(CoordH,names(OccSL))
 OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[1]]))
 OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[2]]))
-
+OccSL$id=c(1:nrow(OccSL))
 
 #coordinates(OccSL) <- c("decimalLongitude", "decimalLatitude")
 coordinates(OccSL) <- CoordH
@@ -36,7 +36,7 @@ BufferL=gBuffer(OccSL_L93,width=BufferLarge,byid=T)
 
 #I don't do Corine Land Cover habitats for small buffers because CLC is not accurate enough (min pol size >> buffer size)
 Sys.time()
-SpCLC_M=intersect(BufferM[1,],CLC12) # 0.3 sec / pol
+SpCLC_M=intersect(BufferM,CLC12) # 0.8 sec / pol
 Sys.time()
 SpCLC_M=subset(SpCLC_M,is.na(SpCLC_M$CODE_12)==F)
 
