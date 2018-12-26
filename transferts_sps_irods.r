@@ -1,10 +1,9 @@
 library(data.table)
-library(curl)
 ATS=fread("C:/wamp64/www/atraitersps.txt",h=F)
 ATA=fread("C:/wamp64/www/atraiter.txt",h=F)
 Particip=fread("C:/wamp64/www/p_export.csv")
 
-Pshort=subset(Particip,select=c("participation","observateur","date_debut","date_fin","site"))
+Pshort=subset(Particip,select=c("participation","observateur","nb_wav","date_debut","date_fin","site","trait_debut"))
 
 logsps=fread("C:/wamp64/www/logsps.txt")
 
@@ -47,3 +46,4 @@ logpG2=logpG2[order(logpG2$SUnum,decreasing=T),]
 fwrite(logpG2,"C:/wamp64/www/logpG2.csv")
 fwrite(logpA,"C:/wamp64/www/logpA.csv")
 fwrite(logprodNA,"C:/wamp64/www/logpNA.csv")
+
