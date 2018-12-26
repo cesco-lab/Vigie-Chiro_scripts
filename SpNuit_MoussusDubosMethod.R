@@ -11,17 +11,21 @@ library(glmmTMB)
 FirstYear=2014
 LastYear=2017
 SpeciesList=fread("SpeciesList.csv")
+FAct="SpNuit2_Seuil50_DataLP_PF_exportTot.csv"  
+FGIS="./VigieChiro/GIS/GI_coordWGS84_SpNuit2_Seuil50_DataLP_PF_exportTot_Lat41.45_51.61_Long-5.9_9.73.csv"
+Particip=fread("C:/wamp64/www/p_export.csv")
+SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
+DateSel=c(1:183)
+SelBat=T
+
 Bat=subset(SpeciesList$Esp,SpeciesList$Group=="bat")
 BS=subset(SpeciesList$Esp,SpeciesList$Group=="bush-cricket")
 
 
-FAct="SpNuit2_Seuil50_DataLP_PF_exportTot.csv"  
+
 SpNuit=fread(FAct)
-FGIS="./VigieChiro/GIS/GI_coordWGS84_SpNuit2_Seuil50_DataLP_PF_exportTot_Lat41.45_51.61_Long-5.9_9.73.csv"
 GIS=fread(FGIS)
 
-Particip=fread("C:/wamp64/www/p_export.csv")
-SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
 
 Gite=mapply(function(x,y) 
   ((grepl(paste0(y,"="),x))|(grepl(paste0(y," ="),x)))
@@ -66,10 +70,13 @@ db=rbind(SpNuit_SLPAG,Data0,use.names=T)
 db$year=substr(db$Nuit,1,4)
 db$day=yday(as.Date(db$Nuit))
 
+db=subset(db,db$day %in% DateSel)
 
+db=subset(db,db$year %in% c(FirstYear:LastYear))
 
-
-
+if(SelBat){
+  db=subset(db,db$espece %in% Bat)
+}
 
 #preparing result storage
 
@@ -117,20 +124,23 @@ for(sp in levels(factor(db$espece))){
   }
 }
 
-save(aics, file = "./VigieChiro/GLMs/DecPheno/aics.array")
-
+NameArray=paste0("./VigieChiro/GLMs/DecPheno/aics_",FirstYear,"_",LastYear,"_",min(DateSel),"_",max(DateSel),".array")
+  
+  
+  
+save(aics, file = NameArray)
 
 #checking aic curves
 
-load("./VigieChiro/GLMs/DecPheno/aics.array")
+#load(NameArray)
 par(mfrow = c(2,2))
 for(sp in dimnames(aics)[[3]]){ 
   for(i in FirstYear:LastYear){
     if(!is.na(aics[as.character(i), ,sp]))
     {
-    plot(aics[as.character(i), ,sp], main = paste(sp, i))
+      plot(aics[as.character(i), ,sp], main = paste(sp, i))
     }
-      }
+  }
 }
 
 
@@ -142,6 +152,8 @@ t <- array(dim = c(nlevels(factor(db$year)), nlevels(factor(db$espece))),
 
 # finding the best fitting shift (for each years and each species)
 # this will save the shift 't' for which the AIC of the previous model is the best
+
+
 
 for(i in dimnames(aics)[[3]]){
   for(j in rownames(aics)){
@@ -157,7 +169,10 @@ for(i in dimnames(aics)[[3]]){
 t <- melt(t)
 colnames(t) <- c("year", "espece", "t")
 t$t[t$year == "2017"] <- 0 # here 2007 was a reference year. I set it to zero manually ('cause it's simple you know...)
-save(t, file = "./VigieChiro/GLMs/DecPheno/t.array")
+
+NameT=paste0("./VigieChiro/GLMs/DecPheno/t_",FirstYear,"_",LastYear,"_",min(DateSel),"_",max(DateSel),".array")
+
+save(t, file = NameT)
 
 par(mfrow = c(1,1))
 
@@ -194,6 +209,6 @@ for(i in levels(factor(db$espece))){
   sub <- t[t$espece == i, ]
   if(nrow(sub)>0)
   {
-  hist(as.numeric(as.character(sub$t)), main = i, xlim = c(-20,20))
+    hist(as.numeric(as.character(sub$t)), main = i, xlim = c(-20,20))
   }
-    }
+}
