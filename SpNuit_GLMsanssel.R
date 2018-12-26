@@ -7,11 +7,17 @@ FAct="SpNuit2_Seuil50_DataLP_PF_exportTot.csv"
 FAT="AnomalieTemp.csv"
 FGIS="./VigieChiro/GIS/GI_coordWGS84_SpNuit2_Seuil50_DataLP_PF_exportTot_Lat41.45_51.61_Long-5.9_9.73.csv"
 FVC="variables_choisies"
-TagModel="GLMnonselect_"
+TagModel="GLMnonselect_DecOT_iJour"
+SpeciesList=fread("SpeciesList.csv")
+# Famille
+familyMod="nbinom2"
+TraitsClim=fread("C:/Users/Yves Bas/Documents/VigieChiro/Traits/ClimNiche_OccSL_bush-cricket.csv")
+
+SpeciesShort=subset(SpeciesList,select=c("Esp","Scientific name","Group"))
 
 
 # Modèle minimal
-FormulaFix_TtSp="nb_contacts~(Jour+I(Jour^2)+I(Jour^3)+I(Jour^4)+I(Jour^5))+(AT81+I(AT81^2))+((AT1+I(AT1^2))+(AT9+I(AT9^2)))+SpBioc10+SpBioc11+SpBioc12+SpHO1S+SpHO2S+SpHO4S+SpWS_S+SpWC_S"
+FormulaFix_TtSp="nb_contacts~(Jour+I(Jour^2)+I(Jour^3)+I(Jour^4)+I(Jour^5))*DecOT+(AT81+I(AT81^2))+((AT1+I(AT1^2))+(AT9+I(AT9^2)))+SpBioc12+SpHO1S+SpHO2S+SpHO4S+SpWS_S+SpWC_S"
 # Variables à sélectionner et à tester en interaction
 VarSimple=fread(paste0(FVC,".csv"))$variable
 # Parmi ces variables, lesquelles ne doivent pas être testées en interaction avec d'autres
@@ -22,8 +28,6 @@ VarDispoSansInter=""
 FormulaRandom=""
 
 
-# Famille
-familyMod="nbinom2"
 
 
 
@@ -151,6 +155,7 @@ DataNuit=unique(as.data.table(SpNuit_Scale),by=c("participation","Nuit"))
 NuitEch=paste(DataNuit$participation,DataNuit$Nuit)
 
 
+Estimates=vector()
 for (j in 1:nlevels(as.factor(SpNuit_Scale$espece)))
 {
   print(Sys.time())
@@ -165,9 +170,22 @@ for (j in 1:nlevels(as.factor(SpNuit_Scale$espece)))
   Formula=as.formula(paste0(FormulaFix_TtSp
                             ,FormulaRandom))
   
+ TC_Sp=TraitsClim[match(levels(as.factor(SpNuit_Scale$espece))[j]
+                        ,TraitsClim$Species),] 
   
+ SpData_w0$DecOT=(SpData_w0$SpBioc10+SpData_w0$SpBioc11)/2
   ModSp=glmmTMB(Formula,data=SpData_w0, family=familyMod)  
-
+  Estimates=rbind(Estimates,coef(summary(ModSp))$cond[,1])
+  Terms=terms(ModSp)
+  TermLabels=attr(Terms,"term.labels")
+  
   save(ModSp,file=paste0("./VigieChiro/GLMs/",TagModel,levels(as.factor(SpNuit_Scale$espece))[j],".glm"))
 }
+
+names(Estimates)=TermLabels
+TabEstimates=data.frame(cbind(Species2=levels(as.factor(SpNuit_Scale$espece)),Estimates))
+TabEstimatesD=merge(TabEstimates,SpeciesShort,by.x="Species2",by.y="Esp")
+TabEstimatesD=TabEstimatesD[order(TabEstimatesD$Group),]
+
+fwrite(TabEstimatesD,paste0("./VigieChiro/GLMs/Summaries/",TagModel,"Coefs.csv"))
 
