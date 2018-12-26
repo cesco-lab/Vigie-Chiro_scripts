@@ -15,9 +15,23 @@ op <- options(digits.secs=3)
 #Saison=c("05","06","07") #obsolete
 
 
-args="SpNuit2_Seuil90_DataLP_PF_exportTot"
-args[2]="GI_coordWGS84_SpNuit2_Seuil50_DataLP_PF_exportTot_Lat41.45_51.61_Long-5.9_9.73"
-args[3]="SpeciesList.csv"
+#args="SpNuit2_Seuil90_DataLP_PF_exportTot"
+args="./VigieChiro/STOC-EPS/data_FrenchBBS_squarre_Diane_20180628_allSp_2001_2018"
+
+#args[2]="GI_coordWGS84_SpNuit2_Seuil50_DataLP_PF_exportTot_Lat41.45_51.61_Long-5.9_9.73"
+args[2]="GI_carre_stoc_1_1000_Lat41.45_51.61_Long-5.9_9.73"
+#args[3]="SpeciesList.csv"
+args[3]=NA
+args[4]="code_sp" #name of taxa column (useless if args[3] is specified)
+args[5]="bird" #name of taxa group (useless if args[3] is specified)
+DataLoc=T
+args[6]="pk_carre.x" #name of locality in CoordSIG
+args[7]="carre" #name of locality in CoordSIG
+args[8]="id_carre_annee" #name of participation (=sampling event)
+args[9]=F #if date (=day-of-year) is provided or not
+args[10]="abondance"
+#args[6]="longitude_grid_wgs84"
+#args[7]="latitude_grid_wgs84"
 args[11]=40 #number of coordinates projections (must be a division of 360)
 
 
@@ -28,15 +42,89 @@ DataCPL3=fread(paste0(args[1],".csv"))
 Sys.time()
 CoordSIG=fread(paste0("./VigieChiro/GIS/",args[2],".csv"))
 Sys.time()
+if(!match("Group.1",names(CoordSIG)))
+{
 CoordSIG$Group.1=CoordSIG$Group.1.x
 CoordSIG$Group.2=CoordSIG$Group.2.x
 CoordSIG$Group.1.x=NULL
 CoordSIG$Group.1.y=NULL
 CoordSIG$Group.2.x=NULL
 CoordSIG$Group.2.y=NULL
+}
 
+
+
+if(!DataLoc)
+{
+  #récupération des données participation
+  Particip=fread("C:/wamp64/www/p_export.csv")
+  #récupération des localités
+  SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
+  Gite=mapply(function(x,y) 
+    ((grepl(paste0(y,"="),x))|(grepl(paste0(y," ="),x)))
+    ,SiteLoc$commentaire
+    ,SiteLoc$localite)
+  SiteLoc$SpGite=as.numeric(Gite)
+  
+  #liste des coordonnées existantes dans ce jeu de données
+  ListPar=levels(as.factor(DataCPL3$participation))
+  SelPar=subset(Particip,Particip$participation %in% ListPar)
+  SelParSL=merge(SiteLoc,SelPar,by.x=c("site","nom"),by.y=c("site","point"))
+  CoordPar=aggregate(SelParSL$participation
+                     ,by=c(list(SelParSL$longitude),list(SelParSL$latitude),list(SelParSL$participation))
+                     ,FUN=length)
+  CoordPar$x=NULL
+  
+}else{
+ColCode1=match(args[6],names(CoordSIG))
+ColCode2=match(args[7],names(DataCPL3))
+ColCode3=match(args[8],names(DataCPL3))
+DataCPL3$participation=as.data.frame(DataCPL3)[,ColCode3]
+DataCPL3$localite=as.data.frame(DataCPL3)[,ColCode2]
+SelParSL=subset(DataCPL3,select=c("participation","localite"))
+SelParSL=unique(SelParSL)
+CoordPar0=subset(CoordSIG,select=c("Group.1","Group.2",args[6]))
+CoordPar=merge(CoordPar0,SelParSL,by.x=args[6],by.y="localite")
+names(CoordPar)[4]="Group.3"
+#SelParSL=CoordSIG
+#SelParSL$participation=CoordPar$Group.3
+
+#ColLat=match(args[7],names(DataCPL3))  
+#Latitude=as.data.frame(DataCPL3)[,ColLat]  
+#Latitude=as.numeric(gsub(",",".",Latitude))
+}
+
+
+
+CoordPS=merge(CoordPar,CoordSIG,by=c("Group.1","Group.2"))
+
+test=(is.na(CoordPS))
+test2=apply(test,MARGIN=1,sum)
+test3=apply(test,MARGIN=2,sum)
+plot(test2)
+plot(test3)
+
+CoordPS=subset(CoordPS,test2==0)
+testPar=grepl(args[6],names(CoordPS))
+numPar=subset(c(1:length(testPar)),testPar)
+CoordPS$participation=as.data.frame(CoordPS)[,numPar[1]]
+
+if(!is.na(args[3]))
+   {
 SpeciesList=fread(args[3])
+ListSp=levels(as.factor(DataCPL3$espece))
 
+}else{
+  Group=args[5]
+  colTaxa=match(args[4],names(DataCPL3))
+  DataCPL3$espece=as.data.frame(DataCPL3)[,colTaxa]
+  Esp=unique(as.data.frame(DataCPL3)[,colTaxa])
+  ListSp=levels(as.factor(Esp))
+  Metric=args[10]
+  DataCPL3$nb_contacts=subset(DataCPL3,select=Metric)
+      SpeciesList=data.table(cbind(Group,Esp))
+      fwrite(SpeciesList,paste0("SpeciesList_",Group,substr(Sys.time(),1,10),".csv"))
+}
 
 
 
@@ -44,34 +132,9 @@ SpeciesList=fread(args[3])
 #FranceD= shapefile("C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp")
 #Sys.time()
 
-#récupération des données participation
-Particip=fread("C:/wamp64/www/p_export.csv")
-#récupération des localités
-SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
-
-Gite=mapply(function(x,y) 
-  ((grepl(paste0(y,"="),x))|(grepl(paste0(y," ="),x)))
-  ,SiteLoc$commentaire
-  ,SiteLoc$localite)
-SiteLoc$SpGite=as.numeric(Gite)
-
-#liste des coordonnées existantes dans ce jeu de données
-ListPar=levels(as.factor(DataCPL3$participation))
-SelPar=subset(Particip,Particip$participation %in% ListPar)
-SelParSL=merge(SiteLoc,SelPar,by.x=c("site","nom"),by.y=c("site","point"))
-CoordPar=aggregate(SelParSL$participation
-                   ,by=c(list(SelParSL$longitude),list(SelParSL$latitude),list(SelParSL$participation))
-                   ,FUN=length)
-CoordPar$x=NULL
-
-CoordPS=merge(CoordPar,CoordSIG,by=c("Group.1","Group.2"))
-
-test=(is.na(CoordPS))
-test2=apply(test,MARGIN=1,sum)
-CoordPS=subset(CoordPS,test2==0)
 
 
-ListSp=levels(as.factor(DataCPL3$espece))
+
 #ListSp=c("Barbar","Eptser","Hypsav","Minsch","Myoalc","Myodau","Myoema"
 #        ,"Myomys"
 #       ,"Myonat","Nyclas","Nyclei","Nycnoc","Pipkuh","Pipnat","Pippip"
@@ -83,7 +146,9 @@ ListSp=levels(as.factor(DataCPL3$espece))
 for (i in 1:length(ListSp))
 {
   DataSp=subset(DataCPL3,DataCPL3$espece==ListSp[i])
+  
   DataSpSL=merge(DataSp,SelParSL,by="participation")
+  fwrite(DataSpSL,paste0("./VigieChiro/DataSp/DataSpSL_",ListSp[i],".csv"))
   
   print(paste(ListSp[i],nrow(DataSp),Sys.time()))
   #subset des données correspondant à l'espèce i
@@ -92,8 +157,7 @@ for (i in 1:length(ListSp))
   
   DataSpSL_w0=merge(DataSp,SelParSL,by="participation",all.y=T)
   DataSpSL_w0$nb_contacts[is.na(DataSpSL_w0$nb_contacts)]=0
-  
-  
+
   DataSaison=merge(DataSpSL_w0,CoordPS
                    ,by.x=c("participation")
                    ,by.y=c("Group.3"))
@@ -102,11 +166,15 @@ for (i in 1:length(ListSp))
   
   
   #add date of year
-  
+  if(args[9])
+  {
   Date1=as.Date(substr(DataSaison$date_debut,1,10)
                 ,format="%d/%m/%Y")
   DataSaison$SpFDate=yday(Date1)
-  
+  }else{
+    DataSaison$SpFDate=0
+    
+  }
   #add several rotated coordinates
   CoordDS=as.matrix(cbind(DataSaison$Group.1,DataSaison$Group.2))
   
