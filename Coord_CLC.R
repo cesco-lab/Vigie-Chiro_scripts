@@ -38,6 +38,12 @@ proj4string(OccSL) <- CRS("+init=epsg:4326") # WGS 84
 
 #CRS.new <- CRS(proj4string(CarthageP))
 OccSL_L93=spTransform(OccSL,CRS(proj4string(CLC12)))
+test=over(OccSL_L93,CLC12)
+OccSL_L93=subset(OccSL_L93,!is.na(test$AREA_HA))
+Sys.time()
+OccSL=subset(OccSL,OccSL$id %in% OccSL_L93$id)
+
+
 
 BufferM=gBuffer(OccSL_L93,width=BufferMedium,byid=T)
 BufferL=gBuffer(OccSL_L93,width=BufferLarge,byid=T)
