@@ -17,9 +17,9 @@ BufferLarge=5000
 Sys.time()
 CLC12=shapefile("C:/Users/Yves Bas/Downloads/CLC/CLC12_FR_RGF.shp") # 85 sec
 Sys.time()
-Split=F
-Start=1
-End=10000
+#Split=F
+#Start=1
+#End=10000
 
 testH=match(CoordH,names(OccSL))
 OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[1]]))
@@ -223,12 +223,12 @@ print(spplot(OccSL_L93CLC,zcol=names(HabufPropT)[i],main=names(HabufPropT)[i]))
 OccSL_ARajouter=subset(OccSL_L93CLC,select=grepl("Sp",names(OccSL_L93CLC)))
 
 CLC=data.frame(cbind(coordinates(OccSL),as.data.frame(OccSL_ARajouter)))
-if(Split)
-{
-  NewName=paste0(FOccSL,"_CLC_",Start,"_",End,".csv")
-}else{
+#if(Split)
+#{
+#  NewName=paste0(FOccSL,"_CLC_",Start,"_",End,".csv")
+#}else{
   NewName=paste0(FOccSL,"_CLC.csv")
-}
+#}
 fwrite(CLC,NewName)
 
 coordinates(CLC) <- CoordH
