@@ -15,20 +15,20 @@ op <- options(digits.secs=3)
 #Saison=c("05","06","07") #obsolete
 
 
-#args="SpNuit2_Seuil90_DataLP_PF_exportTot"
-args="./VigieChiro/STOC-EPS/data_FrenchBBS_squarre_Diane_20180628_allSp_2001_2018"
+args="SpNuit2_Seuil90_DataLP_PF_exportTot"
+#args="./VigieChiro/STOC-EPS/data_FrenchBBS_squarre_Diane_20180628_allSp_2001_2018"
 
 #args[2]="GI_coordWGS84_SpNuit2_Seuil50_DataLP_PF_exportTot_Lat41.45_51.61_Long-5.9_9.73"
-args[2]="GI_carre_stoc_1_1000_Lat41.45_51.61_Long-5.9_9.73"
-#args[3]="SpeciesList.csv"
-args[3]=NA
+args[2]="GI_coordWGS84_ALL"
+args[3]="SpeciesList.csv"
+#args[3]=NA
 args[4]="code_sp" #name of taxa column (useless if args[3] is specified)
 args[5]="bird" #name of taxa group (useless if args[3] is specified)
-DataLoc=T
+DataLoc=F
 args[6]="pk_carre.x" #name of locality in CoordSIG
 args[7]="carre" #name of locality in CoordSIG
 args[8]="id_carre_annee" #name of participation (=sampling event)
-args[9]=F #if date (=day-of-year) is provided or not
+args[9]=T #if date (=day-of-year) is provided or not
 args[10]="abondance"
 #args[6]="longitude_grid_wgs84"
 #args[7]="latitude_grid_wgs84"
