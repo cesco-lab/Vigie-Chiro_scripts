@@ -4,9 +4,10 @@ library(raster)
 library(maptools)
 #library(Rnightlights)
 #OccSL=fread("./vigiechiro/Traits/GBIF/OccSL_bush-cricket.csv")
-FOccSL="./vigiechiro/GIS/carre_stoc"
+FOccSL="./vigiechiro/GIS/RandPts_France_dep_L93Radius_ 28000_1000"
 OccSL=fread(paste0(FOccSL,".csv"))
 CoordH=c("Group.1", "Group.2")
+#CoordH=c("decimalLongitude", "decimalLatitude")
 BufferLarge=5000
 
 
@@ -15,9 +16,8 @@ OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[1]]))
 OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[2]]))
 
 #ALAN=getCtryNlData("FRA","FRA_adm0",nlTypes="OLS.Y",nlPeriods=2012,nlStats="mean")
-ALAN=raster("C:/wamp64/www/SVDNB_npp_20161201-20161231_75N060W_vcmslcfg_v10_c201701271138.avg_rade9.tif")
+ALAN=raster("C:/Users/Yves Bas/Downloads/SVDNB_npp_20161201-20161231_75N060W_vcmslcfg_v10_c201701271138.avg_rade9.tif")
 
-#coordinates(OccSL) <- c("decimalLongitude", "decimalLatitude")
 coordinates(OccSL) <- CoordH
 proj4string(OccSL) <- CRS("+init=epsg:4326") # WGS 84
 
