@@ -10,7 +10,7 @@ LongMax=180
 
 
 #table "données"
-DataTot=fread("C:/wamp64/www/export_180903.txt")
+DataTot=fread("C:/wamp64/www/export.txt")
 Sys.time()
 DataRP=subset(DataTot,substr(DataTot$donnee,1,3)=="Cir")
 Sys.time()
@@ -113,5 +113,8 @@ Sys.time()
 Sys.time()
 fwrite(DataLP_RP,"DataLP_RP.csv",row.names=F) # 1 sec
 Sys.time()
+#DataLP_R=subset(DataLP_RP,grepl("Routier",DataLP_RP$site))
+#DataLP_P=subset(DataLP_RP,!grepl("Routier",DataLP_RP$site))
 
-
+#fwrite(DataLP_R,"DataLP_R.csv",row.names=F) # 1 sec
+#fwrite(DataLP_P,"DataLP_P.csv",row.names=F) # 1 sec
