@@ -3,8 +3,8 @@ SED="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/SelExportDonnees.r"
 EPD="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/extr_PF_DataLP.r"
 EPA="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/extr_PF_ActNuit.r"
 
-#PP=c("55","56","57","58","59","5a","5b")
-PP=c("5b")
+PP=c("55","56","57","58","59","5a","5b","5c")
+#PP=c("5b")
 
 
 args="Valid"
