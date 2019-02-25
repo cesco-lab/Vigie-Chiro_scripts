@@ -6,18 +6,18 @@ library(rgeos)
 
 #library(Rnightlights)
 #OccSL=fread("./vigiechiro/Traits/GBIF/OccSL_bush-cricket.csv")
-FOccSL="./vigiechiro/GIS/RandPts_France_dep_L93Radius_ 28000_1000"
+FOccSL="./vigiechiro/GIS/PA_Fulcri"
 OccSL=fread(paste0(FOccSL,".csv"))
-CoordH=c("Group.1", "Group.2")
-#CoordH=c("decimalLongitude", "decimalLatitude")
+#CoordH=c("Group.1", "Group.2")
+CoordH=c("decimalLongitude", "decimalLatitude")
 BufferSmall=50
 BufferMedium=500
 BufferLarge=5000 
 #récupération des données Carthage (eau)
 Sys.time()
-CarthageP <- shapefile("C:/Users/Yves Bas/Downloads/CARTHAGE_PLAN/HYDROGRAPHIE_SURFACIQUE.shp") # 11 sec
+CarthageP <- shapefile("C:/wamp64/www/CARTHAGE_PLAN/HYDROGRAPHIE_SURFACIQUE.shp") # 11 sec
 Sys.time()
-CarthageC <- shapefile("C:/Users/Yves Bas/Downloads/CARTHAGE_COURS/TRONCON_HYDROGRAPHIQUE.shp") # 6 min
+CarthageC <- shapefile("C:/wamp64/www/CARTHAGE_COURS/TRONCON_HYDROGRAPHIQUE.shp") # 6 min
 Sys.time()
 Split=F
 #Start=10001
