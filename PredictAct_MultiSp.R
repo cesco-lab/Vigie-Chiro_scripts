@@ -6,17 +6,18 @@ PredictPresence="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/Predict_Pres
 Interpole="./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/Interpole.r"
 
 args=vector()
-#args[4]="SpeciesList.csv"
-args[4]="SpeciesList_bird2018-12-21.csv"
+args[4]="SpeciesList.csv"
+#args[4]="SpeciesList_bird2018-12-21.csv"
 #args[13]=c("TURPHI")
-args[2]="GI_SysGrid_France_Lat41.45_51.61_Long-5.9_9.73"
-args[3]="01/11/2018" #date of prediction
+args[2]="GI_SysGrid__20000"
+args[3]="15/07/2019" #date of prediction
 #args[5]=90 #Threshold
-args[5]=NA #Threshold
+#args[5]=NA #Threshold
+args[5]="xportTot" #Suffix
 
-#args[7]="FranceD__12_30_34_48.shp"
+#args[7]="France_dep_L93Radius_ 28000.shp"
 args[7]="France_dep_L93.shp"
-args[8]=10000 #raster pixel size?
+args[8]=5000 #raster pixel size?
 args[9]=F #DM
 args[10]=T #Act
 args[12]=F #Presence
@@ -24,10 +25,16 @@ args[11]=40 #number of coordinates projections (must be a division of 360)
 
 if(!is.na(args[5]))
 {
+  if(is.numeric(args[5]))
+  {
   Suffix=paste0("_Seuil",args[5],".learner")  
-    }else{
+  }else{
+    Suffix=paste0(args[5],".learner")  
+    }
+
+  }else{
       Suffix=paste0("NA.learner")  
-      
+        
     }
   
 Prefix="./VigieChiro/ModPred/ModRF"
@@ -41,6 +48,9 @@ SpeciesList=fread(args[4])
 #  SpeciesList=data.frame(Esp=Species)
 #}
 ListSp=SpeciesList$Esp
+
+
+
 
 for (h in 1:length(ListSp))
 {
