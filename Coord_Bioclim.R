@@ -2,10 +2,10 @@ library(data.table)
 library(sp)
 library(raster)
 #OccSL=fread("./vigiechiro/Traits/GBIF/OccSL_bush-cricket.csv")
-FOccSL="./vigiechiro/GIS/RandPts_France_dep_L93Radius_ 28000_1000"
+FOccSL="./vigiechiro/GIS/PA_Fulcri"
 OccSL=fread(paste0(FOccSL,".csv"))
-CoordH=c("Group.1", "Group.2")
-#CoordH=c("decimalLongitude", "decimalLatitude")
+#CoordH=c("Group.1", "Group.2")
+CoordH=c("decimalLongitude", "decimalLatitude")
 
 testH=match(CoordH,names(OccSL))
 OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[1]]))
