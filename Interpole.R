@@ -6,10 +6,25 @@ library(gstat)
 #args[6]="./VigieChiro/ModPred/Tadten_DM_06_GI_SysGrid__30_34_2000_Lat41.45_51.61_Long-5.9_9.73"
 #args[7]="C:/Users/Yves Bas/Documents/VigieChiro/GIS/FranceD__30_34.shp"
 #args[8]=2000 #PixelSize
+#ModRF_file=paste0("./VigieChiro/ModPred/ModRFActLog_",args[1],"_Seuil",args[5],".learner")
+#load(ModRF_file)
+
 
 #Limite
 Limite=shapefile(paste0("./VigieChiro/GIS/",args[7]))
 Sys.time()
+
+LimiteL=as(Limite,'SpatialLines')
+
+Title=substr(args[6],22,27)
+
+SubT=""
+if(sum(grepl("rsq",names(ModRF)))>0)
+{
+  SubT=paste0(SubT,"PseudoR2 = ",round(ModRF$rsq[length(ModRF$rsq)],2))
+}
+Num=sum(ModRF$y>0)
+SubT=paste0(SubT," / N = ",Num)
 
 PredLoc=fread(paste0(args[6],".csv"))
 
@@ -29,7 +44,7 @@ if(is.na(MaxScale)){MaxScale=0.1}
 ScaleAt=c(-0.1,c(1:49)/49*MaxScale,Inf)
 
 
-if(nrow(PredL93)<10000)
+if(nrow(PredL93)<20000)
 {
 print(spplot(VL, 'pred',main=substr(args[6],22,27),col="transparent"
              ,par.settings =
@@ -37,10 +52,16 @@ print(spplot(VL, 'pred',main=substr(args[6],22,27),col="transparent"
              ,col.regions=get_col_regions(),at=ScaleAt))
 
 png(paste0(args[6],".png"))
-print(spplot(VL, 'pred',main=substr(args[6],22,27),col="transparent"
+
+
+  p=spplot(VL, 'pred',main=substr(args[6],22,27),col="transparent"
              ,par.settings =
                list(axis.line = list(col =  'transparent'))
-             ,col.regions=get_col_regions(),at=ScaleAt))
+             ,col.regions=get_col_regions(),at=ScaleAt,sp.layout = LimiteL
+           ,xlab=SubT)
+
+  print(p)
+
 dev.off()
 }
 r <- raster(Limite, res=as.numeric(args[8]))
@@ -59,7 +80,8 @@ spplot(vpred,main=substr(args[6],22,27),at=ScaleAt)
 writeRaster(vpred,paste0(args[6],"_pred.asc"),overwrite=T)
 
 png(paste0(args[6],"_R.png"))
-print(spplot(vpred,main=substr(args[6],22,27),at=ScaleAt))
+print(spplot(vpred,main=substr(args[6],22,27),at=ScaleAt,sp.layout = LimiteL
+             ,xlab=SubT))
 dev.off()
 
 
