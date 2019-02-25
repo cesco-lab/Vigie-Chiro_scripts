@@ -6,9 +6,10 @@ library(rgeos)
 
 #library(Rnightlights)
 #OccSL=fread("./vigiechiro/Traits/GBIF/OccSL_bush-cricket.csv")
-FOccSL="./vigiechiro/GIS/carre_stoc"
+FOccSL="./vigiechiro/GIS/RandPts_France_dep_L93Radius_ 28000_1000"
 OccSL=fread(paste0(FOccSL,".csv"))
 CoordH=c("Group.1", "Group.2")
+#CoordH=c("decimalLongitude", "decimalLatitude")
 BufferSmall=50
 BufferMedium=500
 BufferLarge=5000 
@@ -18,6 +19,17 @@ CarthageP <- shapefile("C:/Users/Yves Bas/Downloads/CARTHAGE_PLAN/HYDROGRAPHIE_S
 Sys.time()
 CarthageC <- shapefile("C:/Users/Yves Bas/Downloads/CARTHAGE_COURS/TRONCON_HYDROGRAPHIQUE.shp") # 6 min
 Sys.time()
+Split=F
+#Start=10001
+#End=20000
+Start=1
+End=5000
+
+
+if(Split)
+{
+  OccSL=OccSL[Start:(min(End,nrow(OccSL))),]
+}
 
 
 testH=match(CoordH,names(OccSL))
@@ -30,7 +42,7 @@ coordinates(OccSL) <- CoordH
 proj4string(OccSL) <- CRS("+init=epsg:4326") # WGS 84
 
 #CRS.new <- CRS(proj4string(CarthageP))
-OccSL_L93=spTransform(OccSL,CRS("+init=epsg:2154"))
+OccSL_L93=spTransform(OccSL,CRS(proj4string(CarthageC)))
 
 #subset des points d'eau douce
 CarthagePP=CarthageP[CarthageP$NATURE=="Eau douce permanente",]
@@ -111,34 +123,61 @@ spplot(OccSL_L93PP,zcol="SpWS_L",col="transparent")
 
 
 #for water courses
+SpPClistS=list()
 Sys.time()
-buftemp=intersect(CarthageCP,BufferS) # 0.05 sec / buffer
+for (k in 1:ceiling(nrow(OccSL_L93)/1000))
+{
+  SpPClistS[[k]]=intersect(CarthageCP,BufferS[((k-1)*1000+1)
+                                   :(min(k*1000,nrow(OccSL_L93))),]) # 0.05 sec / pol
+  print(paste(k,Sys.time()))
+}
+SpCarthagePC=do.call(rbind,SpPClistS) # 0.05 sec / pol
 Sys.time()
-LengthB=gLength(buftemp,byid=T)
+#buftemp=intersect(CarthageCP,BufferS) # 0.05 sec / buffer
 Sys.time()
-PC_50=aggregate(LengthB,by=list(buftemp$id),FUN=sum)
+LengthB=gLength(SpCarthagePC,byid=T)
+Sys.time()
+PC_50=aggregate(LengthB,by=list(SpCarthagePC$id),FUN=sum)
 names(PC_50)[ncol(PC_50)]="SpWC_S"
 OccSL_L93PP=merge(OccSL_L93PP,PC_50,by.x="id",by.y="Group.1",all.x=T)
 OccSL_L93PP$SpWC_S[is.na(OccSL_L93PP$SpWC_S)]=0
 spplot(OccSL_L93PP,zcol="SpWC_S",col="transparent")
 
+SpPClistM=list()
 Sys.time()
-buftemp=intersect(CarthageCP,BufferM) # 0.1 sec / buffer
+for (k in 1:ceiling(nrow(OccSL_L93)/1000))
+{
+  SpPClistM[[k]]=intersect(CarthageCP,BufferM[((k-1)*1000+1)
+                                              :(min(k*1000,nrow(OccSL_L93))),]) # 0.05 sec / pol
+  print(paste(k,Sys.time()))
+}
+SpCarthagePC=do.call(rbind,SpPClistM) # 0.05 sec / pol
 Sys.time()
-LengthB=gLength(buftemp,byid=T)
+#buftemp=intersect(CarthageCP,BufferM) # 0.05 sec / buffer
 Sys.time()
-PC_50=aggregate(LengthB,by=list(buftemp$id),FUN=sum)
+LengthB=gLength(SpCarthagePC,byid=T)
+Sys.time()
+PC_50=aggregate(LengthB,by=list(SpCarthagePC$id),FUN=sum)
 names(PC_50)[ncol(PC_50)]="SpWC_M"
 OccSL_L93PP=merge(OccSL_L93PP,PC_50,by.x="id",by.y="Group.1",all.x=T)
 OccSL_L93PP$SpWC_M[is.na(OccSL_L93PP$SpWC_M)]=0
 spplot(OccSL_L93PP,zcol="SpWC_M",col="transparent")
 
+SpPClistL=list()
 Sys.time()
-buftemp=intersect(CarthageCP,BufferL) # 0.2 sec / buffer
+for (k in 1:ceiling(nrow(OccSL_L93)/1000))
+{
+  SpPClistL[[k]]=intersect(CarthageCP,BufferL[((k-1)*1000+1)
+                                              :(min(k*1000,nrow(OccSL_L93))),]) # 0.05 sec / pol
+  print(paste(k,Sys.time()))
+}
+SpCarthagePC=do.call(rbind,SpPClistL) # 0.05 sec / pol
 Sys.time()
-LengthB=gLength(buftemp,byid=T)
+#buftemp=intersect(CarthageCP,BufferL) # 0.05 sec / buffer
 Sys.time()
-PC_50=aggregate(LengthB,by=list(buftemp$id),FUN=sum)
+LengthB=gLength(SpCarthagePC,byid=T)
+Sys.time()
+PC_50=aggregate(LengthB,by=list(SpCarthagePC$id),FUN=sum)
 names(PC_50)[ncol(PC_50)]="SpWC_L"
 OccSL_L93PP=merge(OccSL_L93PP,PC_50,by.x="id",by.y="Group.1",all.x=T)
 OccSL_L93PP$SpWC_L[is.na(OccSL_L93PP$SpWC_L)]=0
@@ -148,7 +187,14 @@ OccSL_ARajouter=subset(OccSL_L93PP,select=grepl("Sp",names(OccSL_L93PP)))
   
 Carthage=data.frame(cbind(coordinates(OccSL),as.data.frame(OccSL_ARajouter)))
 
-fwrite(Carthage,paste0(FOccSL,"_Carthage.csv"))
+if(Split)
+{
+  NewName=paste0(FOccSL,"_Carthage_",Start,"_",End,".csv")
+}else{
+  NewName=paste0(FOccSL,"_Carthage.csv")
+}
+
+fwrite(Carthage,NewName)
 
 coordinates(Carthage) <- CoordH
 
