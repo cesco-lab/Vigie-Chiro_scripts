@@ -17,18 +17,22 @@ CoordSIG=fread(paste0("./VigieChiro/GIS/",args[2],".csv"))
 Sys.time()
 
 CoordSIG=subset(CoordSIG,is.na(CoordSIG$SpAltiS)==F)
+CoordSIG=subset(CoordSIG,is.na(CoordSIG$SpBioC1)==F)
 
 
 CoordSIG$SpGite=0
 CoordSIG$SpFDate=yday(as.Date(args[3]
                               ,format="%d/%m/%Y"))
 
-CoordSIG$Group.1=CoordSIG$Group.1.x
-CoordSIG$Group.2=CoordSIG$Group.2.x
-CoordSIG$Group.1.x=NULL
-CoordSIG$Group.1.y=NULL
-CoordSIG$Group.2.x=NULL
-CoordSIG$Group.2.y=NULL
+if(sum(grepl("Group.1.x",names(CoordSIG)))>0)
+{
+  CoordSIG$Group.1=CoordSIG$Group.1.x
+  CoordSIG$Group.2=CoordSIG$Group.2.x
+  CoordSIG$Group.1.x=NULL
+  CoordSIG$Group.1.y=NULL
+  CoordSIG$Group.2.x=NULL
+  CoordSIG$Group.2.y=NULL
+}
 
 CoordDS=as.matrix(cbind(CoordSIG$Group.1,CoordSIG$Group.2))
 
