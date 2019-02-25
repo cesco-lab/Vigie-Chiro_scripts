@@ -4,16 +4,16 @@ library(raster)
 library(maptools)
 #library(Rnightlights)
 #OccSL=fread("./vigiechiro/Traits/GBIF/OccSL_bush-cricket.csv")
-FOccSL="./vigiechiro/GIS/RandPts_France_dep_L93Radius_ 28000_1000"
+FOccSL="./vigiechiro/GIS/PA_Fulcri"
 OccSL=fread(paste0(FOccSL,".csv"))
-CoordH=c("Group.1", "Group.2")
-#CoordH=c("decimalLongitude", "decimalLatitude")
+#CoordH=c("Group.1", "Group.2")
+CoordH=c("decimalLongitude", "decimalLatitude")
 BufferMedium=500
 BufferLarge=5000
 
 Sys.time()
 #récupération de la BD Alti
-asc_files<- list.files("C:/Users/Yves Bas/Downloads/BDALTIV2_2-0_75M_ASC_LAMB93-IGN69_FRANCE_2018-01-15/BDALTIV2/1_DONNEES_LIVRAISON_2018-01-00245/BDALTIV2_MNT_75M_ASC_LAMB93_IGN69_FRANCE"
+asc_files<- list.files("C:/wamp64/www/BDALTIV2_MNT_75M_ASC_LAMB93_IGN69_FRANCE"
                        ,pattern =".asc$",full.names=T)
 Sys.time()
 
