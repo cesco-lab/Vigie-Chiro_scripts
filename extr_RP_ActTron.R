@@ -1,6 +1,6 @@
 library(data.table)
-SeuilFiable="Seuil90" #à éditer 
-
+SeuilFiable="Seuil50" #à éditer 
+#SeuilFiable=""
 
 #ETAPE 0 - IMPORT DES TABLES
 #bien renommer les chemins en fonction de l'ordi utilisé
@@ -9,7 +9,7 @@ Sys.time()
 DataLP=fread("DataLP_RP.csv")
 Sys.time()
 #table "seuils"
-RefSeuils=fread("Referentiel_seuils_ProbEspHF_1510_.csv")
+RefSeuils=fread("Referentiel_seuils_ProbEspHF_1510_Cir.csv")
 
 #table "espèces"
 #GroupList_prev=fread("GroupList_HF.csv") 
@@ -44,8 +44,9 @@ SelQ90Pip=subset(Q90PipDur,(Q90PipDur$x>0.2)&(Q90PipDur$x>0.33))
 Sys.time()
 test=match(paste(DataLP$participation,DataLP$Datamicro)
            ,paste(SelQ90Pip$Group.1,SelQ90Pip$Group.2)) # 6 sec
+test2=(is.na(test))
 Sys.time()
-DataLP=subset(DataLP,is.na(test)==F)
+DataLP$Fiab=test2
 Sys.time()
 
 
@@ -64,6 +65,10 @@ SpManquante=subset(DataLP,is.na(test))
 table(SpManquante$espece)
 #rm(DataLP)
 
+if(SeuilFiable=="")
+{
+  DataFiable=DataLPG
+}else{
 ColS=match(SeuilFiable,colnames(DataLPG))
 Fiable=(DataLPG$probabilite>as.data.frame(DataLPG)[,ColS])
 table(Fiable,DataLPG$espece)
@@ -71,7 +76,7 @@ table(Fiable,DataLPG$espece)
 DataFiable=subset(DataLPG,Fiable)
 #rm(DataLPG)
 #test=DataFiable[1:100000,]
-
+}
 Sys.time()
 DataRP_ActTron=aggregate(DataFiable$donnee
                          ,by=list(DataFiable$participation
