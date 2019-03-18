@@ -64,9 +64,9 @@ sites$hab[sites$corine %in% c(35:44)] <- "Wetlands/Water bodies"
 sites$mysiteid <- paste0(sites$longitude, sites$latitude)
 
 ############### SSI computing
-load("xxx/data/sites")
+load("xxx/data/sites") # get coordinates
 
-load("xxx/data/g2")
+load("xxx/data/g2") # get biological data (counts)
 load("xxx/data/g10")
 load("xxx/data/glist")
 
@@ -123,18 +123,26 @@ for(j in levels(as.factor(gg10$participation))) {
 
 # save(ggg10, file = "F:/bat veolia mnhn/data/ggg10")
 
-############ computing CSI based on sample data (in order: for the 1st night, for the 1st + 2nd nights, etc...)
+############ computing CSI based on sample data [for power analyses]
+# 1. random sample
+# 2. in order (for the 1st night, for the 1st + 2nd nights, etc...) 
+# 3. sample pairwise units: n and n+1 (attempt to control for delta drops)
+
+library(dplyr)
+library(MASS)
 
 pawa <- c() 
 for(j in levels(as.factor(ggg10$participation))) {
   sub <- ggg10[ggg10$participation == j, ]
   for(l in 1:nrow(sub)){
-      susub <- sub[1:l, ]
-      trueab <- sum(sub$nb_contacts) / nrow(sub)
-      falseab <- sum(susub$nb_contacts) / nrow(sub)
-      delta.abund <- trueab - falseab
+      #susub <- sample_n(sub, l)      # 1. (random sample of n unit, n+1 units etc...)
+      #susub <- sub[1:l, ]            # 2. (ordered sampling)
+      susub <- sub[c(l, l+1), ]       # 3. sampling pairwise 
+      trueab <- sum(sub$nb_contacts) / nrow(sub)      # compute total abundance (all species); for modelling adjustment purposes
+      falseab <- sum(susub$nb_contacts) / nrow(sub)   # abundance from sample data (add a by-species loop for true power analysis)
+      delta.abund <- trueab - falseab                 # sensitivity of abudance on sampling effort
       
-      wcsi <- sum(na.omit(susub$ssi)*susub$nb_contact) / sum(na.omit(susub$nb_contact))
+      wcsi <- sum(na.omit(susub$ssi)*susub$nb_contact) / sum(na.omit(susub$nb_contact))  # CSI from sample data
       # csi.p <- sum(na.omit(susub$ssi.presence)*susub$nb_contact) / sum(susub$nb_contact)
       
       tcsi <- susub$truecsi
@@ -150,7 +158,7 @@ pawa$wcsi <- as.numeric(as.character(pawa$wcsi))
 pawa$n.night <- as.numeric(as.character(pawa$n.night))
 pawa <- pawa[!duplicated(pawa), ]
 
-#standardising csi and getting "delta csi at once"
+#standardising csi and getting "delta csi" at once
 pawa$sd.csi <- sd(pawa$wcsi)
 pawa$sd.csi <- as.numeric(as.character(pawa$sd.csi))
 pawa$delta.csi <- (pawa$wcsi - pawa$tcsi) / pawa$sd.csi
