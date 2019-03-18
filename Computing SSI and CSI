@@ -159,6 +159,6 @@ pawa$n.night <- as.numeric(as.character(pawa$n.night))
 pawa <- pawa[!duplicated(pawa), ]
 
 #standardising csi and getting "delta csi" at once
-pawa$sd.csi <- sd(pawa$wcsi)
+pawa$sd.csi <- sd(na.omit(pawa$wcsi))
 pawa$sd.csi <- as.numeric(as.character(pawa$sd.csi))
 pawa$delta.csi <- (pawa$wcsi - pawa$tcsi) / pawa$sd.csi
