@@ -7,4 +7,4 @@ test=match(U1$identifiant,U0$identifiant)
 
 Unouveau=subset(U1,!(U1$identifiant %in% U0$identifiant))
 Unouveau$instruction=paste("INVITE vigie-chiro",Unouveau$email)
-fwrite(Unouveau,"AInscrire.csv")
+fwrite(Unouveau,"AInscrire.csv",sep=";")
