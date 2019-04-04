@@ -209,5 +209,4 @@ fwrite(Estimates,paste0("./VigieChiro/GLMs/Summaries/",TagModel,"_",Suffix,"_Coe
 
 fwrite(as.list(FormulaFix_TtSp),paste0("./VigieChiro/GLMs/logs/",substr(Sys.time(),1,13),".log"))
 
-
 fwrite(SpNuit_Sample,paste0("./VigieChiro/GLMs/",TagModel,"_",Suffix,"_Res.csv"))
