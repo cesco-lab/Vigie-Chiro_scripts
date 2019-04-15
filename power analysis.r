@@ -1,7 +1,7 @@
 
 ############################### 1. producing data selected on the basis of the participation length (number of nights)
 
-gg <- read.csv("xxx/SpNuit2_Seuil90_DataLP_PF_exportTot.csv", h = T, sep = ",")
+gg <- read.csv("SpNuit2_Seuil90_DataLP_PF_exportTot.csv", h = T, sep = ",")
 
 
 gg$Nuit <- as.Date(gg$Nuit, format = "%Y-%m-%d")
@@ -33,7 +33,7 @@ for(i in levels(gg$espece)){
 
 # save(glist, file = "xxx/data/glist")
 
-load("xxx/data/glist")
+#load("xxx/data/glist")
 
 
 ###☺ get number of nights per participation
@@ -61,12 +61,12 @@ ref10 <- n.night[n.night$n >= 10, ]
 
 ### extract participations with n nights
 g2 <- list()
-# g5 <- list()
-# g10 <- list()
+ g5 <- list()
+ g10 <- list()
 for(i in levels(gg$espece)){
   g2[[i]] <- glist[[i]][glist[[i]]$participation %in% ref2$session, ]
-  # g5[[i]] <- glist[[i]][glist[[i]]$participation %in% ref5$session, ]
-  # g10[[i]] <- glist[[i]][glist[[i]]$participation %in% ref10$session, ]
+ g5[[i]] <- glist[[i]][glist[[i]]$participation %in% ref5$session, ]
+ g10[[i]] <- glist[[i]][glist[[i]]$participation %in% ref10$session, ]
 }
 
 head(g2[[i]])
@@ -78,11 +78,11 @@ head(g2[[i]])
 
 ############################### 2. comparing number of contacts per species between participations of different minimal lenght
 
-load("F:/bat veolia mnhn/data/g2")
-load("F:/bat veolia mnhn/data/g5")
-load("F:/bat veolia mnhn/data/g10")
+#load("F:/bat veolia mnhn/data/g2")
+#load("F:/bat veolia mnhn/data/g5")
+#load("F:/bat veolia mnhn/data/g10")
 
-load("F:/bat veolia mnhn/data/glist")
+#load("F:/bat veolia mnhn/data/glist")
 par(mfrow = c(1,2))
 
 mean.contact <- data.frame()
