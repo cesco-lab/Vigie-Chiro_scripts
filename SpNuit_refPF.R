@@ -54,4 +54,4 @@ for (i in 1:nlevels(as.factor(SpNuit$espece)))
 
 Ref=cbind(Espece=levels(as.factor(SpNuit$espece)),MoyG,EtypG,MoySiP,EtypSiP,Q25,Q75,Q98,nbocc
           ,DM25,DM10,DM02)  
-write.csv(Ref,paste0("refPF_",SeuilFiable,".csv"))
+fwrite(data.frame(Ref),paste0("refPF_",SeuilFiable,".csv"),sep=";")
