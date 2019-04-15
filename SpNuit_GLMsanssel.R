@@ -7,7 +7,7 @@ FAct="SpNuit2_Seuil50_DataLP_PF_exportTot.csv"
 FAT="AnomalieTemp.csv"
 FGIS="./VigieChiro/GIS/GI_coordWGS84_SpNuit2_Seuil50_DataLP_PF_exportTot_Lat41.45_51.61_Long-5.9_9.73.csv"
 FVC="variables_choisies"
-TagModel="GLMnonselect_DecOT_iJour"
+TagModel="GLMnonselect_DecOT2_AT81"
 SpeciesList=fread("SpeciesList.csv")
 # Famille
 familyMod="nbinom2"
@@ -17,7 +17,9 @@ SpeciesShort=subset(SpeciesList,select=c("Esp","Scientific name","Group"))
 
 
 # Modèle minimal
-FormulaFix_TtSp="nb_contacts~(Jour+I(Jour^2)+I(Jour^3)+I(Jour^4)+I(Jour^5))*DecOT+(AT81+I(AT81^2))+((AT1+I(AT1^2))+(AT9+I(AT9^2)))+SpBioc12+SpHO1S+SpHO2S+SpHO4S+SpWS_S+SpWC_S"
+#FormulaFix_TtSp="nb_contacts~(Jour+I(Jour^2)+I(Jour^3)+I(Jour^4)+I(Jour^5))*DecOT+(AT81+I(AT81^2))+((AT1+I(AT1^2))+(AT9+I(AT9^2)))+SpBioc12+SpHO1S+SpHO2S+SpHO4S+SpWS_S+SpWC_S"
+FormulaFix_TtSp="nb_contacts~(Jour+I(Jour^2)+I(Jour^3)+I(Jour^4)+I(Jour^5))*(AT81+I(AT81^2)+(AT1+I(AT1^2))+(AT9+I(AT9^2)))+(DecOT+I(DecOT^2))*(AT81+I(AT81^2))+SpBioc12+SpHO1S+SpHO2S+SpHO4S+SpWS_S+SpWC_S"
+
 # Variables à sélectionner et à tester en interaction
 VarSimple=fread(paste0(FVC,".csv"))$variable
 # Parmi ces variables, lesquelles ne doivent pas être testées en interaction avec d'autres
@@ -151,18 +153,20 @@ SpNuit_Scale$AT81_2=SpNuit_Scale$AT81^2
 
 
 #TRES MOCHE mais efficace...
-DataNuit=unique(as.data.table(SpNuit_Scale),by=c("participation","Nuit"))
-NuitEch=paste(DataNuit$participation,DataNuit$Nuit)
+DataNuit=unique(as.data.table(SpNuit_Scale),by=c("participation","Nuit","num_micro"))
+NuitEch=paste(DataNuit$participation,DataNuit$Nuit,DataNuit$num_micro)
 
 
 Estimates=vector()
+Nocc=vector()
 for (j in 1:nlevels(as.factor(SpNuit_Scale$espece)))
 {
   print(Sys.time())
   print(levels(as.factor(SpNuit_Scale$espece))[j])
   SpData=subset(SpNuit_Scale
                 ,SpNuit_Scale$espece==levels(as.factor(SpNuit_Scale$espece))[j])
-  NuitPart=paste(SpData$participation,SpData$Nuit)
+  Nocc=c(Nocc,nrow(SpData))
+  NuitPart=paste(SpData$participation,SpData$Nuit,SpData$num_micro)
   Sp0=subset(DataNuit,!NuitEch %in% NuitPart)
   Sp0$nb_contacts=0
   SpData_w0=rbind(SpData,Sp0)
