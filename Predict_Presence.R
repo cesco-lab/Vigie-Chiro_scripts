@@ -16,7 +16,7 @@ CoordSIG=fread(paste0("./VigieChiro/GIS/",args[2],".csv"))
 Sys.time()
 
 CoordSIG=subset(CoordSIG,is.na(CoordSIG$SpAltiS)==F)
-
+CoordSIG=subset(CoordSIG,is.na(CoordSIG$SpBioC1)==F)
 
 CoordSIG$SpGite=0
 
