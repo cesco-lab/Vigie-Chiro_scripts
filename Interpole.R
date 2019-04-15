@@ -8,7 +8,8 @@ library(gstat)
 #args[8]=2000 #PixelSize
 #ModRF_file=paste0("./VigieChiro/ModPred/ModRFActLog_",args[1],"_Seuil",args[5],".learner")
 #load(ModRF_file)
-
+SpeciesList=fread("SpeciesList.csv")
+Rasteriz=F
 
 #Limite
 Limite=shapefile(paste0("./VigieChiro/GIS/",args[7]))
@@ -46,24 +47,37 @@ ScaleAt=c(-0.1,c(1:49)/49*MaxScale,Inf)
 
 if(nrow(PredL93)<20000)
 {
-print(spplot(VL, 'pred',main=substr(args[6],22,27),col="transparent"
-             ,par.settings =
-               list(axis.line = list(col =  'transparent'))
-             ,col.regions=get_col_regions(),at=ScaleAt))
-
-png(paste0(args[6],".png"))
-
-
-  p=spplot(VL, 'pred',main=substr(args[6],22,27),col="transparent"
-             ,par.settings =
-               list(axis.line = list(col =  'transparent'))
-             ,col.regions=get_col_regions(),at=ScaleAt,sp.layout = LimiteL
+  Taxon=substr(args[6],22,27)
+  test=match(Taxon,SpeciesList$Esp)
+  if(is.na(test))
+  {
+    Title=Taxon
+  }else{
+    Title=SpeciesList$NomFR[test]
+  }
+  # print(spplot(VL, 'pred',main=Title,col="transparent"
+  #           ,par.settings =
+  #            list(axis.line = list(col =  'transparent'))
+  #         ,col.regions=get_col_regions(),at=ScaleAt))
+  
+  png(paste0(args[6],".png"))
+  
+  
+  
+  p=spplot(VL, 'pred',main=Title,col="transparent"
+           ,par.settings =
+             list(axis.line = list(col =  'transparent'))
+           ,col.regions=get_col_regions(),at=ScaleAt,sp.layout = LimiteL
            ,xlab=SubT)
-
+  
   print(p)
-
-dev.off()
+  
+  dev.off()
+  
 }
+
+if(Rasteriz)
+{
 r <- raster(Limite, res=as.numeric(args[8]))
 vpred <- rasterize(VL, r, 'pred')
 
@@ -93,3 +107,4 @@ verr <- rasterize(VL, r, 'err')
 writeRaster(verr,paste0(args[6],"_err.asc"),overwrite=T)
 
 
+}
