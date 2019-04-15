@@ -1,22 +1,93 @@
 library(data.table)
 
-Occurences=fread("./VigieChiro/Traits/GBIF/OccSL_bird.csv")
-SpTarget="Fulcri"
+Occurences=fread("./VigieChiro/Traits/GBIF/OccSL_Gagea polidorii.csv")
+SpTarget="Gagea polidorii"
+#SpTarget="Scorus"
 Sample=1000
 
 
-OccP=subset(Occurences,Occurences$Esp==SpTarget)
-if(nrow(OccP)>Sample)
+OccPtot=subset(Occurences,Occurences$Esp==SpTarget)
+if(nrow(OccPtot)>1000)
 {
-  OccP=OccP[sample.int(nrow(OccP),size=Sample),]
+  OccP=subset(OccPtot,OccPtot$coordinateUncertaintyInMeters<100)
+  if(nrow(OccP)<1000)
+  {
+    OccPsup=subset(OccPtot,is.na(OccPtot$coordinateUncertaintyInMeters))
+    if(nrow(OccPsup)>Sample-nrow(OccP))
+  {
+    OccPsup=OccPsup[sample.int(nrow(OccPsup),Sample-nrow(OccP)),]
+    }
+    OccP=rbind(OccP,OccPsup)
+    if(nrow(OccP)<1000)
+    {
+      OccPsup=subset(OccPtot,(OccPtot$coordinateUncertaintyInMeters<1000)
+                     &(OccPtot$coordinateUncertaintyInMeters>=100))
+      if(nrow(OccPsup)>Sample-nrow(OccP))
+      {
+        OccPsup=OccPsup[sample.int(nrow(OccPsup),Sample-nrow(OccP)),]
+      }
+      OccP=rbind(OccP,OccPsup)
+      if(nrow(OccP)<1000)
+      {
+        OccPsup=subset(OccPtot,(OccPtot$coordinateUncertaintyInMeters>=1000))
+        if(nrow(OccPsup)>Sample-nrow(OccP))
+        {
+          OccPsup=OccPsup[sample.int(nrow(OccPsup),Sample-nrow(OccP)),]
+        }
+        OccP=rbind(OccP,OccPsup)
+      }
+    }
+  }else{
+    OccP=OccP[sample.int(nrow(OccP),Sample),]
+  }
+}else{
+  OccP=OccPtot
 }
-OccA=subset(Occurences,Occurences$Esp!=SpTarget)
-OccA=OccA[sample.int(nrow(OccA),size=Sample),]
-OccP$presence=1
-plot(OccP$decimalLongitude,OccP$decimalLatitude)
-OccA$presence=0
-points(OccA$decimalLongitude,OccA$decimalLatitude,col=2,pch=2)
 
+OccAtot=subset(Occurences,Occurences$Esp!=SpTarget)
+if(nrow(OccAtot)>1000)
+{
+  OccA=subset(OccAtot,OccAtot$coordinateUncertaintyInMeters<100)
+  if(nrow(OccA)<1000)
+  {
+    OccAsup=subset(OccAtot,is.na(OccAtot$coordinateUncertaintyInMeters))
+    if(nrow(OccAsup)>Sample-nrow(OccA))
+    {
+      OccAsup=OccAsup[sample.int(nrow(OccAsup),Sample-nrow(OccA)),]
+    }
+    OccA=rbind(OccA,OccAsup)
+    if(nrow(OccA)<1000)
+    {
+      OccAsup=subset(OccAtot,(OccAtot$coordinateUncertaintyInMeters<1000)
+                     &(OccAtot$coordinateUncertaintyInMeters>=100))
+      if(nrow(OccAsup)>Sample-nrow(OccA))
+      {
+        OccAsup=OccAsup[sample.int(nrow(OccAsup),Sample-nrow(OccA)),]
+      }
+      OccA=rbind(OccA,OccAsup)
+      if(nrow(OccA)<1000)
+      {
+        OccAsup=subset(OccAtot,(OccAtot$coordinateUncertaintyInMeters>=1000))
+        if(nrow(OccAsup)>Sample-nrow(OccA))
+        {
+          OccAsup=OccAsup[sample.int(nrow(OccAsup),Sample-nrow(OccA)),]
+        }
+        OccA=rbind(OccA,OccAsup)
+      }
+    }
+  }else{
+    OccA=OccA[sample.int(nrow(OccA),Sample),]
+  }
+}else{
+  OccA=OccAtot
+}
+
+
+OccP$presence=1
+OccA$presence=0
+plot(OccA$decimalLongitude,OccA$decimalLatitude)
+points(OccP$decimalLongitude,OccP$decimalLatitude,col=2,pch=2)
+table(OccA$Esp)
 Occ=rbind(OccP,OccA)
 
 fwrite(Occ,paste0("./VigieChiro/GIS/PA_",SpTarget,".csv"))
