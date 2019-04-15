@@ -1,6 +1,6 @@
 library(data.table)
 library(corrplot)
-ListTabTraits=c("ClimNiche_OccSL_bush-cricket","Saisies_traits_Sauterelles","GLMnonselect_DecOT_iJourCoefs")
+ListTabTraits=c("ClimNiche_OccSL_bush-cricket","Saisies_traits_Sauterelles","GLMnonselect_DecOT2_AT81Coefs")
 
 
 
@@ -28,14 +28,17 @@ for (i in 2:length(ListTabTraits))
 
 SelCol= which(sapply(Tab_merge,is.numeric))
 
-fwrite(Tab_merge,"TabMerge.csv")
+NameTab=paste0("TabMerge",ListTabTraits[length(ListTabTraits)],".csv")
+fwrite(Tab_merge,NameTab)
+
 
 Tab_num=Tab_merge[,SelCol,with=F]
 Tab_num=subset(Tab_num,!is.na(Tab_num$DecPheno))
 
 M=cor(Tab_num)
 
+pal <- colorRampPalette(c("blue3","white","brown3"))
 
-corrplot(M, method="circle",tl.cex=0.5)
+corrplot(M, method="circle",tl.cex=0.5,col=pal(200))
 
 setwd("C:/Users/Yves Bas/Documents/")
