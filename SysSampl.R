@@ -3,11 +3,11 @@ library(raster)
 library(rgdal)
 #Zone="C:/Users/Yves Bas/Documents/natura/jasses/domaine.shp"
 Zone="C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp"
-Sample=100000
-SelDep=F
+Sample=10000
+SelDep=T
 #Dep=c("09","12","31","32","46","65","81","82") #midipy
-#Dep=c("09","11","12","30","31","32","34","46","48","65","66","81","82") #occitanie
-Dep=c("12","30","34","48") #4
+Dep=c("09","11","12","30","31","32","34","46","48","65","66","81","82") #occitanie
+#Dep=c("12","30","34","48") #4
 #Dep=c("07","11","12","13","30","34","48","81") #8
 #Dep=c("07","11","12","13","26","30","34","48","81","84") #10
 #Dep=c("04","05","07","09","11","12","13","15"
@@ -23,8 +23,10 @@ LatMin=6297000
 LatMax=6308000
 LongMin=755000
 LongMax=766000
-
-
+SelBuffer=F
+LatOrigin=6303000
+LongOrigin=762000
+Radius=91000
 
 
 #France_departement
@@ -51,6 +53,17 @@ if(SelLongLat)
   Suffix=paste(Suffix,LongMin,LongMax,LatMin,LatMax,sep="_")
   
 }
+
+if(SelBuffer)
+{
+  p <- SpatialPoints(cbind(LongOrigin,LatOrigin))
+  proj4string(p)=proj4string(FranceD)
+  pBuffer=buffer(p,width=Radius)
+  FranceD=crop(FranceD,pBuffer)
+  Suffix=paste("Radius_",Radius)
+}
+
+
 
 if(Suffix!="")
   {
