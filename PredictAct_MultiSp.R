@@ -9,15 +9,19 @@ args=vector()
 args[4]="SpeciesList.csv"
 #args[4]="SpeciesList_bird2018-12-21.csv"
 #args[13]=c("TURPHI")
-args[2]="GI_SysGrid__20000"
-args[3]="15/07/2019" #date of prediction
+#args[2]="GI_RandPts_France_dep_L93Radius_ 91000_1000"
+args[2]="GI_SysGrid__09_11_12_30_31_32_34_46_48_65_66_81_82_10000"
+#args[2]="GI_SysGrid__20000"
+args[3]="15/08/2019" #date of prediction
 #args[5]=90 #Threshold
+args[5]="xportTot" #Threshold
+#args[5]="_filtree" #Threshold
 #args[5]=NA #Threshold
-args[5]="xportTot" #Suffix
+#args[5]="s nitens" #Suffix
 
 #args[7]="France_dep_L93Radius_ 28000.shp"
-args[7]="France_dep_L93.shp"
-args[8]=5000 #raster pixel size?
+args[7]="France_dep_L93_09_11_12_30_31_32_34_46_48_65_66_81_82.shp"
+args[8]=2000 #raster pixel size?
 args[9]=F #DM
 args[10]=T #Act
 args[12]=F #Presence
@@ -27,18 +31,18 @@ if(!is.na(args[5]))
 {
   if(is.numeric(args[5]))
   {
-  Suffix=paste0("_Seuil",args[5],".learner")  
+    Suffix=paste0("_Seuil",args[5],".learner")  
   }else{
     Suffix=paste0(args[5],".learner")  
-    }
-
-  }else{
-      Suffix=paste0("NA.learner")  
-        
-    }
+  }
   
+}else{
+  Suffix=paste0("NA.learner")  
+  
+}
+
 Prefix="./VigieChiro/ModPred/ModRF"
-    
+
 
 #if(!is.na(args[4]))
 #{
@@ -55,36 +59,36 @@ ListSp=SpeciesList$Esp
 for (h in 1:length(ListSp))
 {
   args[1]=ListSp[h]
-ModRF_file=paste0(Prefix,"DecMin_",ListSp[h],Suffix)  
-
-if(file.exists(ModRF_file))
-{
+  ModRF_file=paste0(Prefix,"DecMin_",ListSp[h],Suffix)  
   
-if(args[9]==T)
-{
-  if (SpeciesList$Group[h]=="bat")
-  {
-    source(PredictDM)
-    print(ListSp[h])
-    args[6]=FilName
-    source(Interpole)
-  }
-}
-  }
-  
-ModRF_file=paste0(Prefix,"ActLog_",ListSp[h],Suffix)  
-
-if(file.exists(ModRF_file))
+  if(file.exists(ModRF_file))
   {
     
-  
-  if(args[10])
-  {
-  source(PredictAct)
-  print(ListSp[h])
-  args[6]=FilName
-  source(Interpole)
+    if(args[9]==T)
+    {
+      if (SpeciesList$Group[h]=="bat")
+      {
+        source(PredictDM)
+        print(ListSp[h])
+        args[6]=FilName
+        source(Interpole)
+      }
+    }
   }
+  
+  ModRF_file=paste0(Prefix,"ActLog_",ListSp[h],Suffix)  
+  
+  if(file.exists(ModRF_file))
+  {
+    
+    
+    if(args[10])
+    {
+      source(PredictAct)
+      print(ListSp[h])
+      args[6]=FilName
+      source(Interpole)
+    }
   }else{
     ModRF_file=paste0(Prefix,"Presence_",ListSp[h],Suffix)  
     if(file.exists(ModRF_file))
@@ -97,7 +101,7 @@ if(file.exists(ModRF_file))
         source(Interpole)
       }
     }
-}
+  }
 }
 
 
