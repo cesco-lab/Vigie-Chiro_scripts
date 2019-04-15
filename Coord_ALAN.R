@@ -4,10 +4,11 @@ library(raster)
 library(maptools)
 #library(Rnightlights)
 #OccSL=fread("./vigiechiro/Traits/GBIF/OccSL_bush-cricket.csv")
-FOccSL="./vigiechiro/GIS/PA_Fulcri"
+FOccSL="./vigiechiro/GIS/RandPts_France_dep_L93Radius_ 93000_1000"
+#FOccSL="./vigiechiro/GIS/PA_Scorus"
 OccSL=fread(paste0(FOccSL,".csv"))
-#CoordH=c("Group.1", "Group.2")
-CoordH=c("decimalLongitude", "decimalLatitude")
+CoordH=c("Group.1", "Group.2")
+#CoordH=c("decimalLongitude", "decimalLatitude")
 BufferLarge=5000
 
 

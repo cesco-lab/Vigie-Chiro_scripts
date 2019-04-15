@@ -1,24 +1,24 @@
+Coord_Bioclim=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
+{
+  
 library(data.table)
 library(sp)
 library(raster)
 library(maptools)
 library(rgeos)
-
+  FOccSL=points
+  OccSL=fread(paste0(FOccSL,".csv"))
+  CoordH=names_coord
+  BufferLarge=bl
+  
 #library(Rnightlights)
-#OccSL=fread("./vigiechiro/Traits/GBIF/OccSL_bush-cricket.csv")
-FOccSL="./vigiechiro/GIS/PA_Fulcri"
-OccSL=fread(paste0(FOccSL,".csv"))
-#CoordH=c("Group.1", "Group.2")
-CoordH=c("decimalLongitude", "decimalLatitude")
-BufferSmall=50
-BufferMedium=500
-BufferLarge=5000 
+BufferSmall=bs
+BufferMedium=bm
+BufferLarge=bl 
 #récupération des données Carthage (eau)
 Sys.time()
-CarthageP <- shapefile("C:/wamp64/www/CARTHAGE_PLAN/HYDROGRAPHIE_SURFACIQUE.shp") # 11 sec
-Sys.time()
-CarthageC <- shapefile("C:/wamp64/www/CARTHAGE_COURS/TRONCON_HYDROGRAPHIQUE.shp") # 6 min
-Sys.time()
+CarthageP <- shapefile(carthagep)
+CarthageC <- shapefile(carthagec)
 Split=F
 #Start=10001
 #End=20000
@@ -201,3 +201,16 @@ coordinates(Carthage) <- CoordH
 SelCol=sample(names(OccSL_ARajouter),1)
 spplot(Carthage,zcol=SelCol,main=SelCol)
 
+}
+
+
+#for testing
+Coord_Carthage(
+  points="./vigiechiro/GIS/PA_Gagea polidorii"
+  ,names_coord=c("decimalLongitude", "decimalLatitude")
+  ,bs=50
+  ,bm=500
+  ,bl=5000
+  ,carthagep="C:/wamp64/www/CARTHAGE_PLAN/HYDROGRAPHIE_SURFACIQUE.shp"
+  ,carthagec="C:/wamp64/www/CARTHAGE_COURS/TRONCON_HYDROGRAPHIQUE.shp"
+)

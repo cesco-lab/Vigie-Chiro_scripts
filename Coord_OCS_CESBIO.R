@@ -4,10 +4,11 @@ library(raster)
 library(maptools)
 #library(Rnightlights)
 #OccSL=fread("./vigiechiro/Traits/GBIF/OccSL_bush-cricket.csv")
-FOccSL="./vigiechiro/GIS/PA_Fulcri"
+FOccSL="./vigiechiro/GIS/RandPts_France_dep_L93Radius_ 93000_1000"
+#FOccSL="./vigiechiro/GIS/PA_Scorus"
 OccSL=fread(paste0(FOccSL,".csv"))
-#CoordH=c("Group.1", "Group.2")
-CoordH=c("decimalLongitude", "decimalLatitude")
+CoordH=c("Group.1", "Group.2")
+#CoordH=c("decimalLongitude", "decimalLatitude")
 BufferSmall=50
 BufferMedium=500
 #BufferLarge=5000 #too long
@@ -20,6 +21,8 @@ testH=match(CoordH,names(OccSL))
 OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[1]]))
 OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[2]]))
 
+OccSL$id=c(1:nrow(OccSL))
+
 
 #coordinates(OccSL) <- c("decimalLongitude", "decimalLatitude")
 coordinates(OccSL) <- CoordH
@@ -27,6 +30,9 @@ proj4string(OccSL) <- CRS("+init=epsg:4326") # WGS 84
 
 #CRS.new <- CRS(proj4string(CarthageP))
 OccSL_L93=spTransform(OccSL,CRS("+init=epsg:2154"))
+OccSL_L93=crop(OccSL_L93,Hab)
+OccSL=subset(OccSL,OccSL$id %in% OccSL_L93$id)
+
 
 
 #habitats (OCS)

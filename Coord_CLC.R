@@ -6,7 +6,8 @@ library(rgeos)
 
 #library(Rnightlights)
 #OccSL=fread("./vigiechiro/Traits/GBIF/OccSL_bush-cricket.csv")
-FOccSL="./vigiechiro/GIS/coordWGS84_ALL"
+FOccSL="./vigiechiro/GIS/RandPts_France_dep_L93Radius_ 93000_1000"
+#FOccSL="./vigiechiro/GIS/PA_Scorus"
 OccSL=fread(paste0(FOccSL,".csv"))
 CoordH=c("Group.1", "Group.2")
 #CoordH=c("decimalLongitude", "decimalLatitude")
@@ -54,12 +55,12 @@ OccSL_L93CLC=OccSL_L93
 if(exists("SpCLC_Mtot")){rm(SpCLC_Mtot)}
 for (h in 1:ceiling(nrow(BufferM)/300)) #300 is optimal number of buffers for intersection
 {
-#I don't do Corine Land Cover habitats for small buffers because CLC is not accurate enough (min pol size >> buffer size)
-print(paste(h,Sys.time()))
-SpCLC_M=intersect(BufferM[((h-1)*300+1):(min(h*300,nrow(BufferM))),],CLC12) # 0.2 sec / pol
-print(plot(BufferM[((h-1)*300+1):(min(h*300,nrow(BufferM))),]))
-SpCLC_M=subset(SpCLC_M,is.na(SpCLC_M$CODE_12)==F)
-if(exists("SpCLC_Mtot")){SpCLC_Mtot=rbind(SpCLC_Mtot,SpCLC_M)}else{SpCLC_Mtot=SpCLC_M}
+  #I don't do Corine Land Cover habitats for small buffers because CLC is not accurate enough (min pol size >> buffer size)
+  print(paste(h,Sys.time()))
+  SpCLC_M=intersect(BufferM[((h-1)*300+1):(min(h*300,nrow(BufferM))),],CLC12) # 0.2 sec / pol
+  #print(plot(BufferM[((h-1)*300+1):(min(h*300,nrow(BufferM))),]))
+  SpCLC_M=subset(SpCLC_M,is.na(SpCLC_M$CODE_12)==F)
+  if(exists("SpCLC_Mtot")){SpCLC_Mtot=rbind(SpCLC_Mtot,SpCLC_M)}else{SpCLC_Mtot=SpCLC_M}
 }
 
 for (i in 1:nlevels(as.factor(SpCLC_Mtot$CODE_12)))
@@ -139,7 +140,7 @@ for (h in 1:ceiling(nrow(BufferL)/100)) #100 is optimal number of buffers for in
   #I don't do Corine Land Cover habitats for small buffers because CLC is not accurate enough (min pol size >> buffer size)
   print(paste(h,Sys.time()))
   SpCLC_L=intersect(BufferL[((h-1)*100+1):(min(h*100,nrow(BufferL))),],CLC12) # 0.2 sec / pol
-  print(plot(BufferL[((h-1)*100+1):(min(h*100,nrow(BufferL))),]))
+  #print(plot(BufferL[((h-1)*100+1):(min(h*100,nrow(BufferL))),]))
   SpCLC_L=subset(SpCLC_L,is.na(SpCLC_L$CODE_12)==F)
   if(exists("SpCLC_Ltot")){SpCLC_Ltot=rbind(SpCLC_Ltot,SpCLC_L)}else{SpCLC_Ltot=SpCLC_L}
 }
@@ -227,7 +228,7 @@ CLC=data.frame(cbind(coordinates(OccSL),as.data.frame(OccSL_ARajouter)))
 #{
 #  NewName=paste0(FOccSL,"_CLC_",Start,"_",End,".csv")
 #}else{
-  NewName=paste0(FOccSL,"_CLC.csv")
+NewName=paste0(FOccSL,"_CLC.csv")
 #}
 fwrite(CLC,NewName)
 
