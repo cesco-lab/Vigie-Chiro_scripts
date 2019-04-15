@@ -5,9 +5,11 @@ library(rgbif)
 SpeciesList=fread("SpeciesList.csv")
 
 
-SpNameFilter=c("Gagea polidorii","Gagea dubia","Gagea erubescens"
-               ,"Gagea foliosa","Gagea granatelli","Gagea luberonensis"
-               ,"Gagea minima")
+SpNameFilter=c("Thymus nitens","Thymus longicaulis","Thymus serpyllum"
+               ,"Thymus striatus","Thymus longidens","Thymus carnosus"
+               ,"Thymus richardii","Thymus longiflorus","Thymus calaminthoides"
+               ,"Tymus ceretanus","Thymus costei","Thymus dolomiticus"
+               ,"Thymus drucei","Thymus heribaudii")
 Groupfilter=c("plant")
 CountryFilter="FR"
 
