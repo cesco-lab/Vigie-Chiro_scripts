@@ -22,18 +22,20 @@ args="SpNuit2_Seuil90_DataLP_PF_exportTot"
 args[2]="GI_coordWGS84_ALL"
 args[3]="SpeciesList.csv"
 #args[3]=NA
-args[4]="code_sp" #name of taxa column (useless if args[3] is specified)
-args[5]="bird" #name of taxa group (useless if args[3] is specified)
+args[4]="Esp" #name of taxa column (useless if args[3] is specified)
+#args[4]="code_sp" #name of taxa column (useless if args[3] is specified)
+args[5]="bat" #name of taxa group (useless if args[3] is specified)
 DataLoc=F
-args[6]="pk_carre.x" #name of locality in CoordSIG
-args[7]="carre" #name of locality in CoordSIG
+args[6]="Group.3" #name of sampling event
+args[7]="carre" #name of locality in CoordSIG (if DataLoc)
 args[8]="id_carre_annee" #name of participation (=sampling event)
 args[9]=T #if date (=day-of-year) is provided or not
-args[10]="abondance"
+#args[10]="abondance"
+args[10]="nb_contacts"
 #args[6]="longitude_grid_wgs84"
 #args[7]="latitude_grid_wgs84"
 args[11]=40 #number of coordinates projections (must be a division of 360)
-
+MinData=1
 
 #recupération des données chiros
 DataCPL3=fread(paste0(args[1],".csv"))
@@ -76,7 +78,6 @@ if(!DataLoc)
   CoordPar$x=NULL
   
 }else{
-ColCode1=match(args[6],names(CoordSIG))
 ColCode2=match(args[7],names(DataCPL3))
 ColCode3=match(args[8],names(DataCPL3))
 DataCPL3$participation=as.data.frame(DataCPL3)[,ColCode3]
@@ -191,7 +192,7 @@ for (i in 1:length(ListSp))
   #  DataSaison=subset(DataSaison,substr(DataSaison$`date part. debut`,4,5) %in% Saison)
   
   
-  if(sum(DataSaison$nb_contacts)>0)
+  if(sum(DataSaison$nb_contacts)>=MinData)
   {
     DataSPos=subset(DataSaison,DataSaison$nb_contacts>0)
     #NbReplicatsSpatiaux=nlevels(as.factor(as.character(DataSPos$Coord)))
