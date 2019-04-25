@@ -132,7 +132,7 @@ for(j in levels(as.factor(ggg10$participation))) {
     susub <- sub[sub$Nuit %in% levels(factor(sub$Nuit))[1:(l+1)], ] # sample data nights 1:n+1
     sususub <- sub[sub$Nuit %in% levels(factor(sub$Nuit))[1:l], ]   # sample data nights 1:n
     
-    trueab <- sum(sub$nb_contacts) / sub$n.night # total abundance per day at a site based on all data (for abundance sensitivity analysis of CSI-richness power analysis)
+    trueab <- sum(sub$nb_contacts) / unique(sub$n.night) # total abundance per day at a site based on all data (for abundance sensitivity analysis of CSI-richness power analysis)
     abundn1 <- sum(susub$nb_contacts) / nlevels(factor(susub$Nuit)) # mean abundance per day, estimated for n+1 night samples (for abundance power analysis)
     abundn <- sum(sususub$nb_contacts) / nlevels(factor(sususub$Nuit)) # mean abundance per day, estimated for n night samples (for abundance power analysis)
     ratio.abund <- ifelse(abundn1 < abundn, abundn1 / abundn, abundn / abundn1) #final response variable for abundance power analysis
@@ -154,7 +154,6 @@ pawa$trueab <- as.numeric(as.character(pawa$trueab))
 pawa$tcsi <- as.numeric(as.character(pawa$tcsi))
 pawa$wcsi <- as.numeric(as.character(pawa$wcsi))
 pawa$n.night <- as.numeric(as.character(pawa$n.night))
-pawa <- pawa[!duplicated(pawa), ]
 
 # final response variables for csi power analysis
 #pawa$delta.csi <- (pawa$wcsi - pawa$tcsi) / pawa$sd.csi
