@@ -140,7 +140,7 @@ for(j in levels(as.factor(ggg10$participation))) {
     truerich <- nlevels(factor(sub$species)) # richness per site based on all data (for curiosity)
     richn1 <- nlevels(factor(susub$species)) #richness based on n+1 nights (for power analysis)
     richn <- nlevels(factor(sususub$species))#richness based on n nights (for power analysis)
-    ratio.rich <- ifelse(richn1 < richn, richn1 / richn, richn / richn1) #final response variable for abundance power analysis
+    ratio.rich <- ifelse(richn1 < richn, richn1 / richn, richn / richn1) #final response variable for richness power analysis
     
      tcsi <- sum(na.omit(susub$ssi)*susub$nb_contact) / sum(na.omit(susub$nb_contact)) # CSI based on n+1 nights (for power analysis)
      wcsi <- sum(na.omit(sususub$ssi)*sususub$nb_contact) / sum(na.omit(sususub$nb_contact)) # CSI based on n nights (for power analysis)
@@ -156,7 +156,8 @@ pawa$wcsi <- as.numeric(as.character(pawa$wcsi))
 pawa$n.night <- as.numeric(as.character(pawa$n.night))
 pawa <- pawa[!duplicated(pawa), ]
 
-pawa$delta.csi <- (pawa$wcsi - pawa$tcsi) / pawa$sd.csi
-pawa$delta.csi.hui <- abs((pawa$wcsi - pawa$tcsi) / pawa$wcsi)
+# final response variables for csi power analysis
+#pawa$delta.csi <- (pawa$wcsi - pawa$tcsi) / pawa$sd.csi
+#pawa$delta.csi.hui <- abs((pawa$wcsi - pawa$tcsi) / pawa$wcsi)
 pawa$ratio.csi <- ifelse(pawa$wcsi < pawa$tcsi, pawa$wcsi / pawa$tcsi, pawa$tcsi / pawa$wcsi) 
 
