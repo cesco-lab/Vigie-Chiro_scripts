@@ -104,7 +104,7 @@ save(SSI, file = "F:/bat veolia mnhn/data/SSI")
 
 load("F:/bat veolia mnhn/data/g10")
 load("F:/bat veolia mnhn/data/SSI")
-gg10 <- do.call("rbind", glist[c(3, 8, 9, 13:19, 21:24, 27:39, 41:44, 46)]) 
+gg10 <- do.call("rbind", glist[c(3, 8, 9, 13:19, 21:24, 27:39, 41:44, 46)]) # rbind list elements
 
 gg10 <- merge(SSI, gg10, all.y = T, by.x = "species", by.y = "espece")
 gg10 <- gg10[gg10$groupe == "bat", ]
@@ -115,7 +115,7 @@ ggg10 <- c()
 for(j in levels(as.factor(gg10$participation))) {
   sub <- gg10[gg10$participation == j, ]
   sub$truecsi <- sum(na.omit(sub$ssi)*sub$nb_contact) / sum(na.omit(sub$nb_contact))  # CSI based on full data is named 'truecsi'
-  sub$truecsi.p <- sum(na.omit(sub$ssi.presence)*sub$nb_contact) / sum(sub$nb_contact)
+  sub$truecsi.p <- sum(na.omit(sub$ssi.presence)*sub$nb_contact) / sum(sub$nb_contact) # CSI for presence-absence
   sub$n.night <- nlevels(as.factor(sub$Nuit))
   ggg10 <- rbind(ggg10, sub)
 }
@@ -123,34 +123,40 @@ for(j in levels(as.factor(gg10$participation))) {
 
 # save(ggg10, file = "F:/bat veolia mnhn/data/ggg10")
 
-############ computing CSI based on sample data (in order: for the 1st night, for the 1st + 2nd nights, etc...)
+############ power analysis: computing CSI based on sample data (in order: for the 1st night, for the 1st + 2nd nights, etc...)
 
 pawa <- c() 
 for(j in levels(as.factor(ggg10$participation))) {
   sub <- ggg10[ggg10$participation == j, ]
-  for(l in 1:nrow(sub)){
-      susub <- sub[1:l, ]
-      trueab <- sum(sub$nb_contacts) / nrow(sub)
-      falseab <- sum(susub$nb_contacts) / nrow(sub)
-      delta.abund <- trueab - falseab
-      
-      wcsi <- sum(na.omit(susub$ssi)*susub$nb_contact) / sum(na.omit(susub$nb_contact))
-      # csi.p <- sum(na.omit(susub$ssi.presence)*susub$nb_contact) / sum(susub$nb_contact)
-      
-      tcsi <- susub$truecsi
+  for(l in 1: nlevels(factor(sub$Nuit))){
+    susub <- sub[sub$Nuit %in% levels(factor(sub$Nuit))[1:(l+1)], ] # sample data nights 1:n+1
+    sususub <- sub[sub$Nuit %in% levels(factor(sub$Nuit))[1:l], ]   # sample data nights 1:n
+    
+    trueab <- sum(sub$nb_contacts) / sub$n.night # total abundance per day at a site based on all data (for abundance sensitivity analysis of CSI-richness power analysis)
+    abundn1 <- sum(susub$nb_contacts) / nlevels(factor(susub$Nuit)) # mean abundance per day, estimated for n+1 night samples (for abundance power analysis)
+    abundn <- sum(sususub$nb_contacts) / nlevels(factor(sususub$Nuit)) # mean abundance per day, estimated for n night samples (for abundance power analysis)
+    ratio.abund <- ifelse(abundn1 < abundn, abundn1 / abundn, abundn / abundn1) #final response variable for abundance power analysis
+     
+    truerich <- nlevels(factor(sub$species)) # richness per site based on all data (for curiosity)
+    richn1 <- nlevels(factor(susub$species)) #richness based on n+1 nights (for power analysis)
+    richn <- nlevels(factor(sususub$species))#richness based on n nights (for power analysis)
+    ratio.rich <- ifelse(richn1 < richn, richn1 / richn, richn / richn1) #final response variable for abundance power analysis
+    
+     tcsi <- sum(na.omit(susub$ssi)*susub$nb_contact) / sum(na.omit(susub$nb_contact)) # CSI based on n+1 nights (for power analysis)
+     wcsi <- sum(na.omit(sususub$ssi)*sususub$nb_contact) / sum(na.omit(sususub$nb_contact)) # CSI based on n nights (for power analysis)
       n.night <- l
-      paw <- cbind(j, trueab, delta.abund, wcsi, tcsi, n.night)
+      paw <- cbind(j, trueab, ratio.abund, ratio.rich, wcsi, tcsi, n.night)
       pawa <- as.data.frame(rbind(pawa, paw))
     }
   }
+
 pawa$trueab <- as.numeric(as.character(pawa$trueab))
-pawa$delta.abund <- as.numeric(as.character(pawa$delta.abund))
 pawa$tcsi <- as.numeric(as.character(pawa$tcsi))
 pawa$wcsi <- as.numeric(as.character(pawa$wcsi))
 pawa$n.night <- as.numeric(as.character(pawa$n.night))
 pawa <- pawa[!duplicated(pawa), ]
 
-#standardising csi and getting "delta csi at once"
-pawa$sd.csi <- sd(pawa$wcsi)
-pawa$sd.csi <- as.numeric(as.character(pawa$sd.csi))
 pawa$delta.csi <- (pawa$wcsi - pawa$tcsi) / pawa$sd.csi
+pawa$delta.csi.hui <- abs((pawa$wcsi - pawa$tcsi) / pawa$wcsi)
+pawa$ratio.csi <- ifelse(pawa$wcsi < pawa$tcsi, pawa$wcsi / pawa$tcsi, pawa$tcsi / pawa$wcsi) 
+
