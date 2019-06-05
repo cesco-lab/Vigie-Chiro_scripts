@@ -10,7 +10,7 @@ Coord_ALAN=function(points,names_coord,bl,layer)
   OccSL=fread(paste0(FOccSL,".csv"))
   CoordH=names_coord
   BufferLarge=bl
-  
+  ALAN=raster(layer)
 
   
   #library(Rnightlights)
