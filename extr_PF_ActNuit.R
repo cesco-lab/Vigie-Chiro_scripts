@@ -2,9 +2,12 @@ library(data.table)
 library(StreamMetabolism)
 
 if(!exists("args")){args=""}
-
-#args[3]="Seuil50"
-#args[4]="DataLP_PF_export_55.csv"
+Tri=T
+WDF=F
+#args[3]=50
+#args[4]="DataLP_PF_exportMyoGT.txt"
+#Tri=F
+#WDF=T
 
 memory.limit(3210241024*1024)
 
@@ -17,7 +20,7 @@ DataLP=fread(args[4]) # 1e5 lines / sec
 Sys.time()
 
 #table "seuils"
-RefSeuils=fread("Referentiel_seuils_tabase3HF_1015France_IdConc_Car.csv")
+#RefSeuils=fread("Referentiel_seuils_tabase3HF_1015France_IdConc_Car.csv")
 
 
 #table "espèces"
@@ -34,21 +37,24 @@ op <- options(digits.secs=3)
 #pour reset
 #options(op)
 
-#ETAPE 0 - tri des participations foireuses (durée séquence Pip)
-#A FAIRE : tri sur le sampling rate
-Sys.time()
-DataPip=subset(DataLP,substr(DataLP$espece,1,3)=="Pip") #3 sec
-Sys.time()
-DurSeq=DataPip$temps_fin-DataPip$temps_debut
-Q90Pip=aggregate(DurSeq,by=list(DataPip$participation,DataPip$DataMicFinal)
-                 ,FUN=function(x) quantile(x,0.9))
-SelQ90Pip=subset(Q90Pip,Q90Pip$x>4.3)
-Sys.time()
-test=match(paste(DataLP$participation,DataLP$DataMicFinal)
-           ,paste(SelQ90Pip$Group.1,SelQ90Pip$Group.2)) # 6 sec
-Sys.time()
-DataLP=subset(DataLP,is.na(test)==F)
-Sys.time()
+if(Tri)
+{
+  #ETAPE 0 - tri des participations foireuses (durée séquence Pip)
+  #A FAIRE : tri sur le sampling rate
+  Sys.time()
+  DataPip=subset(DataLP,substr(DataLP$espece,1,3)=="Pip") #3 sec
+  Sys.time()
+  DurSeq=DataPip$temps_fin-DataPip$temps_debut
+  Q90Pip=aggregate(DurSeq,by=list(DataPip$participation,DataPip$DataMicFinal)
+                   ,FUN=function(x) quantile(x,0.9))
+  SelQ90Pip=subset(Q90Pip,Q90Pip$x>4.3)
+  Sys.time()
+  test=match(paste(DataLP$participation,DataLP$DataMicFinal)
+             ,paste(SelQ90Pip$Group.1,SelQ90Pip$Group.2)) # 6 sec
+  Sys.time()
+  DataLP=subset(DataLP,is.na(test)==F)
+  Sys.time()
+}
 
 #ETAPE 1 - formattage des tables et de leurs attributs
 #ajout des infos temps relatifs / sunrise-sunset
@@ -89,6 +95,8 @@ Sys.time()
 DataLPS[,DecsrP:=DecsrP]
 Sys.time()
 
+if(exists("RefSeuils"))
+{
 #merge avec espèce pour tri selon seuil
 #simplifie la table groupe pour ne pas alourdir la grosse table Data...
 #simplifie la table groupe pour ne pas alourdir la grosse table Data...
@@ -116,6 +124,16 @@ DataFiable=subset(DataLPSG,as.logical(Fiable)) # 10 sec
 Sys.time()
 rm(DataLPSG) # 30 sec
 #test=DataFiable[1:100000,]
+}else{
+  DataFiable=subset(DataLPS,DataLPS$probabilite>(as.numeric(args[3])/100)) # 10 sec
+}
+
+if(WDF)
+{
+  fwrite(DataFiable,paste0("S_",args[4]))
+}
+
+
 
 Sys.time()
 DataPF_ActNuit=aggregate(DataFiable$donnee
@@ -124,17 +142,17 @@ DataPF_ActNuit=aggregate(DataFiable$donnee
                                   ,DataFiable$DataMicFinal
                                   ,DataFiable$groupe
                                   ,DataFiable$espece
-                                  )
+                         )
                          ,FUN=length) # 15 min
 Sys.time()
 DataPF_MinSt=aggregate(DataFiable$DecstP
-                         ,by=list(DataFiable$participation
-                                  ,DataFiable$DateNuit
-                                  ,DataFiable$DataMicFinal
-                                  ,DataFiable$groupe
-                                  ,DataFiable$espece
-                         )
-                         ,FUN=min)
+                       ,by=list(DataFiable$participation
+                                ,DataFiable$DateNuit
+                                ,DataFiable$DataMicFinal
+                                ,DataFiable$groupe
+                                ,DataFiable$espece
+                       )
+                       ,FUN=min)
 Sys.time()
 DataPF_MinSr=aggregate(DataFiable$DecsrP
                        ,by=list(DataFiable$participation
@@ -147,7 +165,7 @@ DataPF_MinSr=aggregate(DataFiable$DecsrP
 Sys.time()
 DataPF_SpNuit=cbind(DataPF_ActNuit,DataPF_MinSt$x,DataPF_MinSr$x)
 colnames(DataPF_SpNuit)=c("participation","Nuit","num_micro","groupe","espece"
-                           ,"nb_contacts","min_decalage_coucher","min_decalage_lever")
+                          ,"nb_contacts","min_decalage_coucher","min_decalage_lever")
 
 
 
@@ -158,7 +176,7 @@ DataDMinSr=aggregate(DataFiable$DecsrP
                      ,by=list(DataFiable$participation
                               ,DataFiable$DateNuit
                               ,DataFiable$DataMicFinal)
-                                              ,FUN=min) # 20 sec
+                     ,FUN=min) # 20 sec
 Sys.time()
 DataDMaxSr=aggregate(DataFiable$DecsrP
                      ,by=list(DataFiable$participation
