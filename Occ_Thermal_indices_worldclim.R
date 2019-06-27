@@ -24,7 +24,7 @@ thermal_indices <- array(dim = c(nlevels(as.factor(species)), 6, 3),
 for(i in species){
   print(i)
   t0 <-   Sys.time()
-  occ <- read.csv(paste0("F:/bat veolia mnhn/gbif occurrences/", i, ".csv"), sep = "\t") #reading occurrence data after download from gbif
+  occ <- read.csv(paste0("your.directory/gbif occurrences/", i, ".csv"), sep = "\t") #reading occurrence data after download from gbif
   occ <- occ[complete.cases(occ$decimalLatitude), ]
   occ <- occ[occ$decimalLatitude > 30 & 
                occ$decimalLongitude > -20 &
@@ -34,7 +34,7 @@ for(i in species){
   points(occ$decimalLatitude ~ occ$decimalLongitude)
   text(0, 70 ,i)
   
-Bioclimdir="F:/Climate data/worldclim/wc2.0_10m_bio" #where bioclim TIFF files are
+Bioclimdir="your.directory/worldclim/wc2.0_10m_bio" #where bioclim TIFF files are
 
 ListTifiles=list.files(Bioclimdir,full.names=T)
 
@@ -56,7 +56,7 @@ for(j in c(1,5,6)){
   thermal_indices[i, 5, j] <- thermal_indices[i, 3, j] - thermal_indices[i, 4, j] 
   thermal_indices[i, 6, j] <- (thermal_indices[i, 3, j] + thermal_indices[i, 4, j])/2
 }
-save(thermal_indices, file = "F:/bat veolia mnhn/data/thermal indices/thermal_indices.bioclim")
+save(thermal_indices, file = "your.directory/thermal indices/thermal_indices.bioclim")
 print(thermal_indices)
 cat(paste("---- ", Sys.time(), "Computing time for species", i, ": ", Sys.time()-t0, "\n"))
 }
