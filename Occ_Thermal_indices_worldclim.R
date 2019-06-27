@@ -30,7 +30,7 @@ for(i in species){
                occ$decimalLongitude > -20 &
                occ$decimalLongitude < 70, ]  # Europe and surrounings only
   
-    map("worldHires", xlim = c(-20, 59), ylim = c(35, 71)) # visualising the data in Europe
+  map("worldHires", xlim = c(-20, 59), ylim = c(35, 71)) # visualising the data in Europe
   points(occ$decimalLatitude ~ occ$decimalLongitude)
   text(0, 70 ,i)
   
@@ -45,10 +45,10 @@ occ.raster <- rasterize(x = occ[, c("decimalLongitude", "decimalLatitude")],
                  fun = function(x, ...) 1) # Bien vÃ©rifier le rÃ©sultat et ajuster la fonction
 occ.unique <- xyFromCell(occ.raster, Which(occ.raster == 1,
                                            cells = TRUE))
-
+ #computing thermal niche indices
 for(j in c(1,5,6)){
   SpBioci  <- extract(raster(ListTifiles[j]), occ.unique)
-  j <- ifelse(j == 1, j, ifelse(j == 5, 2, 3))  # change bioclim numbers for the array
+  j <- ifelse(j == 1, j, ifelse(j == 5, 2, 3))  # change bioclim numbers to fit the array's dimentions
   thermal_indices[i, 1, j] <- mean(na.omit(SpBioci))
   thermal_indices[i, 2, j] <- sd(na.omit(SpBioci))
   thermal_indices[i, 3, j] <- quantile(SpBioci,0.95, na.rm = T)
