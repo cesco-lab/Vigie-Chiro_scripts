@@ -3,9 +3,9 @@ GLMpackage=list.files("./Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/functi
 ListDataSp=list.files("./VigieChiro/DataSp/RPCirw0_90",full.names=T)
 
 TagData="Seuil90"
-TagModel="GLM_tendancesfacteur_"
+TagModel="GLM_tendancesfacteurTESTSANSJULIAN_"
 VI="nb_contacts_strict"
-LE=c("year","poly(julian,2)","sample_cat","nb_Tron_strict"
+LE=c("year","sample_cat","nb_Tron_strict"
      ,"temps_enr_strict","latitude","longitude","expansion_direct"
 )
 AF="year"
