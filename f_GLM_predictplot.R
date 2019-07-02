@@ -9,7 +9,7 @@ VarToPredict=c("year")
 VarNotToPredict=NA #list of variables in interaction with VarToPredict
 #ToPredict=c("DecOT [((-10:10)/10)]","AT81 [-1,0,1]")
 FixedLevels=c(2006:2018)
-GLMPref="GLM_tendancesfacteurTESTSANSJULIAN_Pipkuh_Seuil50.glm"
+GLMPref="GLM_tendancesfacteurTESTSANSJULIAN_"
 FFBT="forBackTransform_GLM_tendancesfacteurTESTSANSJULIAN_Pipkuh_Seuil50.csv"
 
 
@@ -24,6 +24,7 @@ for (i in 1:length(VarToPredict))
 
 forBackTransform=fread(paste0("./VigieChiro/GLMs/forBackTransform/",FFBT))
 ListMod=list.files("./VigieChiro/GLMs/",pattern=GLMPref,full.names=T)
+ListMod=subset(ListMod,grepl(".glm",ListMod))
 VarMatch=match(VarToPredict,forBackTransform$VarList)
 
 
@@ -82,91 +83,62 @@ for (i in 1:length(ListMod))
   TestVar=subset(PVal_woInt,TermTarget)
   if(sum(is.na(TestVar))<length(TestVar))
   {
-    if(min(subset(TestVar,!is.na(TestVar)))<0.05)
+    #if(min(subset(TestVar,!is.na(TestVar)))<0.05)
+    #{
+    ModInfo=tstrsplit(ListMod[i],"_")
+    #Species=c(Species,substr(ModInfo[[length(ModInfo)]],nchar(ModInfo[[length(ModInfo)]])-9,nchar(ModInfo[[length(ModInfo)]])-4))
+    #Create predict table
+    print(Sys.time())
+    pr1.0 <- ggpredict(ModSp, c(terms = ToPredict),pretty = FALSE)
+    Sys.time()
+    pr1=pr1.0
+    # Backtransform before scaling (utiliser la table crée lors de l'utilisation de la fonction scale)
+    if (Continuous)
     {
-      ModInfo=tstrsplit(ListMod[i],"_")
-      #Species=c(Species,substr(ModInfo[[length(ModInfo)]],nchar(ModInfo[[length(ModInfo)]])-9,nchar(ModInfo[[length(ModInfo)]])-4))
-      #Create predict table
-      print(Sys.time())
-      pr1.0 <- ggpredict(ModSp, c(terms = ToPredict),pretty = FALSE)
-      Sys.time()
-      pr1=pr1.0
-      # Backtransform before scaling (utiliser la table crée lors de l'utilisation de la fonction scale)
-      if (Continuous)
-      {
       pr1$x=pr1$x*forBackTransform$Sdev[VarMatch[1]]+forBackTransform$Mean[VarMatch[1]]
       Xmin=quantile(pr1$x,0.05)
       Xmax=quantile(pr1$x,0.95)
-      }else{
-        Xmin=min(FixedLevels)
-        Xmax=max(FixedLevels)
-        
-      }
-      pr1$predicted=subset(pr1$predicted,!is.na(pr1$x))
-      pr1$group=subset(pr1$group,!is.na(pr1$x))
-      pr1$x=subset(pr1$x,!is.na(pr1$x))
-      #pr1$invgroup=as.factor(-(as.numeric(as.character(pr1$group))))
+    }else{
+      Xmin=min(FixedLevels)
+      Xmax=max(FixedLevels)
       
-      #Ymin=quantile(pr1$predicted,0.04)*0.5
-      Ymin=0
-      Ymax=quantile(pr1$predicted,0.99)*1.5
-      
-      
-      RawPredict=log(pr1$predicted)
-      
-      summary(pr1$predicted)
-      
-      pr1$anom=as.numeric(as.character(pr1$group))
-      names(pr1)[ncol(pr1)]=VarToPredict[2]
-      pr1$predicted=pmin(pr1$predicted,10000)    
-      
-      # Plot
-      #GradColor=scale_color_gradient2(low="blue",mid="green",high="red")
-      if(nlevels(pr1$group)==3)
-      {
-        if(!is.na(match("facet",names(pr1)))){
-          for (j in 1:nlevels(as.factor(pr1$facet)))
-          {
-            DirNameTemp=paste0(paste0(dirname(ListMod[i]),"/Plots/",DirVTP))
-            dir.create(DirNameTemp)
-            GraphNameTemp=paste0(DirNameTemp,"/",j,"_",gsub(".glm","",basename(ListMod[i])),".png")
-            png(filename=GraphNameTemp, res=100)
-            
-            prtemp=subset(pr1,pr1$facet==levels(as.factor(pr1$facet))[j])
-            print(ggplot(prtemp, aes(x, predicted,fill=group)) +
-                    #scale_color_gradient2(low="blue",mid="green",high="red") +
-                    #scale_colour_discrete(name = "anom")+
-                    scale_color_manual(values=c("blue","green","red"))+
-                    geom_line(aes(color = group),size=1)  +
-                    #geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1)+
-                    geom_ribbon(data=prtemp[prtemp[,ncol(prtemp)]==1,]
-                                ,aes(ymin = conf.low, ymax = conf.high), alpha = .1
-                                ,fill="red")+
-                    geom_ribbon(data=prtemp[prtemp[,ncol(prtemp)]==0,]
-                                ,aes(ymin = conf.low, ymax = conf.high), alpha = .1
-                                ,fill="green")+
-                    geom_ribbon(data=prtemp[prtemp[,ncol(prtemp)]==-1,]
-                                ,aes(ymin = conf.low, ymax = conf.high), alpha = .1
-                                ,fill="blue")+
-                    xlab(VarToPredict) + 
-                    ylab("Acoustic Activity") +
-                    scale_x_continuous(limits = c(Xmin, Xmax)) +
-                    scale_y_continuous(limits = c(Ymin, Ymax)) +
-                    theme_bw(base_size = 10)+
-                    
-                    ggtitle(gsub(".png","",basename(GraphNameTemp))) 
-                  #theme(plot.title = element_text(size = 8))+
-                  #scale_fill_discrete(values=c("blue","green","red"),guide=FALSE)+
-            )
-            dev.off()
-          }
-        }else{
+    }
+    pr1$predicted=subset(pr1$predicted,!is.na(pr1$x))
+    pr1$group=subset(pr1$group,!is.na(pr1$x))
+    pr1$x=subset(pr1$x,!is.na(pr1$x))
+    #pr1$invgroup=as.factor(-(as.numeric(as.character(pr1$group))))
+    
+    #Ymin=quantile(pr1$predicted,0.04)*0.5
+    Ymin=0
+    Ymax=quantile(pr1$predicted,0.99)*1.5
+    pr1$conf.high=pmin(pr1$conf.high,Ymax)
+    
+    RawPredict=log(pr1$predicted)
+    
+    summary(pr1$predicted)
+    
+    pr1$anom=as.numeric(as.character(pr1$group))
+    names(pr1)[ncol(pr1)]=VarToPredict[2]
+    pr1$predicted=pmin(pr1$predicted,10000)    
+    
+    DirNameTemp=paste0(paste0(dirname(ListMod[i]),"/Plots/",DirVTP))
+    dir.create(DirNameTemp)
+    GraphNameTemp=paste0(DirNameTemp,"/",gsub(".glm","",basename(ListMod[i])),".png")
+    
+    
+    # Plot
+    #GradColor=scale_color_gradient2(low="blue",mid="green",high="red")
+    if(nlevels(pr1$group)==3)
+    {
+      if(!is.na(match("facet",names(pr1)))){
+        for (j in 1:nlevels(as.factor(pr1$facet)))
+        {
           DirNameTemp=paste0(paste0(dirname(ListMod[i]),"/Plots/",DirVTP))
           dir.create(DirNameTemp)
-          GraphNameTemp=paste0(DirNameTemp,"/",gsub(".glm","",basename(ListMod[i])),".png")
+          GraphNameTemp=paste0(DirNameTemp,"/",j,"_",gsub(".glm","",basename(ListMod[i])),".png")
           png(filename=GraphNameTemp, res=100)
           
-          prtemp=pr1
+          prtemp=subset(pr1,pr1$facet==levels(as.factor(pr1$facet))[j])
           print(ggplot(prtemp, aes(x, predicted,fill=group)) +
                   #scale_color_gradient2(low="blue",mid="green",high="red") +
                   #scale_colour_discrete(name = "anom")+
@@ -193,25 +165,62 @@ for (i in 1:length(ListMod))
                 #scale_fill_discrete(values=c("blue","green","red"),guide=FALSE)+
           )
           dev.off()
-          
-        }  
+        }
       }else{
-        print(ggplot(pr1, aes(x, predicted)) +
-                geom_line()  +
+        DirNameTemp=paste0(paste0(dirname(ListMod[i]),"/Plots/",DirVTP))
+        dir.create(DirNameTemp)
+        GraphNameTemp=paste0(DirNameTemp,"/",gsub(".glm","",basename(ListMod[i])),".png")
+        png(filename=GraphNameTemp, res=100)
+        
+        prtemp=pr1
+        print(ggplot(prtemp, aes(x, predicted,fill=group)) +
                 #scale_color_gradient2(low="blue",mid="green",high="red") +
-                geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1)+
+                #scale_colour_discrete(name = "anom")+
+                scale_color_manual(values=c("blue","green","red"))+
+                geom_line(aes(color = group),size=1)  +
+                #geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1)+
+                geom_ribbon(data=prtemp[prtemp[,ncol(prtemp)]==1,]
+                            ,aes(ymin = conf.low, ymax = conf.high), alpha = .1
+                            ,fill="red")+
+                geom_ribbon(data=prtemp[prtemp[,ncol(prtemp)]==0,]
+                            ,aes(ymin = conf.low, ymax = conf.high), alpha = .1
+                            ,fill="green")+
+                geom_ribbon(data=prtemp[prtemp[,ncol(prtemp)]==-1,]
+                            ,aes(ymin = conf.low, ymax = conf.high), alpha = .1
+                            ,fill="blue")+
                 xlab(VarToPredict) + 
                 ylab("Acoustic Activity") +
                 scale_x_continuous(limits = c(Xmin, Xmax)) +
                 scale_y_continuous(limits = c(Ymin, Ymax)) +
+                theme_bw(base_size = 10)+
                 
-                ggtitle(ListMod[i]) + 
-                theme_bw(base_size = 13)
+                ggtitle(gsub(".png","",basename(GraphNameTemp))) 
+              #theme(plot.title = element_text(size = 8))+
+              #scale_fill_discrete(values=c("blue","green","red"),guide=FALSE)+
         )
+        dev.off()
         
-      }
+      }  
+    }else{
+      png(filename=GraphNameTemp, res=100)
+      
+      print(ggplot(pr1, aes(x, predicted)) +
+              geom_line()  +
+              #scale_color_gradient2(low="blue",mid="green",high="red") +
+              geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1)+
+              xlab(VarToPredict) + 
+              ylab("Acoustic Activity") +
+              scale_x_continuous(limits = c(Xmin, Xmax)) +
+              scale_y_continuous(limits = c(Ymin, Ymax)) +
+              
+              ggtitle(gsub(".png","",basename(GraphNameTemp))) + 
+              theme_bw(base_size = 13)
+      )
+      dev.off()
+      
     }
   }
 }
+#}
 
 beep()
