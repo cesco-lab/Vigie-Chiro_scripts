@@ -62,8 +62,8 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     for (i in 1:length(asfactor))
     {
       test=match(asfactor[i],names(SpNuit))
-    SpNuit[,test]=as.factor(SpNuit[,test])
-      }
+      SpNuit[,test]=as.factor(SpNuit[,test])
+    }
     SpNuit=as.data.table(SpNuit)
     
   }
@@ -76,119 +76,128 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
   
   
   SpA1=aggregate(AbwoNA,by=list(SpNuitwoNA$espece),FUN=mean)
-  barplot(SpA1$x,names.arg=SpA1$Group.1,las=2,cex.names=0.6)
-  SpPos=subset(SpNuitwoNA,AbwoNA>0)
-  AbPos=subset(Ab,Ab>0)
-  SpOcc=aggregate(AbPos,by=list(SpPos$espece),FUN=length)
-  barplot(SpOcc$x,names.arg=SpOcc$Group.1,las=2,cex.names=0.6)
   
-  SpAbIfP=aggregate(AbPos,by=list(SpPos$espece),FUN=mean)
-  barplot(SpAbIfP$x,names.arg=SpAbIfP$Group.1,las=2,cex.names=0.6)
-  
-  # Calcul du VIF (adapté à glmmTMB, sinon il faut adapter v et nam)
-  vif.mer <- function (fit) {
-    ## adapted from rms::vif
     
-    v <- vcov(fit)$cond
-    nam <- names(fixef(fit)$cond)
-    
-    ## exclude intercepts
-    ns <- sum(1 * (nam == "Intercept" | nam == "(Intercept)"))
-    if (ns > 0) {
-      v <- v[-(1:ns), -(1:ns), drop = FALSE]
-      nam <- nam[-(1:ns)]
-    }
-    
-    d <- diag(v)^0.5
-    v <- diag(solve(v/(d %o% d)))
-    names(v) <- nam
-    v
-  }
-  
-  
-  # Pour correction autocorrelation spatiale
-  #MaDataActiNew$FauxGroupe=rep(1,nrow(MaDataActiNew))
-  #MaDataActiNew$Coord=numFactor(MaDataActiNew$X,MaDataActiNew$Y)
-  
-  
-  SpNuit_SLPAGN=as.data.frame(SpNuitwoNA)
-  
-  OtherVariables=subset(names(SpNuit),!(names(SpNuit) %in% VarSimple))
-  
-  SpNuit_Scale=subset(SpNuit_SLPAGN,select=OtherVariables)
-  
-  
-  Mean=vector()
-  Sdev=vector()
-  VarList=vector()
-  for (i in 1:length(VarSimple))
-  {
-    if(substr(VarSimple[i],1,5)=="poly(")
+    barplot(SpA1$x,names.arg=SpA1$Group.1,las=2,cex.names=0.6)
+    SpPos=subset(SpNuitwoNA,AbwoNA>0)
+    AbPos=subset(Ab,Ab>0)
+    print(length(AbPos))
+    if(length(AbPos)<=length(VarAbondance))
     {
-      Var=gsub("poly","",VarSimple[i])
-      Terms=tstrsplit(Var,split=",")
-      VarTemp=substr(Terms[[1]],2,nchar(Terms[[1]]))
-    }else{
-      VarTemp=VarSimple[i]
-    }
-    VarList=c(VarList,VarTemp)
-    Vinit=(SpNuit_SLPAGN)[,VarTemp]
-    if(is.numeric(Vinit))
+      print(paste(FAct,": too few positive data to fit model"))
+    }else
     {
       
-      Vscale=scale(Vinit)
-      Mean=c(Mean,mean(Vinit))
-      Sdev=c(Sdev,sd(Vinit))
-    }else{
-      Vscale=Vinit
-      Mean=c(Mean,NA)
-      Sdev=c(Sdev,NA)
-    }
-    SpNuit_Scale=cbind(SpNuit_Scale,Vscale)
-    names(SpNuit_Scale)[ncol(SpNuit_Scale)]=VarTemp
-    if(i%%10==1){print(paste(i,Sys.time()))}
+    SpOcc=aggregate(AbPos,by=list(SpPos$espece),FUN=length)
+    barplot(SpOcc$x,names.arg=SpOcc$Group.1,las=2,cex.names=0.6)
     
+    SpAbIfP=aggregate(AbPos,by=list(SpPos$espece),FUN=mean)
+    barplot(SpAbIfP$x,names.arg=SpAbIfP$Group.1,las=2,cex.names=0.6)
+    
+    # Calcul du VIF (adapté à glmmTMB, sinon il faut adapter v et nam)
+    vif.mer <- function (fit) {
+      ## adapted from rms::vif
+      
+      v <- vcov(fit)$cond
+      nam <- names(fixef(fit)$cond)
+      
+      ## exclude intercepts
+      ns <- sum(1 * (nam == "Intercept" | nam == "(Intercept)"))
+      if (ns > 0) {
+        v <- v[-(1:ns), -(1:ns), drop = FALSE]
+        nam <- nam[-(1:ns)]
+      }
+      
+      d <- diag(v)^0.5
+      v <- diag(solve(v/(d %o% d)))
+      names(v) <- nam
+      v
+    }
+    
+    
+    # Pour correction autocorrelation spatiale
+    #MaDataActiNew$FauxGroupe=rep(1,nrow(MaDataActiNew))
+    #MaDataActiNew$Coord=numFactor(MaDataActiNew$X,MaDataActiNew$Y)
+    
+    
+    SpNuit_SLPAGN=as.data.frame(SpNuitwoNA)
+    
+    OtherVariables=subset(names(SpNuit),!(names(SpNuit) %in% VarSimple))
+    
+    SpNuit_Scale=subset(SpNuit_SLPAGN,select=OtherVariables)
+    
+    
+    Mean=vector()
+    Sdev=vector()
+    VarList=vector()
+    for (i in 1:length(VarSimple))
+    {
+      if(substr(VarSimple[i],1,5)=="poly(")
+      {
+        Var=gsub("poly","",VarSimple[i])
+        Terms=tstrsplit(Var,split=",")
+        VarTemp=substr(Terms[[1]],2,nchar(Terms[[1]]))
+      }else{
+        VarTemp=VarSimple[i]
+      }
+      VarList=c(VarList,VarTemp)
+      Vinit=(SpNuit_SLPAGN)[,VarTemp]
+      if(is.numeric(Vinit))
+      {
+        
+        Vscale=scale(Vinit)
+        Mean=c(Mean,mean(Vinit))
+        Sdev=c(Sdev,sd(Vinit))
+      }else{
+        Vscale=Vinit
+        Mean=c(Mean,NA)
+        Sdev=c(Sdev,NA)
+      }
+      SpNuit_Scale=cbind(SpNuit_Scale,Vscale)
+      names(SpNuit_Scale)[ncol(SpNuit_Scale)]=VarTemp
+      if(i%%10==1){print(paste(i,Sys.time()))}
+      
+    }
+    forBackTransform=data.frame(cbind(VarList,Mean,Sdev))
+    fwrite(forBackTransform,paste0("./VigieChiro/GLMs/forBackTransform/forBackTransform_"
+                                   ,TagModel,".csv"))
+    
+    ColNumTest=unlist(lapply(SpNuit_Scale[1,],FUN=function(x) is.numeric(x)))
+    ColNum=subset(names(SpNuit_Scale),ColNumTest)
+    SpNuit_ColNum=subset(SpNuit_Scale,select=ColNum)
+    MatCor=cor(SpNuit_ColNum)
+    corrplot(MatCor)
+    Formula=as.formula(paste0(FormulaFix_TtSp
+                              ,FormulaRandom))
+    
+    
+    if(SelSample<nrow(SpNuit_Scale))
+    {
+      SpNuit_Sample=SpNuit_Scale[sample.int(nrow(SpNuit_Scale),SelSample),]
+    }else{
+      SpNuit_Sample=SpNuit_Scale
+    }
+    Sys.time()
+    ModSp=glmmTMB(Formula,data=SpNuit_Sample, family=familyMod)  #37 min
+    Sys.time()
+    beep()
+    Res=residuals(ModSp)
+    SpNuit_Sample$Res=Res
+    
+    Estimates=as.data.frame(coef(summary(ModSp))$cond)
+    Estimates=cbind(term=row.names(Estimates),Estimates)
+    save(ModSp,file=paste0("./VigieChiro/GLMs/",TagModel,".glm"))
+    VIFMod=c(1,vif.mer(ModSp))
+    Estimates$VIF=VIFMod
+    Suffix=tstrsplit(basename(FAct),split="[.]")[[1]]
+    
+    fwrite(Estimates,paste0("./VigieChiro/GLMs/Summaries/",TagModel,"_",Suffix,"_Coefs.csv"),sep=";")
+    
+    fwrite(as.list(FormulaFix_TtSp),paste0("./VigieChiro/GLMs/logs/",substr(Sys.time(),1,13),".log"))
+    
+    fwrite(SpNuit_Sample,paste0("./VigieChiro/GLMs/",TagModel,"_",Suffix,"_Res.csv"))
   }
-  forBackTransform=data.frame(cbind(VarList,Mean,Sdev))
-  fwrite(forBackTransform,paste0("./VigieChiro/GLMs/forBackTransform/forBackTransform_"
-                                 ,TagModel,".csv"))
-  
-  ColNumTest=unlist(lapply(SpNuit_Scale[1,],FUN=function(x) is.numeric(x)))
-  ColNum=subset(names(SpNuit_Scale),ColNumTest)
-  SpNuit_ColNum=subset(SpNuit_Scale,select=ColNum)
-  MatCor=cor(SpNuit_ColNum)
-  corrplot(MatCor)
-  Formula=as.formula(paste0(FormulaFix_TtSp
-                            ,FormulaRandom))
-  
-  
-  if(SelSample<nrow(SpNuit_Scale))
-  {
-    SpNuit_Sample=SpNuit_Scale[sample.int(nrow(SpNuit_Scale),SelSample),]
-  }else{
-    SpNuit_Sample=SpNuit_Scale
-  }
-  Sys.time()
-  ModSp=glmmTMB(Formula,data=SpNuit_Sample, family=familyMod)  #37 min
-  Sys.time()
-  beep()
-  Res=residuals(ModSp)
-  SpNuit_Sample$Res=Res
-  
-  Estimates=as.data.frame(coef(summary(ModSp))$cond)
-  Estimates=cbind(term=row.names(Estimates),Estimates)
-  save(ModSp,file=paste0("./VigieChiro/GLMs/",TagModel,".glm"))
-  VIFMod=c(1,vif.mer(ModSp))
-  Estimates$VIF=VIFMod
-  Suffix=tstrsplit(basename(FAct),split="[.]")[[1]]
-  
-  fwrite(Estimates,paste0("./VigieChiro/GLMs/Summaries/",TagModel,"_",Suffix,"_Coefs.csv"),sep=";")
-  
-  fwrite(as.list(FormulaFix_TtSp),paste0("./VigieChiro/GLMs/logs/",substr(Sys.time(),1,13),".log"))
-  
-  fwrite(SpNuit_Sample,paste0("./VigieChiro/GLMs/",TagModel,"_",Suffix,"_Res.csv"))
 }
-
 #for test
 if(test)
 {
