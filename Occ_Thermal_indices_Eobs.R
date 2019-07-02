@@ -56,10 +56,16 @@ for(i in species){
   map("worldHires", xlim = c(-20, 59), ylim = c(35, 71)) # visualising the data in Europe
   points(occ$decimalLatitude ~ occ$decimalLongitude)
   
-  sites <- occ[, c("decimalLongitude", "decimalLatitude", "occurrenceID")] # formatting spatial data for the point_grid_extract function
-  colnames(sites) <- c("longitude", "latitude", "site_id")
-  sites <- sites[complete.cases(sites$longitude), ]
-  mean.temp <- point_grid_extract(mean.t, sites) # extracting data downloaded from E-obs ; go have a coffee 
+  # controlling for spatial bias in gbif occurrences (picking 1 occurrence per cell)
+  occ.raster <- rasterize(x = occ[, c("decimalLongitude", "decimalLatitude")],
+                 y = raster(ListTifiles[1]),
+                 fun = function(x, ...) 1)
+  occ.unique <- xyFromCell(occ.raster, Which(occ.raster == 1, cells = T)) 
+                          
+  occ.unique$site_id <- rownames(occ.unique)
+  colnames(occ.unique) <- c("longitude", "latitude", "site_id")
+  occ.unique <- occ.unique[complete.cases(occ.unique$longitude), ]
+  mean.temp <- point_grid_extract(mean.t, occ.unique) # extracting data downloaded from E-obs ; go have a coffee 
   mean.temp$season <- which.season(mean.temp$site_id)  # getting the season from date (named site_id after the point_grid_extract function)
   
   m.temp <- melt(mean.temp[2:ncol(mean.temp)], id = c("season")) # formatting into a decent neater data frame
