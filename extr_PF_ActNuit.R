@@ -125,7 +125,10 @@ Sys.time()
 rm(DataLPSG) # 30 sec
 #test=DataFiable[1:100000,]
 }else{
-  DataFiable=subset(DataLPS,DataLPS$probabilite>(as.numeric(args[3])/100)) # 10 sec
+  GroupSimpl=data.frame(espece=GroupList$Esp,nom=GroupList$`Scientific name`
+                        ,groupe=GroupList$Group)
+  DataLPSG=merge(DataLPS,GroupSimpl,by="espece")
+  DataFiable=subset(DataLPSG,DataLPSG$probabilite>(as.numeric(args[3])/100)) # 10 sec
 }
 
 if(WDF)
