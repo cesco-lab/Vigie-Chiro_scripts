@@ -1,5 +1,18 @@
 test=F
 
+#' a relatively generic function to fit multiple regression with glmmTMB, scaling numeric variables, supporting interactions and conversion of numeric variables to factors  
+#' @param dataFile data file location
+#' @param varInterest the name of the variable to be regressed (a character value)
+#' @param listEffects the names of the explanatory variables (a character vector)
+#' @param interactions a list of numeric vectors giving the position of the explanatory variables composing interactions (TO DO : adapt script to give variable names instead), default to NA (= no interactions)
+#' @param formulaRandom the random part of the formula starting by "+" (default to ="+1" = no random effects)
+#' @param selSample numeric, to downsample data (for testing)
+#' @param tagModel a character tag identifying model outputs
+#' @param family distrubution family of varInterest (default to "nbinom2", probably the better choice for abundance data)
+#' @param asfactor a character vector giving the numeric variables to be treated as factor in the modelling, default to NA
+#' @return write 5 files: (1) a .glm to save model fit in R format; (2) a "XXX_coefs.csv" table giving estimates and vif coefficients of the model; (3) a "XXX.log" to keep track of the formula of the model; (4) a "XXX_Res.csv" a table giving the residuals value; (5) a "forBackTransform_XXX.csv" table giving the mean and standard deviation value of numeric explanatory variables, to allow back transformation to real values when predicting
+#' @example see at the end of this code
+
 Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
                       ,formulaRandom="+1",selSample=1e10,tagModel=""
                       ,family="nbinom2",asfactor=NA)
