@@ -82,7 +82,7 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     SpPos=subset(SpNuitwoNA,AbwoNA>0)
     AbPos=subset(Ab,Ab>0)
     print(length(AbPos))
-    if(length(AbPos)<=length(VarAbondance))
+    if(length(AbPos)<=length(VarSimple))
     {
       print(paste(FAct,": too few positive data to fit model"))
     }else
