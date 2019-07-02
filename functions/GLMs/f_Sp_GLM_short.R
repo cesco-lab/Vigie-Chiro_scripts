@@ -3,7 +3,7 @@ test=F
 #' a relatively generic function to fit multiple regression with glmmTMB, scaling numeric variables, supporting interactions and conversion of numeric variables to factors  
 #' @param dataFile data file location
 #' @param varInterest the name of the variable to be regressed (a character value)
-#' @param listEffects the names of the explanatory variables (a character vector)
+#' @param listEffects the names of the explanatory variables (a character vector). Polynomial effects should be written as poly(x,n)
 #' @param interactions a list of numeric vectors giving the position of the explanatory variables composing interactions (TO DO : adapt script to give variable names instead), default to NA (= no interactions)
 #' @param formulaRandom the random part of the formula starting by "+" (default to ="+1" = no random effects)
 #' @param selSample numeric, to downsample data (for testing)
