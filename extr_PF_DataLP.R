@@ -1,7 +1,7 @@
 library(data.table)
 library(StreamMetabolism)
 
-#args="export_55.csv"
+#args="C:/wamp64/www/exportMyoGT.txt"
 
 #ETAPE 0 - IMPORT DES TABLES
 #bien renommer les chemins en fonction de l'ordi utilisé
@@ -159,7 +159,7 @@ DataLP[,(ListePurge):=NULL]
 Sys.time()
 
 Sys.time()
-fwrite(DataLP,paste0("DataLP_PF_",args[1]),row.names=F) # 1 min
+fwrite(DataLP,paste0("DataLP_PF_",basename(args[1])),row.names=F) # 1 min
 Sys.time()
 
 
