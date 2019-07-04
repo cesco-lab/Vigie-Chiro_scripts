@@ -1,4 +1,4 @@
-Test=F
+Test=T
 Coord_OCS_CESBIO=function(points,names_coord,bs,bm,layer)
 {
   library(data.table)
@@ -7,7 +7,7 @@ Coord_OCS_CESBIO=function(points,names_coord,bs,bm,layer)
   library(maptools)
   FOccSL=points
   OccSL=fread(paste0(FOccSL,".csv"))
-  #OccSL=OccSL[sample.int(nrow(OccSL),100),]
+  #OccSL=OccSL[sample.int(nrow(OccSL),10),]
   CoordH=names_coord
   BufferSmall=bs
   BufferMedium=bm
@@ -90,47 +90,6 @@ Coord_OCS_CESBIO=function(points,names_coord,bs,bm,layer)
   
   colnames(HabufPropT)=paste0("SpHO",colnames(HabufPropT),"M")
   
-  #select three-levels habitats
-  testNC=(nchar(colnames(HabufPropT))==8)
-  N3=colnames(HabufPropT)[testNC]
-  HabufPropT3l=HabufPropT[,..N3]
-  Prop32=as.data.table(table(substr(colnames(HabufPropT3l),1,6)))
-  
-  if(nrow(Prop32)>0)
-  {
-    #sum three-levels habitats 
-    for (i in 1:nrow(Prop32))
-    {
-      testi=substr(colnames(HabufPropT3l),1,6)==Prop32$V1[i]
-      Ni=colnames(HabufPropT3l)[testi]
-      HabufPropTi=HabufPropT3l[,..Ni]
-      HabufPropTsum=apply(HabufPropTi,MARGIN=1,FUN=sum)
-      HabufPropT=cbind(HabufPropT,HabufPropTsum)
-      names(HabufPropT)[ncol(HabufPropT)]=paste0(Prop32$V1[i],"M")
-    }
-  }
-  
-  
-  #select 2-levels habitats
-  testNC=(nchar(colnames(HabufPropT))==7)
-  N3=colnames(HabufPropT)[testNC]
-  HabufPropT3l=HabufPropT[,..N3]
-  Prop32=as.data.table(table(substr(colnames(HabufPropT3l),1,5)))
-  
-  if(nrow(Prop32)>0)
-  {
-    #sum 2-levels habitats 
-    for (i in 1:nrow(Prop32))
-    {
-      testi=substr(colnames(HabufPropT3l),1,5)==Prop32$V1[i]
-      Ni=colnames(HabufPropT3l)[testi]
-      HabufPropTi=HabufPropT3l[,..Ni]
-      HabufPropTsum=apply(HabufPropTi,MARGIN=1,FUN=sum)
-      HabufPropT=cbind(HabufPropT,HabufPropTsum)
-      names(HabufPropT)[ncol(HabufPropT)]=paste0(Prop32$V1[i],"M")
-    }
-  }
-  
   OccSL3=spCbind(OccSL2,HabufPropT)
   
   i=sample(c(1:ncol(HabufPropT)),1)
@@ -145,7 +104,7 @@ Coord_OCS_CESBIO=function(points,names_coord,bs,bm,layer)
   OccSL_ARajouter=subset(OccSL3,select=grepl("Sp",names(OccSL3)))
   
   OCS=data.frame(cbind(coordinates(OccSL),as.data.frame(OccSL_ARajouter)))
-  fwrite(OCS,paste0(FOccSL,"_OCS.csv"))
+  fwrite(OCS,paste0(FOccSL,"_OCS2018bis.csv"),sep=";")
   
   coordinates(OCS) <- CoordH
   
