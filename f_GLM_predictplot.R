@@ -6,11 +6,11 @@ library(moments)
 library(Hmisc)
 library(beepr)
 VarToPredict=c("year")
-VarNotToPredict=NA #list of variables in interaction with VarToPredict
+VarNotToPredict=NA #list of variables in interaction with VarToPredict - TO BE SUPPRESSED in a better version...
 #ToPredict=c("DecOT [((-10:10)/10)]","AT81 [-1,0,1]")
-FixedLevels=c(2006:2018)
-GLMPref="GLM_tendancesfacteurTESTSANSJULIAN_"
-FFBT="forBackTransform_GLM_tendancesfacteurTESTSANSJULIAN_Pipkuh_Seuil50.csv"
+FixedLevels=c(2006:2018) # x-axis position to be predicted
+GLMPref="GLM_tendancesfacteur_flexibledirect" #prefix of glm files to be used
+FFBT="forBackTransform_GLM_tendancesfacteur_flexibledirectNycnoc_Seuil50.csv"
 
 
 
