@@ -83,11 +83,6 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
         }
     }
 
-
-
-
-
-
     if(is.null(data)) SpNuit=fread(FAct) else SpNuit <- data
 
     if(!is.na(asfactor))
@@ -131,9 +126,10 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
             barplot(SpAbIfP$x,names.arg=SpAbIfP$Group.1,las=2,cex.names=0.6)
         }
         ## Calcul du VIF (adapté à glmmTMB, sinon il faut adapter v et nam)
+        ## adapted from rms::vif
         vif.mer <- function (fit) {
-            ## adapted from rms::vif
 
+            ## Variance-Covariance Matrix
             v <- vcov(fit)$cond
             nam <- names(fixef(fit)$cond)
 
@@ -144,8 +140,20 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
                 nam <- nam[-(1:ns)]
             }
 
+            ## squarre root of the diagonal matrix (of the variance-covariance matrix)
+            # !! doesn't work if diag(v) product negative values !!
             d <- diag(v)^0.5
-            v <- diag(solve(v/(d %o% d)))
+            if(any(is.na(d))) {
+                cat("! the diagonal matrice of the variance covariance matrix produce at least one negative value !\n")
+                cat("  -> the VIFs values are not assessed\n\n")
+            }
+
+            ## variance-covariance matrix on outer product of d
+            d <- v/(d %o% d)
+            ## inversing d
+            d <- solve(d)
+            ## and return the diag of d
+            v <- diag(d)
             names(v) <- nam
             v
         }
@@ -199,13 +207,13 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
             SpNuit_Scale=cbind(SpNuit_Scale,Vscale)
             names(SpNuit_Scale)[ncol(SpNuit_Scale)]=VarTemp
             if(i%%10==1 & i != 1){
-                 timeAvancement <- Sys.time() ## heure de demarage
+                 timeAvancement <- Sys.time() ## heure de d'avancement
                  timeAvancement <- format(timeAvancement, "%d-%m-%Y %HH%M")
                 cat("\n       ",timeAvancement,"  ... \n")}
 
         }
 
-        end <- Sys.time() ## heure de demarage
+        end <- Sys.time() ## heure de fin
         diff <- end-start
         diff <- paste(round(diff,1),units(diff))
         cat("\n  ", format(end, "%d-%m-%Y %HH%M")," -> ",diff,"\n\n")
@@ -273,7 +281,8 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
 
         VIFMod=c(1,vif.mer(ModSp))
         Estimates$VIF=VIFMod
-        Suffix=tstrsplit(basename(FAct),split="[.]")[[1]]
+
+        Suffix=tstrsplit(basename(as.character(FAct)),split="[.]")[[1]]
 
         csvfile <- paste0(repoutSummary,TagModel,"_",Suffix,"_Coefs.csv")
         cat("  --> [CSV]:",csvfile)
