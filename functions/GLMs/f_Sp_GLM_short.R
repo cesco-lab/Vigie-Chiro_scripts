@@ -10,15 +10,20 @@ test=F
 #' @param tagModel a character tag identifying model outputs
 #' @param family distrubution family of varInterest (default to "nbinom2", probably the better choice for abundance data)
 #' @param asfactor a character vector giving the numeric variables to be treated as factor in the modelling, default to NA
-#' @param data by default the function load de file from dataFile, it's also possible to declare the data.frame
+#' @param data by default the function load the file from dataFile, it's also possible to declare the data.frame
+#' @param repout le path for the output
+#' @param checkRepout TRUE to verifiy the presence of repout and create it (and some sub-repertories) if no exist
+#' @param saveFig TRUE to save the figures
 #' @param output to get a multiple object from the function, by default FALSE
+#' @param doBeep TRUE to do a beep after model fitting
+#' @param printFormula TRUE to print the formula
 #' @return write 5 files: (1) a .glm to save model fit in R format; (2) a "XXX_coefs.csv" table giving estimates and vif coefficients of the model; (3) a "XXX.log" to keep track of the formula of the model; (4) a "XXX_Res.csv" a table giving the residuals value; (5) a "forBackTransform_XXX.csv" table giving the mean and standard deviation value of numeric explanatory variables, to allow back transformation to real values when predicting
 #' @example see at the end of this code
-
+#' @author Yves Bas
 Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
                      ,formulaRandom="+1",selSample=1e10,tagModel=""
                      ,family="nbinom2",asfactor=NA,
-                      data=NULL,repout=NULL,checkRepout=FALSE,saveFig=FALSE,output=FALSE,doBeep=TRUE)
+                      data=NULL,repout=NULL,checkRepout=TRUE,saveFig=FALSE,output=FALSE,doBeep=TRUE,printFormula=TRUE)
 {
 
     library(data.table)
@@ -32,6 +37,13 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     ##Interactions=list(c(6,7,8),c(6,7,9),c(6,8,9),c(6,4))
     Interactions=interactions
     FormulaRandom=formulaRandom
+    if(!is.na(asfactor)) {
+        VarAbondance <- paste0(VarAbondance,ifelse(VarAbondance %in% asfactor,"_as_factor",""))
+        VarSimple <- paste0(VarSimple,ifelse(VarSimple %in% asfactor,"_as_factor",""))
+        if(!is.na(Interactions))
+            for(l in 1:length(Interactions))
+                 Interactions[[l]] <- paste0(Interactions[[l]],ifelse(Interactions[[l]] %in% asfactor,"_as_factor",""))
+        }
     ##FormulaRandom="+(1|espece)+(1|site)"
     ##FormulaRandom="+(1|espece)"
     SelSample=selSample #for testing computing time
@@ -90,8 +102,9 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
         SpNuit=as.data.frame(SpNuit)
         for (i in 1:length(asfactor))
         {
-            test=match(asfactor[i],names(SpNuit))
-            SpNuit[,test]=as.factor(SpNuit[,test])
+            test <- match(asfactor[i],names(SpNuit))
+            newcolname <- paste0(colnames(SpNuit)[test],"_as_factor")
+            SpNuit[,newcolname] <-  as.factor(SpNuit[,test])
         }
         SpNuit=as.data.table(SpNuit)
 
@@ -259,6 +272,7 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
         start <- Sys.time() ## heure de demarage
         cat("  ",format(start, "%d-%m-%Y %HH%M"),"  ...  ")
 
+        if(printFormula) cat("\nglmmTMB(Formula= ",as.character(Formula)[2]," ",as.character(Formula)[1]," ",as.character(Formula)[3],", familiy= ",familyMod,")\n",sep="")
         ModSp=glmmTMB(Formula,data=SpNuit_Sample, family=familyMod)  #37 min
         if(doBeep) beep()
 
