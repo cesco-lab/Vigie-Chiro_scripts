@@ -155,8 +155,6 @@ SSI$corrected.ssi <- (SSI$ssi - SSI$simulated.ssi) / SSI$sd.simulated.ssi
 
 # save(SSI, file = "F:/bat veolia mnhn/data/SSI.Godet")
 
-
-
 ############### computing CSI based on all data (here, using participations > 10 days (change g10 into g2 (> 2 nights) or glist (full) if not wanted)
 
 load("F:/bat veolia mnhn/data/g2")
