@@ -248,7 +248,7 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
         end <- Sys.time() ## heure de fin
         diff <- end-start
         diff <- paste(round(diff,1),units(diff))
-        cat("\n  ", format(end, "%d-%m-%Y %HH%M")," -> ",diff,"\n\n")
+        cat("      ", format(end, "%d-%m-%Y %HH%M")," -> ",diff,"\n\n")
 
         forBackTransform=data.frame(cbind(VarList,Mean,Sdev))
 
