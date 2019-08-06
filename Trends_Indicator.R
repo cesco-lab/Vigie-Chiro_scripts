@@ -1,5 +1,4 @@
 library(data.table)
-#IndicatorList=c("Eptser","Myospp","Nyclei","Nycnoc","Pipkuh","Pippip","Pippyg")
 IndicatorList=c("Eptser","Myospp","Nyclei","Nycnoc","Pipkuh","Pippip","Pippyg")
 
 Trends=fread("C:/Users/Yves Bas/Documents/VigieChiro/Trends/variationsAnnuellesEspece_2019-07-29.csv",dec=",")
@@ -32,5 +31,5 @@ IndicatorDF=data.frame(Indicator,Years)
 reg=lm(Indicator~as.numeric(as.character(Years)))
 IndicatorDF$Linear=predict(reg)
 
-fwrite(IndicatorDF,".VigieChiro/Trends/IndicatorDF.csv")
+fwrite(IndicatorDF,"./VigieChiro/Trends/IndicatorDF.csv")
 
