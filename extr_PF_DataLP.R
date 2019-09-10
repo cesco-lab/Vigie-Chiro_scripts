@@ -1,16 +1,19 @@
 library(data.table)
 library(StreamMetabolism)
 
-#args="C:/wamp64/www/exportMyoGT.txt"
-
+#args="PrefPart"
+#args[11]="C:/wamp64/www/exportMyoGT.txt"
+#args[10]="E:"
 #ETAPE 0 - IMPORT DES TABLES
 #bien renommer les chemins en fonction de l'ordi utilisé
 #et vérifier les versions (date, import complet ou non)
 
 #table "données"
-DataE=fread(args[1])
+DataE=fread(args[11])
 Sys.time()
 DataPF=subset(DataE,substr(DataE$donnee,1,3)=="Car")
+if(nrow(DataPF)>0)
+{
 Sys.time()
 rm(DataE)
 
@@ -70,7 +73,7 @@ LocaPartData=as.factor(substr(DataPF$donnee,1,27)) #récupération de l'identifian
 Sys.time()
 #Datamicro=as.character(sapply(DataPF$donnee,FUN=microdroitPF)) # récupération du numéro du micro (4 min)
 Sys.time()
-Datamicro2=sapply(DataPF$donnee,FUN=microPF) # récupération du numéro du micro (4 min)
+Datamicro2=sapply(DataPF$donnee,FUN=microPF) # récupération du numéro du micro (1e5 données / secondes)
 Sys.time()
 Datamicro2[is.na(as.numeric(Datamicro2))]=0
 #DataPF$Datamicro2=Datamicro2
@@ -106,7 +109,7 @@ Sys.time()
 TempsEnregistrement2=sapply(DataSel2$donnee,FUN=f2pPF) #long à tourner (3e5 données/min)
 test=subset(DataSel2,is.na(TempsEnregistrement2))
 Partbug=levels(as.factor(test$participation))
-fwrite(as.data.frame(Partbug),paste0("Partbug_PF_LP_",args[1]))
+fwrite(as.data.frame(Partbug),paste0("Partbug_PF_LP_",basename(args[11])))
 Sys.time()
 pourDateNuit=TempsEnregistrement2-12*3600 #bricolage-décalage de 12 heures pour ramener à la date du début de nuit
 Sys.time()
@@ -153,13 +156,15 @@ ListePurge=c("proprietaire","num site",
              "canal_enregistrement_direct",
              "micro0_numero_serie",
              "micro1_numero_serie",
-             "commentaire")
+             "commentaire.x",
+             "commentaire.y")
 Sys.time()
 DataLP[,(ListePurge):=NULL]
 Sys.time()
 
 Sys.time()
-fwrite(DataLP,paste0("DataLP_PF_",basename(args[1])),row.names=F) # 1 min
+fwrite(DataLP,paste0(args[10],"/DataLP_PF_",basename(args[11])),row.names=F) # 1 min
 Sys.time()
 
 
+}
