@@ -15,7 +15,7 @@ args[12]=""
 args[13]=""
 args[14]=""
 FRaw="G:/VigieChiro/Raw"
-FDT="C:/wamp64/www/export_190803_190907.txt"
+FDT="C:/wamp64/www/export_190907_190924.txt"
 
 
 args[3]=Thresholds[1]
@@ -75,7 +75,7 @@ for (i in 1:length(Fnew1))
 
 Fnew1=list.files(args[10],pattern="DataLP",full.names=T)
 Fnew1=subset(Fnew1,substr(basename(Fnew1),1,1)=="D")
-for (i in 108:length(Fnew1))
+for (i in 1:length(Fnew1))
 {
   TabNew=fread(Fnew1[i])
   if(nrow(TabNew)>0)
@@ -125,9 +125,9 @@ for (i in 1:length(Fnew1))
 
 
 
-Pattern=basename(paste0(args[10],"/SpNuit2___",args[3],"_DataLP_PF_export_"))
+Pattern=basename(paste0(FRaw,"/SpNuit2___",args[3],"_DataLP_PF_export_"))
 
-SpToAgg=list.files(args[10],pattern=Pattern,full.names=T)
+SpToAgg=list.files(FRaw,pattern=Pattern,full.names=T)
 
 my.data=list()
 for (k in 1:length(SpToAgg))
@@ -185,9 +185,9 @@ if(length(Thresholds)>1)
     }
     
     
-    Pattern=basename(paste0(args[10],"/SpNuit2___",args[3],"_DataLP_PF_export_"))
+    Pattern=basename(paste0(FRaw,"/SpNuit2___",args[3],"_DataLP_PF_export_"))
     
-    SpToAgg=list.files(args[10],pattern=Pattern,full.names=T)
+    SpToAgg=list.files(FRaw,pattern=Pattern,full.names=T)
     
     my.data=list()
     for (k in 1:length(SpToAgg))
