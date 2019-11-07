@@ -1,0 +1,88 @@
+---
+title: "Run Random Forest Model"
+author: "Vigie Chiro"
+date: "`r Sys.Date()`"
+lang: english
+output: html_document
+---
+
+
+
+# Usage of the function `f_biodiv_modgis()`
+
+
+```{r eval=FALSE, echo=TRUE}
+# Load addings   ----------
+
+library(spdep)
+library(data.table)
+library(randomForest)
+
+source(file.path("R", "f_biodiv_modgis.R"))
+
+
+# Import biodiversity data   ----------
+
+filename <- "DataSpSL_Urosp_90_Data"
+DataCPL3 <- read.csv(
+  file.path(
+    "data",
+    paste0(
+      filename,
+      ".csv"
+    )
+  )
+)
+
+
+# Import environmental data   ----------
+
+CoordSIG <- read.csv(
+  file.path(
+    "data",
+    "GI_coordWGS84_SpNuit2_50_DataLP_PF_exportTot.csv"
+  )
+)
+
+
+# Merge two datasets   ----------
+
+CoordPS <- merge(
+  x = DataCPL3,
+  y = CoordSIG,
+  by.x = c("longitude", "latitude"),
+  by.y = c("Group.1", "Group.2"),
+  all  = FALSE
+)
+
+
+## Run Random Forest   ----------
+
+mod <- f_biodiv_modgis(
+  data          = CoordPS,
+  metric        = "nb_contacts",
+  x             = "longitude",
+  y             = "latitude",
+  date          = "date_debut",
+  strata        = c("id_site", "localite"),
+  num_coord     = 40,
+  log_transform = TRUE,
+  plot_var_imp  = TRUE
+)
+
+
+## Export model   ----------
+
+save(
+  mod_rf,
+  file = file.path(
+    "outputs",
+    paste0(
+      metric,
+      "_",
+      filename,
+      ".learner"
+    )
+  )
+)
+```
