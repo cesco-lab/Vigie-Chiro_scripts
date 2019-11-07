@@ -3,25 +3,26 @@ library(dismo)
 library(raster)
 library(gstat)
 
-#args[6]="./VigieChiro/ModPred/Tadten_DM_06_GI_SysGrid__30_34_2000_Lat41.45_51.61_Long-5.9_9.73"
-#args[7]="C:/Users/Yves Bas/Documents/VigieChiro/GIS/FranceD__30_34.shp"
-#args[8]=2000 #PixelSize
-#ModRF_file=paste0("./VigieChiro/ModPred/ModRFActLog_",args[1],"_Seuil",args[5],".learner")
-#load(ModRF_file)
-SpeciesList=fread("SpeciesList.csv")
+FPredLoc="./VigieChiro/ModPred/Sp_ModRF_nb_contacts_DataSpSL_Urosp_90_Data.csvGI_SysGrid__20000.csv.csv"
+Fextent="C:/Users/Yves Bas/Documents/VigieChiro/GIS/France_dep_L93.shp"
+PixelSize=2000
+ModRF_file="./VigieChiro/ModPred/ModRF_nb_contacts_DataSpSL_Urosp_90_Data.csv.learner"
+FSL="SpeciesList.csv"
 Rasteriz=T
 SaveErrors=F
 
 
 #Limite
-Limite=shapefile(paste0("./VigieChiro/GIS/",args[7]))
+Limite=shapefile(Fextent)
 Sys.time()
 
 LimiteL=as(Limite,'SpatialLines')
 
-Title=substr(args[6],22,27)
+Title=substr(basename(FPredLoc),22,27)
 
+load(ModRF_file)
 
+SpeciesList=fread(FSL)
 SubT=""
 if(exists("ModRF"))
 {
@@ -32,7 +33,7 @@ if(exists("ModRF"))
   Num=sum(ModRF$y!=0)
   SubT=paste0(SubT," / N = ",Num)
 }
-PredLoc=fread(paste0(args[6],".csv"))
+PredLoc=fread(FPredLoc)
 
 coordinates(PredLoc) <- c("Group.1", "Group.2")
 proj4string(PredLoc) <- CRS("+init=epsg:4326") # WGS 84
@@ -52,7 +53,7 @@ ScaleAt=c(-0.1,c(1:49)/49*MaxScale,Inf)
 
 if(nrow(PredL93)<20000)
 {
-  Taxon=substr(args[6],22,27)
+  Taxon=substr(basename(FPredLoc),22,27)
   Taxon=gsub("_","",Taxon)
   test=match(Taxon,SpeciesList$Esp)
   if(is.na(test))
@@ -66,7 +67,7 @@ if(nrow(PredL93)<20000)
   #            list(axis.line = list(col =  'transparent'))
   #         ,col.regions=get_col_regions(),at=ScaleAt))
   
-  png(paste0(args[6],".png"))
+  png(paste0(FPredLoc,".png"))
   
   
   
@@ -84,33 +85,17 @@ if(nrow(PredL93)<20000)
 
 if(Rasteriz)
 {
-  r <- raster(Limite, res=as.numeric(args[8]))
+  r <- raster(Limite, res=as.numeric(PixelSize))
   vpred <- rasterize(VL, r, 'pred')
   
-  #gs <- gstat(formula=PredL93$pred~1, locations=PredL93, nmax=10, set=list(idp = 0))
-  #nn <- interpolate(r, gs)
-  ## [inverse distance weighted interpolation]
-  #nnmsk <- mask(nn, vpred)
-  #plot(nnmsk,main=substr(args[6],22,27))
-  
-  #spplot(VL, 'err', col.regions=get_col_regions())
-  
-  
-  spplot(vpred,main=substr(args[6],22,27),at=ScaleAt)
-  writeRaster(vpred,paste0(args[6],"_pred.asc"),overwrite=T)
-  
-  png(paste0(args[6],"_R.png"))
-  print(spplot(vpred,main=substr(args[6],22,27),at=ScaleAt,sp.layout = LimiteL
-               ,xlab=SubT))
-  dev.off()
-  
-  
+  spplot(vpred,main=substr(basename(FPredLoc),22,27),at=ScaleAt)
+  writeRaster(vpred,paste0(gsub(".csv","",FPredLoc),"_pred.asc"),overwrite=T)
   
   if(SaveErrors)
   {
     verr <- rasterize(VL, r, 'err')
     #plot(verr)
-    writeRaster(verr,paste0(args[6],"_err.asc"),overwrite=T)
+    writeRaster(verr,paste0(gsub(".csv","",FPredLoc),"_err.asc"),overwrite=T)
   }
   
 }
