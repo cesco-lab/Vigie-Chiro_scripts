@@ -164,7 +164,7 @@ f_biodiv_modgis <- function(
 
   # Print PseudoR2     -------------
 
-  print(paste0("PseudoR2: ", round(mod_rf$rsq[mod_rf$ntree], 2))
+  print(paste0("PseudoR2: ", round(mod_rf$rsq[mod_rf$ntree], 2)))
 
   return(mod_rf)
 }
