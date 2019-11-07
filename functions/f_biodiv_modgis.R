@@ -122,8 +122,6 @@ if(var(DataSaison$Metric)>0)
   #test if species is a bat
   save (ModRF,file=paste0("./VigieChiro/ModPred/ModRF_",Metric,"_",basename(FData)
                           ,".learner")) 
-  
-  
 }
 
 
