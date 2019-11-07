@@ -1,0 +1,7 @@
+library(data.table)
+Res=fread("./VigieChiro/GLMs/GLMnonselect_MultiSp_DecOT2_AT81_Jour_simplifie1_CS_STI_SpNuit2_Seuil90_bush-cricket_100_Res.csv")
+plot(Res$DecOT,Res$Res)
+ResRank=rank(Res$Res)
+plot(Res$DecOT,ResRank)
+DecOTClass=round(rank(Res$DecOT)/10000)
+boxplot(ResRank~DecOTClass)
