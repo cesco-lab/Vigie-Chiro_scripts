@@ -3,17 +3,14 @@ library(randomForest)
 library(spdep)
 
 
-#args="Pippyg"
-#args[2]="GI_coordWGS84_DataPF_SpNuit2_Seuil90_Lat42.41_45.23_Long-1.19_5.6"
-#args[3]="15/06/2018" #date of prediction
-#args[5]=50
-#args[11]=40 #number of coordinates projections (must be a division of 360)
-#ModRF_file=paste0("./VigieChiro/ModPred/ModRFActLog_",args[1],"_Seuil",args[5],".learner")
+GIToBePredicted="./VigieChiro/GIS/GI_SysGrid__20000.csv"
+DateToBePredicted="15/06/2018" #date of prediction
+NumCoord=40 #number of coordinates projections (must be a division of 360)
+ModRF_file="./VigieChiro/ModPred/ModRF_nb_contacts_DataSpSL_Urosp_90_Data.csv.learner"
 
-#load(paste0("./VigieChiro/ModPred/ModRFActLog_",args[1],"_Seuil",args[5],".learner"))
 load(ModRF_file)
 Sys.time()
-CoordSIG=fread(paste0("./VigieChiro/GIS/",args[2],".csv"))
+CoordSIG=fread(GIToBePredicted)
 Sys.time()
 
 CoordSIG=subset(CoordSIG,is.na(CoordSIG$SpAltiS)==F)
@@ -21,24 +18,14 @@ CoordSIG=subset(CoordSIG,is.na(CoordSIG$SpBioC1)==F)
 
 
 CoordSIG$SpGite=0
-CoordSIG$SpFDate=yday(as.Date(args[3]
+CoordSIG$SpFDate=yday(as.Date(DateToBePredicted
                               ,format="%d/%m/%Y"))
-
-if(sum(grepl("Group.1.x",names(CoordSIG)))>0)
-{
-  CoordSIG$Group.1=CoordSIG$Group.1.x
-  CoordSIG$Group.2=CoordSIG$Group.2.x
-  CoordSIG$Group.1.x=NULL
-  CoordSIG$Group.1.y=NULL
-  CoordSIG$Group.2.x=NULL
-  CoordSIG$Group.2.y=NULL
-}
 
 CoordDS=as.matrix(cbind(CoordSIG$Group.1,CoordSIG$Group.2))
 
-for (a in 0:(as.numeric(args[11])-1))
+for (a in 0:(as.numeric(NumCoord)-1))
 {
-  Coordi=Rotation(CoordDS,angle=pi*a/as.numeric(args[11]))
+  Coordi=Rotation(CoordDS,angle=pi*a/as.numeric(NumCoord))
   #print(plot(Coordi[,1],CoordDS[,1],main=as.character(a)))
   #print(plot(Coordi[,1],CoordDS[,2],main=as.character(a)))
   CoordSIG=cbind(CoordSIG,Coordi[,1])
@@ -67,7 +54,7 @@ proj4string(CoordSIG) <- CRS("+init=epsg:4326") # WGS 84
 CoordSIG$pred=PredLoc
 CoordSIG$err=PredErr
 
-spplot(CoordSIG,zcol="pred",main=args[1])
+spplot(CoordSIG,zcol="pred",main=basename(ModRF_file))
 #spplot(CoordSIG,zcol="err")
 
 Coord=as.data.table(CoordSIG)
@@ -75,9 +62,9 @@ Coord=subset(Coord,select=c("Group.1","Group.2","pred","err"))
 
 #print(spplot(DataSaison,zcol="pred",main=ListSp[i]))  
 
-FilName=paste0("./VigieChiro/ModPred/"
-       ,args[1],"_Act_",substr(args[3],4,5),"_"
-       ,args[2])
+FilName=paste0("./VigieChiro/ModPred/Sp_"
+       ,gsub(".learner","",basename(ModRF_file))
+       ,basename(GIToBePredicted))
 
 fwrite(Coord,paste0(FilName,".csv"))
 
