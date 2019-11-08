@@ -19,6 +19,7 @@ Layer_CLC="C:/Users/Yves Bas/Downloads/CLC/CLC12_FR_RGF.shp"
 Layer_OCS="C:/Users/Yves Bas/Downloads/OCS_2018_CESBIO.tif"
 ListLayer=c("ALAN","Alti","Bioclim","Carthage","CLC","OCS2018bis")
 
+
 listfun=list.files(folderfun,full.names=T,pattern=".R$")
 for (i in 1:length(listfun))
 {
