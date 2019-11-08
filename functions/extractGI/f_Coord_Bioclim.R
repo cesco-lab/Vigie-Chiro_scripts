@@ -110,24 +110,32 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
   return(output)
 }
 
-#' Download climatic variable 
+#' Load of download french worldclim data
 #'
-## est meridien greenwhich
-r1 <- raster::getData('worldclim', var = 'bio', res = 10, lon = 0, lat = 45)
-## ouest meridien greenwhic
-r2 <- raster::getData('worldclim', var = 'bio', res = 10, lon = -10, lat = 45)
-SpBioc1 = extract(r1, pts)
-SpBioc2 = extract(r2, pts)
+#' Wrapper around raster::getData to get french worldclim data at a resolution
+#' of 0.5°.
+#' 
+#' @inheritParams raster::getData
+#' @param path A string containing the path in which save the worldclim data 
+#' @param res See raster::getData
+#' @param var See raster::getData
+#' @param ... More options to be supplied to raster::getData
+#' @return a raster
+#'
+## Not run ##
+get_fr_worldclim_data()
+## Not run ##
 
-SpBioc12=mapply(FUN=function(x,y) ifelse(is.na(x),y,x),SpBioc1,SpBioc2)
-SpBioc12=as.data.frame(matrix(SpBioc12,ncol=ncol(SpBioc1),nrow=nrow(SpBioc1)))
+get_fr_worldclim_data <- function (path = ".", res = 0.5, var = "bio", ...) {
+  
+  # East and west of Greenwhich
+  east_fr <- raster::getData(name = 'worldclim', path = path, res = res,
+    var = var, lon = 0, lat = 45, ...)
+  west_fr <- raster::getData(name = 'worldclim', path = path, res = res,
+    var = var, lon = -10, lat = 45, ...)
 
-# Obselete code?
-if(Test)
-{
-                                        #for test
-    Coord_Bioclim(
-        points="./vigiechiro/GIS/PA_Thymus nitens" #table giving coordinates in WGS84
-       ,names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving
-    )
+  # Merge the two rasters 
+  fr <- raster::merge(east_fr, west_fr, overlap = TRUE)
+
+  return(fr)
 }
