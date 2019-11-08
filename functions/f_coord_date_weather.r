@@ -21,7 +21,7 @@
 ##' @param save boolean save or not the table
 ##' @param fileouput name of file to save the table
 ##' @return la table sample avec les anomalies des variables météo désiré à 1,3,9,27 et 81 jours
-##' @author Romain Lorrilliere à partir d'un code de Yves Bas
+##' @author Romain Lorrilliere and Yves Bas
 get_sample_weather <- function(dsample=NULL,first_year=NULL,last_year=NULL,nc_local=TRUE,nc_extract=FALSE,nc_data=NULL,nc_rep=NULL,var=c("precipitation","mean_temp"),dsample_colnames=c("site_id"="site_id","date"="date","longitude"="longitude","latitude"="latitudeWGS84"),output=TRUE,save=FALSE,fileouput=NULL) {
 
     library(data.table)
@@ -29,8 +29,10 @@ get_sample_weather <- function(dsample=NULL,first_year=NULL,last_year=NULL,nc_lo
     library(climateExtract) #https://github.com/RetoSchmucki/climateExtract
     library(ncdf4)
 
-      dsample=dsample;first_year=NULL;last_year=NULL;nc_local=TRUE;nc_extract=FALSE;nc_data=NULL;var=c("precipitation","mean_temp");dsample_colnames=c("site_id"="INSEE","date"="DATE_NIGHT_POSIX","longitude"="X_CENTROID","latitude"="Y_CENTROID");output=TRUE;save=FALSE;fileoutput=NULL
-
+    ## -------------------------------------------------------------------------
+    ## set of parameters to debogging
+    ##  dsample=dsample;first_year=NULL;last_year=NULL;nc_local=TRUE;nc_extract=FALSE;nc_data=NULL;var=c("precipitation","mean_temp");dsample_colnames=c("site_id"="INSEE","date"="DATE_NIGHT_POSIX","longitude"="X_CENTROID","latitude"="Y_CENTROID");output=TRUE;save=FALSE;fileoutput=NULL
+    ## -------------------------------------------------------------------------
 
     dsample <- my_import_fread(dsample,"file of sample data")
     nc_data <- my_import_fread(nc_data,"file of sample data")
@@ -142,6 +144,45 @@ get_sample_weather <- function(dsample=NULL,first_year=NULL,last_year=NULL,nc_lo
 
 }
 
+
+
+
+##' import data
+##' @title gen_import_fread
+##' @param d table (data.frame, data.table) or path
+##' @param descri text printer in the case of a file.choose()
+##' @return data at data.table format
+##' @author Romain Lorrilliere
+##' @importFrom data.table fread
+##'
+gen_import_fread <- function(d,descri=NULL) {
+    library(data.table)
+      if (is.null(d)) {
+          cat("select your data file\n")
+          if(!is.null(descri)) cat(descri,"\n")
+        d <- fread(file.choose())
+    } else { # ELSE if (is.null(d))
+        if(class(d)[1]=="character") {
+            if(file.exists(d)) {
+                cat("Importation:",d,"\n")
+                d <- fread(d)
+                cat("  DONE !\n")
+            } else {
+                print("File",d," does not exist, select the correct file:\n")
+                d <- fread(file.choose())
+            }
+        }
+        else {
+            d <- data.table(d)
+        }
+    } # END ELSE if (is.null(d))
+    return(d)
+}
+
+
+
+
+
 ##' Extraction des données à partir des fichier nc téléchargé sur .....
 ##' @title nc2rdata
 ##' @param firstYear
@@ -153,6 +194,12 @@ get_sample_weather <- function(dsample=NULL,first_year=NULL,last_year=NULL,nc_lo
 nc2rdata <- function(firstYear=1950,lastYear=NULL,repOut="data/") {
                                         #  firstYear=1950;lastYear=NULL;repOut="data/"
     library(climateExtract) #https://github.com/RetoSchmucki/climateExtract
+
+    ## -------------------------------------------------------------------------
+    ## set of parameters to debogging
+    ## firstYear=1950;lastYear=NULL;repOut="data/"
+    ## -------------------------------------------------------------------------
+
     if(is.null(lastYear)) lastYear <- as.numeric(format(Sys.time(),"%Y"))
     vecAn_start <- seq(firstYear,lastYear,5)
     vecAn_end <- sort(union(seq(firstYear+4,lastYear,5),lastYear))
@@ -177,9 +224,11 @@ nc2rdata <- function(firstYear=1950,lastYear=NULL,repOut="data/") {
         save(list=c("precipitation","mean_temp"),file=file)
         cat("   DONE!\n\n")
     }
-
     write.csv(dAn,paste0(repOut,"table_weather_Rdata_names.csv"))
 }
+
+
+
 
 ##' Calcul de la référence des moyennes et précipitation journalière sur une période
 ##' @title assess_weather_ref
@@ -198,11 +247,25 @@ nc2rdata <- function(firstYear=1950,lastYear=NULL,repOut="data/") {
 ##' @param fileouput
 ##' @return
 ##' @author
-assess_weather_ref <- function(first_year=1950,last_year=2000,nc_one_file=FALSE,nc_local=TRUE,nc_extract=FALSE,nc_data="data_weather/table_weather_Rdata_names.csv",nc_rep="data_weather",file_nc_out=NULL,var=c("precipitation","mean_temp"),dsample_colnames=c("site_id"="site_id","date"="date","longitude"="longitude","latitude"="latitudeWGS84"),output=TRUE,save=FALSE,fileouput=NULL) {
-
-  #  first_year=1950;last_year=2000;nc_one_file=FALSE;nc_local=TRUE;nc_extract=FALSE;nc_data="data_weather/table_weather_Rdata_names.csv";nc_rep="data_weather";var=c("precipitation","mean_temp");dsample_colnames=c("site_id"="site_id","date"="date","longitude"="longitude","latitude"="latitudeWGS84");output=TRUE;save=FALSE;fileouput=NULL;file_nc_out=NULL
+assess_weather_ref <- function(first_year=1950,last_year=2000,
+                               nc_one_file=FALSE,nc_local=TRUE,
+                               nc_extract=FALSE,
+                               nc_data="data_weather/table_weather_Rdata_names.csv",
+                               nc_rep="data_weather",
+                               file_nc_out=NULL,var=c("precipitation","mean_temp"),
+                               dsample_colnames=c("site_id"="site_id",
+                                                  "date"="date",
+                                                  "longitude"="longitude",
+                                                  "latitude"="latitudeWGS84"),
+                               output=TRUE,save=FALSE,fileouput=NULL) {
 
     library(lubridate)
+
+    ## -------------------------------------------------------------------------
+    ## set of parameters to debogging
+    ##  first_year=1950;last_year=2000;nc_one_file=FALSE;nc_local=TRUE;nc_extract=FALSE;nc_data="data_weather/table_weather_Rdata_names.csv";nc_rep="data_weather";var=c("precipitation","mean_temp");dsample_colnames=c("site_id"="site_id","date"="date","longitude"="longitude","latitude"="latitudeWGS84");output=TRUE;save=FALSE;fileouput=NULL;file_nc_out=NULL
+    ## ------------------------------------------------------------------------
+
 
     start_process <- Sys.time()
 
