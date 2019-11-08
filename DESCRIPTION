@@ -1,0 +1,19 @@
+Package: chirovigie
+Type: Package
+Title: chirovigie
+Version: 0.0-1
+Date: 2019-11-07
+Author: The Vigie Chiro Team [cre, aut]
+Maintainer: xxx xxx <xxx@xxx.com>
+Description: chirovigie
+URL: https://github.com/cesco-lab/Vigie-Chiro_scripts
+BugReports: https://github.com/cesco-lab/Vigie-Chiro_scripts/issues
+Depends: R (>= 3.6.0)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports: randomForest, spdep, data.table
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+NeedsCompilation: no
+RoxygenNote: 6.1.1

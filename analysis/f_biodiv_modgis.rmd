@@ -73,6 +73,7 @@ mod <- f_biodiv_modgis(
 
 ## Export model   ----------
 
+dir.create(file.path("outputs"), recursive = TRUE, showWarnings = FALSE)
 save(
   mod_rf,
   file = file.path(

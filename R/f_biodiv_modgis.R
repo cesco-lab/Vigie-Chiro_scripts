@@ -1,19 +1,20 @@
 #' @title f_biodiv_modgis
-#' @description Run a Random Forest...
+#' @description Run the Random Forest model
 #'
-#' @param data [data frame] ...
-#' @param metric [string] Variable name to be modeled
-#' @param x [string] ...
-#' @param y [string] ...
-#' @param num_coord [numeric] ...
-#' @param log_transform [boolean] ...
-#' @param strata [string] ...
-#' @param plot_var_imp [boolean] ...
+#' @param data [data frame] The data
+#' @param metric [string] Column name of the variable to be modeled
+#' @param x [string] Column name of the longitude
+#' @param y [string] Column name of the latitude
+#' @param num_coord [numeric] Number of coordinates to project
+#' @param log_transform [boolean] If TRUE, log-transform response
+#' @param strata [string] Vector of strata
+#' @param plot_var_imp [boolean] If TRUE, variables importances are plotted
 #'
 #' @export
 #'
 #' @importFrom randomForest randomForest
 #' @importFrom spdep Rotation
+#' @importFrom data.table yday
 #'
 #' @return a Random Forest object
 #'
@@ -163,7 +164,7 @@ f_biodiv_modgis <- function(
 
   # Print PseudoR2     -------------
 
-  print(paste0("PseudoR2: ", round(mod_rf$rsq[mod_rf$ntree], 2))
+  print(paste0("PseudoR2: ", round(mod_rf$rsq[mod_rf$ntree], 2)))
 
   return(mod_rf)
 }
