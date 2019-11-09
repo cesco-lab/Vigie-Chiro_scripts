@@ -9,3 +9,6 @@
 ^functions$
 ^IO$
 ^\.git$
+^\.travis\.yml$
+^appveyor\.yml$
+^tic\.R$

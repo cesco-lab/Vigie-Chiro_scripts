@@ -24,6 +24,10 @@ usethis::use_test("f_biodiv_modgis")
 # Vignettes
 usethis::use_vignette("f_biodiv_modgis")
 
+# CI
+# usetihs::install_github("ropenscilabs/tic")
+tic::use_tic()
+
 # Development
 attachment::att_amend_desc()
 devtools::check()
