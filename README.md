@@ -1,5 +1,7 @@
 # Vigie-Chiro_scripts
 
+[![Build Status](https://travis-ci.org/cesco-lab/Vigie-Chiro_scripts.svg?branch=master)](https://travis-ci.org/cesco-lab/Vigie-Chiro_scripts)
+
 ## Summary
 
 The workflows are summarized [here](https://drive.google.com/open?id=1LV-Li36kZvC18UaklBbJp0hjeumf1fCh) (slides 6 to 20)
