@@ -17,6 +17,8 @@ f_biodiv_modgis(data, metric, x = "longitude", y = "latitude",
 
 \item{y}{[string] Column name of the latitude}
 
+\item{date}{[date] Date}
+
 \item{num_coord}{[numeric] Number of coordinates to project}
 
 \item{log_transform}{[boolean] If TRUE, log-transform response}

@@ -5,6 +5,7 @@
 #' @param metric [string] Column name of the variable to be modeled
 #' @param x [string] Column name of the longitude
 #' @param y [string] Column name of the latitude
+#' @param date [date] Date
 #' @param num_coord [numeric] Number of coordinates to project
 #' @param log_transform [boolean] If TRUE, log-transform response
 #' @param strata [string] Vector of strata
@@ -15,6 +16,7 @@
 #' @importFrom randomForest randomForest
 #' @importFrom spdep Rotation
 #' @importFrom data.table yday
+#' @importFrom stats var
 #'
 #' @return a Random Forest object
 #'
