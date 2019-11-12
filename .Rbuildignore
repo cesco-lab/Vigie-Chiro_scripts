@@ -1,1 +1,14 @@
 ^\.gitattributes$
+^.*\.Rproj$
+^\.Rproj\.user$
+^dev_history\.R$
+^LICENSE\.md$
+^misc$
+^AppShiny$
+^EasyMerging\.pptx$
+^functions$
+^IO$
+^\.git$
+^\.travis\.yml$
+^appveyor\.yml$
+^tic\.R$

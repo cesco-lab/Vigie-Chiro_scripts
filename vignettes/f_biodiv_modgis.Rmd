@@ -1,12 +1,23 @@
 ---
-title: "Run Random Forest Model"
-author: "Vigie Chiro"
-date: "`r Sys.Date()`"
-lang: english
-output: html_document
+title: "f_biodiv_modgis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{f_biodiv_modgis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE #TODO Change to TRUE when reprex available
+)
+```
 
+```{r setup}
+library(chirovigie)
+```
 
 # Usage of the function `f_biodiv_modgis()`
 
@@ -18,7 +29,7 @@ library(spdep)
 library(data.table)
 library(randomForest)
 
-source(file.path("R", "f_biodiv_modgis.R"))
+# source(file.path("R", "f_biodiv_modgis.R"))
 
 
 # Import biodiversity data   ----------
@@ -73,6 +84,7 @@ mod <- f_biodiv_modgis(
 
 ## Export model   ----------
 
+dir.create(file.path("outputs"), recursive = TRUE, showWarnings = FALSE)
 save(
   mod_rf,
   file = file.path(

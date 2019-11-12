@@ -1,95 +1,141 @@
-Test=F
-##' .. content for \description{} (no empty lines) ..
-##'
-##' .. content for \details{} ..
-##' @title Coord_Bioclim function to get bioclim data at locations
-##' @param points table giving coordinates in WGS84 or file path of the table
-##' @param names_coord vector of two values giving
-##' @return table of 12 bioclimatic variable values
-##' @author Yves Bas
-Coord_Bioclim=function(points,names_coord,write=TRUE,id=NULL,merge_data=FALSE
-                       ,plot=TRUE,output_sp = TRUE)
-{
-##  browser()
-    library(data.table)
-    library(sp)
-    library(raster)
-    FOccSL=points
-    if(class(points)[1]=="character") OccSL=fread(paste0(FOccSL,".csv")) else OccSL <- points
-    CoordH=names_coord
+#'  Get bioclim data at given locations
+#'
+#' The function takes a observation points and a raster with climatic variables.
+#' It returns a data.frame or a sp data.frame with climatic values at the
+#' observation points. 
+#'
+#' @param pts table giving coordinates in WGS84 or file path of the table
+#' @param longlat character vector of length 2 given the names of the longitude
+#' and latitude columns respectively 
+#' @param clim raster of climatic data (e.g. obtained by raster::getData())
+#' @return sp data.frame or data.frame with clim values at pts coordinates 
+#' @author Yves Bas
+pt_test <- data.frame(long = c(3, 3, NA), lat = c(27, NA, NA))
+clim_data <- raster::raster(nrows = 3, ncols = 3, xmn = 2, xmx = 4, ymn = 26, ymx = 28)
+raster::values(clim_data) <- rnorm(length(raster::values(clim_data))) 
+sp::proj4string(clim_data) <- sp::CRS("+init=epsg:4326")
+extract_clim(pts = pt_test, longlat = c("long", "lat"),
+  write = FALSE, id = NULL, clim = clim_data, merge_data = FALSE , plot = TRUE, sp_output = TRUE)
 
-    testH=match(CoordH,names(OccSL))
-    OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[1]]))
-    OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[2]]))
+extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
+  write=TRUE, id = NULL, clim = NULL, merge_data = FALSE , plot = TRUE, sp_output = TRUE) {
 
+  # Load pts data.frame if necessary
+  if (class(pts)[1] == "character") {
+    pts_path <- pts
+    stopifnot(file.exists(pts_path), "file does not exist")
+    pts <- data.table::fread(pts_path)
+  }
 
-    ## Bioclimdir="C:/Users/Yves Bas/Documents/SIG/Bioclim_5m/" #where bioclim TIFF files are
+  # Remove pts with NA coordinates    
+  na_pts_mask <- !is.na(pts[[longlat[1]]]) & !is.na(pts[[longlat[2]]])
+  pts <- pts[na_pts_mask,]
+  ## Bioclimdir="C:/Users/Yves Bas/Documents/SIG/Bioclim_5m/" #where bioclim TIFF files are
 
-    ## coordinates(OccSL) <- c("decimalLongitude", "decimalLatitude")
-    coordinates(OccSL) <- CoordH
-    proj4string(OccSL) <- CRS("+init=epsg:4326") # WGS 84
-    ## est meridien greenwhich
-    r1=getData('worldclim',var='bio',res=0.5,lon=0,lat=45)
-    ## ouest meridien greenwhic
-    r2=getData('worldclim',var='bio',res=0.5,lon=-10,lat=45)
+  # Convert pts to sp obj
+  ## may be request directly a sp as pts 
+  sp::coordinates(pts) <- longlat # May be change pts arg to spatial object
+  sp::proj4string(pts) <- sp::CRS("+init=epsg:4326") # WGS 84
+  message("Be careful, the function assumes that coordinates of pts are in WGS 84 projection")
+  stopifnot(sp::proj4string(clim) == sp::proj4string(pts))
 
+  # Extract relevant clim data
+  clim_pts <- raster::extract(clim, pts, df = TRUE)
+  clim_pts$ID <- NULL
 
-                                        #ListTifiles=list.files(args[2],full.names=T)
+  # Rm NA from clim 
+  clim_na_mask <- rowSums(is.na(clim_pts)) == 0
+  pts <- pts[clim_na_mask, ]
+  clim_pts <- clim_pts[clim_na_mask, , drop = FALSE]
 
-    SpBioc1=extract(r1,OccSL)
-    SpBioc2=extract(r2,OccSL)
+  # Prepare output:
 
+  # Necessary for f_biodiv_modgis.r:
+  names(clim_pts) <- paste0("SpBioC", c(1:ncol(clim_pts)))
 
-    SpBioc12=mapply(FUN=function(x,y) ifelse(is.na(x),y,x),SpBioc1,SpBioc2)
-    SpBioc12=as.data.frame(matrix(SpBioc12,ncol=ncol(SpBioc1),nrow=nrow(SpBioc1)))
-###  subset(c(1:nrow(SpBioc12)),is.na(SpBioc12$V1))
-    OccSL=subset(OccSL,!is.na(SpBioc12$V1))
-  #  if(merge)points=subset(points,!is.na(SpBioc12$V1))
-    SpBioc12=subset(SpBioc12,!is.na(SpBioc12$V1))
+  # merge
+  if (merge_data) {
+    output <- data.frame(pts, clim_pts)
+  }  else {
+    output <- data.frame(sp::coordinates(pts), clim_pts)
+  }
 
+  # Write output: 
+  if (write) {
+    if (exists("pts_path")) {
+      data.table::fwrite(output, paste0(pts_path, "_Bioclim.csv")) 
+    
+    } else {
+      if(is.null(id))
+	id <- Sys.Date()
+      data.table::fwrite(output, paste0(id,"_Bioclim.csv"))
+    }
+  }
 
-    names(SpBioc12)=paste0("SpBioC",c(1:ncol(SpBioc12)))
+  # Plot
+  if (plot) {
 
-                                        #AFAIRE = récupérer les données côtières qui donnent des NA dans worldclim
-    if(merge_data) Bioclim=cbind(as.data.frame(OccSL),SpBioc12) else Bioclim=cbind(coordinates(OccSL),SpBioc12)
-    if(write) {
-        if(class(FOccSL)[1]=="character") {
-            fwrite(Bioclim,paste0(FOccSL,"_Bioclim.csv"))
-        } else {
-            if(is.null(id)) id <- Sys.Date()
-            fwrite(Bioclim,paste0(id,"_Bioclim.csv"))
-        }
+    bioclim_plot <- output 
+    sp::coordinates(bioclim_plot) <- longlat
+
+    # Take a var randomly to plot
+    clim_var <- sample(names(clim), 1)
+
+    # Make a issue in sp for spplot 
+    if (nrow(bioclim_plot) > 1) {
+      sp::spplot(bioclim_plot, zcol = clim_var, main = clim_var)
+    } else {
+      sp::plot(bioclim_plot)
+      message("Less than 2 pts, using sp::plot instead of sp::spplot.")
     }
 
-
-    if(plot) {
-     Bioclim_plot <- Bioclim
-    coordinates(Bioclim_plot) <- CoordH
-
-    SelCol=sample(names(SpBioc12),1)
-     spplot(Bioclim_plot,zcol=SelCol,main=SelCol)
-     if(class(FOccSL)[1]=="character") {
-       png(paste0(FOccSL,"_Bioclim.png"))
-       spplot(Bioclim_plot,zcol=SelCol,main=SelCol)
-       dev.off()
-         #savePlot(paste0(FOccSL,"_Bioclim.png"))
-     } else {
-         if(is.null(id)) id <- Sys.Date()
-         savePlot(paste0(id,"_Bioclim.png"))
-        }
+    if (exists("pts_path")) {
+      stopifnot(nrow(bioclim_plot) > 1)
+      png(paste0(pts_path, "_Bioclim.png"))
+      sp::spplot(bioclim_plot, zcol = clim_var, main = clim_var)
+      dev.off()
+    } else {
+      if(is.null(id)) {
+	id <- Sys.Date()
+      }
+      savePlot(paste0(id,"_Bioclim.png"))
     }
+  }
 
+  if (sp_output) {
+    sp::coordinates(output) <- longlat
+    sp::proj4string(output) <- sp::CRS("+init=epsg:4326")
+  }
 
-    if(output_sp)  coordinates(Bioclim) <- CoordH
-
-    return(Bioclim)
+  return(output)
 }
 
-if(Test)
-{
-                                        #for test
-    Coord_Bioclim(
-        points="./vigiechiro/GIS/PA_Thymus nitens" #table giving coordinates in WGS84
-       ,names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving
-    )
+#' Load of download french worldclim data
+#'
+#' Wrapper around raster::getData to get french worldclim data at a resolution
+#' of 0.5°.
+#' 
+#' @inheritParams raster::getData
+#' @param path A string containing the path in which save the worldclim data 
+#' @param res See raster::getData
+#' @param var See raster::getData
+#' @param ... More options to be supplied to raster::getData
+#' @return a raster
+#'
+## Not run ##
+get_fr_worldclim_data()
+## Not run ##
+
+get_fr_worldclim_data <- function (path = ".", res = 0.5, var = "bio", ...) {
+  
+  # East and west of Greenwhich
+  east_fr <- raster::getData(name = 'worldclim', path = path, res = res,
+    var = var, lon = 0, lat = 45, ...)
+  west_fr <- raster::getData(name = 'worldclim', path = path, res = res,
+    var = var, lon = -10, lat = 45, ...)
+
+  # Merge the two rasters 
+  fr <- raster::merge(east_fr, west_fr, overlap = TRUE)
+
+  return(fr)
 }
