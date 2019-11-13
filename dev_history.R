@@ -9,6 +9,7 @@ usethis::use_build_ignore("AppShiny")
 usethis::use_build_ignore("functions")
 usethis::use_build_ignore("IO")
 usethis::use_build_ignore(".git")
+usethis::use_git_ignore(".Rhistory")
 
 # Clean DESCRIPTION
 usethis::use_tidy_description()
@@ -25,7 +26,7 @@ usethis::use_test("f_biodiv_modgis")
 usethis::use_vignette("f_biodiv_modgis")
 
 # CI
-# usetihs::install_github("ropenscilabs/tic")
+# usethis::install_github("ropenscilabs/tic")
 tic::use_tic()
 
 # Development
