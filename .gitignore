@@ -5,6 +5,12 @@ SpNuit_GLMsanssel.R
 inst/doc
 .Rhistory
 data_weather/
+InputOutputvigieChiroScripts/
 
 
-
+*.rmd~
+*.r~
+*.nc
+*.html
+functions/GLMs/f_Sp_GLM_short - Copie.R
+functions/GLMs/f_Sp_GLM_short - Copie (2).R
