@@ -12,5 +12,9 @@ InputOutputvigieChiroScripts/
 *.r~
 *.nc
 *.html
+
+*.yml
+
+
 functions/GLMs/f_Sp_GLM_short - Copie.R
 functions/GLMs/f_Sp_GLM_short - Copie (2).R
