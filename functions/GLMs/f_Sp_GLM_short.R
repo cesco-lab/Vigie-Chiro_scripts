@@ -323,9 +323,10 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     Estimates$coef <- ifelse(is.na(Estimates$bt_sd),Estimates$coef_raw,Estimates$coef_raw^(1/Estimates$bt_sd))
 
 
-    mdIC <- confint(ModSp)[,1:2]
-    mdIC <- mdIC[1:nrow(Estimates),]
+    mdIC <- as.data.frame(confint(ModSp)[,1:2])
+    rownames(mdIC) <- gsub("cond.","",rownames(mdIC))
     colnames(mdIC) <- c("ICinf","ICsup")
+    mdIC <- mdIC[as.character(Estimates$term),]
 
     Estimates <- data.frame(Estimates,mdIC)
     Estimates$ICinf <- ifelse(is.na(Estimates$bt_sd),exp(Estimates$ICinf),exp(Estimates$ICinf)^(1/Estimates$bt_sd))
