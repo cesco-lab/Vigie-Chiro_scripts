@@ -27,6 +27,7 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
         pts <- data.table::fread(pts_path)
     }
 
+
                                         # Remove pts with NA coordinates
     na_pts_mask <- !is.na(pts[[longlat[1]]]) & !is.na(pts[[longlat[2]]])
     pts <- pts[na_pts_mask,]
@@ -37,6 +38,7 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
     sp::coordinates(pts) <- longlat # May be change pts arg to spatial object
     sp::proj4string(pts) <- sp::CRS("+init=epsg:4326") # WGS 84
     message("Be careful, the function assumes that coordinates of pts are in WGS 84 projection")
+
 
     stopifnot(sp::proj4string(clim) == sp::proj4string(pts))
 
@@ -56,7 +58,8 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
 
                                         # merge
     if (merge_data) {
-        output <- data.frame(pts, clim_pts)
+
+           output <- data.frame(pts, clim_pts)
     }  else {
         output <- data.frame(sp::coordinates(pts), clim_pts)
     }
