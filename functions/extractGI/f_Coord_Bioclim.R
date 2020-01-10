@@ -10,12 +10,6 @@
 #' @param clim raster of climatic data (e.g. obtained by raster::getData())
 #' @return sp data.frame or data.frame with clim values at pts coordinates 
 #' @author Yves Bas
-pt_test <- data.frame(long = c(3, 3, NA), lat = c(27, NA, NA))
-clim_data <- raster::raster(nrows = 3, ncols = 3, xmn = 2, xmx = 4, ymn = 26, ymx = 28)
-raster::values(clim_data) <- rnorm(length(raster::values(clim_data))) 
-sp::proj4string(clim_data) <- sp::CRS("+init=epsg:4326")
-extract_clim(pts = pt_test, longlat = c("long", "lat"),
-  write = FALSE, id = NULL, clim = clim_data, merge_data = FALSE , plot = TRUE, sp_output = TRUE)
 
 extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
   write=TRUE, id = NULL, clim = NULL, merge_data = FALSE , plot = TRUE, sp_output = TRUE) {
@@ -23,7 +17,7 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
   # Load pts data.frame if necessary
   if (class(pts)[1] == "character") {
     pts_path <- pts
-    stopifnot(file.exists(pts_path), "file does not exist")
+    stopifnot(file.exists(pts_path))
     pts <- data.table::fread(pts_path)
   }
 
@@ -37,8 +31,8 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
   sp::coordinates(pts) <- longlat # May be change pts arg to spatial object
   sp::proj4string(pts) <- sp::CRS("+init=epsg:4326") # WGS 84
   message("Be careful, the function assumes that coordinates of pts are in WGS 84 projection")
-  stopifnot(sp::proj4string(clim) == sp::proj4string(pts))
-
+  #stopifnot(sp::proj4string(clim) == sp::proj4string(pts)) #weird stuff about proj4string being different despite being the same CRS
+  
   # Extract relevant clim data
   clim_pts <- raster::extract(clim, pts, df = TRUE)
   clim_pts$ID <- NULL
@@ -63,7 +57,8 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
   # Write output: 
   if (write) {
     if (exists("pts_path")) {
-      data.table::fwrite(output, paste0(pts_path, "_Bioclim.csv")) 
+      id=gsub(".csv","",pts_path)
+      data.table::fwrite(output, paste0(id, "_Bioclim.csv")) 
     
     } else {
       if(is.null(id))
@@ -79,7 +74,7 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
     sp::coordinates(bioclim_plot) <- longlat
 
     # Take a var randomly to plot
-    clim_var <- sample(names(clim), 1)
+    clim_var <- sample(names(bioclim_plot), 1)
 
     # Make a issue in sp for spplot 
     if (nrow(bioclim_plot) > 1) {
@@ -90,7 +85,7 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
     }
 
     if (exists("pts_path")) {
-      stopifnot(nrow(bioclim_plot) > 1)
+      #stopifnot(nrow(bioclim_plot) > 1)
       png(paste0(pts_path, "_Bioclim.png"))
       sp::spplot(bioclim_plot, zcol = clim_var, main = clim_var)
       dev.off()
@@ -98,7 +93,11 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
       if(is.null(id)) {
 	id <- Sys.Date()
       }
-      savePlot(paste0(id,"_Bioclim.png"))
+      #savePlot(paste0(id, "_Bioclim.png")) #problem with windows here
+      png(paste0(id, "_Bioclim.png"))
+      sp::plot(bioclim_plot) 
+      dev.off()
+      
     }
   }
 
@@ -109,6 +108,14 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
 
   return(output)
 }
+
+pt_test <- data.frame(long = c(3, 3, NA), lat = c(27, NA, NA))
+clim_data <- raster::raster(nrows = 3, ncols = 3, xmn = 2, xmx = 4, ymn = 26, ymx = 28)
+raster::values(clim_data) <- rnorm(length(raster::values(clim_data))) 
+sp::proj4string(clim_data) <- sp::CRS("+init=epsg:4326")
+extract_clim(pts = pt_test, longlat = c("long", "lat"),
+             write = FALSE, id = NULL, clim = clim_data, merge_data = FALSE , plot = TRUE, sp_output = TRUE)
+
 
 #' Load of download french worldclim data
 #'
@@ -122,8 +129,6 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
 #' @param ... More options to be supplied to raster::getData
 #' @return a raster
 #'
-## Not run ##
-get_fr_worldclim_data()
 ## Not run ##
 
 get_fr_worldclim_data <- function (path = ".", res = 0.5, var = "bio", ...) {
@@ -139,3 +144,5 @@ get_fr_worldclim_data <- function (path = ".", res = 0.5, var = "bio", ...) {
 
   return(fr)
 }
+## Not run ##
+get_fr_worldclim_data()
