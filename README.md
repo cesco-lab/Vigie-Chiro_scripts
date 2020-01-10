@@ -1,6 +1,11 @@
 # Vigie-Chiro_scripts
 
 [![Build Status](https://travis-ci.org/cesco-lab/Vigie-Chiro_scripts.svg?branch=master)](https://travis-ci.org/cesco-lab/Vigie-Chiro_scripts)
+[![Build status](https://ci.appveyor.com/api/projects/status/wfsc5yog9pxn9xr2/branch/master?svg=true)](https://ci.appveyor.com/project/statnmap/vigie-chiro-scripts/branch/master)
+
+
+
+Website with {pkgdown} for documentation: https://cesco-lab.github.io/Vigie-Chiro_scripts/
 
 ## Summary
 

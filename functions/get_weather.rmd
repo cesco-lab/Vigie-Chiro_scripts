@@ -1,0 +1,99 @@
+---
+title: "Extraction et calcul des anamolies climatiques"
+author: "Romain Lorrilliere, Yves Bas (CesCO, MNHN)"
+date: "07/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("f_coord_date_weather.r")
+# rmarkdown::render("get_weather.rmd",output_file="get_weather")
+```
+
+```{r , eval=TRUE, echo=TRUE}
+source("f_coord_date_weather.r")
+library(data.table)
+library(dplyr)
+```
+
+
+## Open file
+
+
+## Weather data extraction from nc files and saving in rData format
+
+default value of parameters: 
+	* firstYear = 1950
+	* lastYear = last available year
+	* repout = data
+
+```{r, eval=FALSE, echo=TRUE}
+nc2rdata()
+
+```
+
+
+
+
+## Assessing reference value of daily weather (temprature mean and
+precipitation)
+
+default value of parameters: 
+
+	* firstYear = 1950
+	* lastYear = last available year
+	* repout = data
+
+
+##' @param first_year
+##' @param last_year
+##' @param nc_one_file
+##' @param nc_local
+##' @param nc_extract
+##' @param nc_data
+##' @param nc_rep
+##' @param file_nc_out
+##' @param var
+##' @param dsample_colnames
+##' @param output
+##' @param save
+##' @param fileouput
+
+
+```{r,eval=FALSE,echo=TRUE}
+assess_weather_ref()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r,eval=FALSE}
+d <- gen_import_fread()
+dsample <- unique(d[,c("date_format","longitude","latitude")])
+dsite <- unique(d[,c("longitude","latitude")])
+dsite$site_id <- 1:nrow(dsite)
+
+dsample <- data.table(inner_join(dsample,dsite))
+
+```
+
+
+```{r, eval=FALSE}
+get_sample_weather()
+
+
+```
+
+
