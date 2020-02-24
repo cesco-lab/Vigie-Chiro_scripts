@@ -158,13 +158,13 @@ abline(1,0,col=2)
 RawIndicator$WeightedIndicator=WeightedIndicator
 RawIndicator$WeightedIndicator_lse=Wsd0
 RawIndicator$WeightedIndicator_use=Wsd1
-fwrite(RawIndicator,paste0("IndicatorForONB_",Sys.Date(),".csv"),sep=";")
 
 
-BS_Indicator=list()
+BS_Indicator=data.frame(year=RawIndicator$year)
 for (g in 1:1000)
 {
-  Sample=unique(ATindw$espece)[sample.int(length(unique(ATindw$espece)))]
+  Sample=unique(ATindw$espece)[sample.int(length(unique(ATindw$espece))
+                                          ,replace=T)]
   AT_BS=subset(ATindw,ATindw$espece %in% Sample)
   WeightedIndicator=vector()
 for (j in 1:nrow(RawIndicator))
@@ -188,8 +188,20 @@ for (j in 1:nrow(RawIndicator))
   Wsd0=c(Wsd0,Indw0)
   Wsd1=c(Wsd1,Indw1)
 }
-  BS_Indicator[[g]]=WeightedIndicator
+  BS_Indicator=cbind(BS_Indicator,WeightedIndicator)
   if(g%%100==1){print(paste(g,Sys.time()))}
 }
 
+LowInt=apply(BS_Indicator[,2:ncol(BS_Indicator)],MARGIN=1
+             ,FUN=function(x) quantile(x,0.025))
+UpInt=apply(BS_Indicator[,2:ncol(BS_Indicator)],MARGIN=1
+             ,FUN=function(x) quantile(x,0.975))
 
+
+RawIndicator$LowInt=LowInt
+RawIndicator$UpInt=UpInt
+plot(RawIndicator$year,WeightedIndicator,type="l",ylim=c(0,2))
+lines(RawIndicator$year,RawIndicator$UpInt,lty=2)
+lines(RawIndicator$year,RawIndicator$LowInt,lty=2)
+abline(1,0,col=2)
+fwrite(RawIndicator,paste0("IndicatorForONB_",Sys.Date(),".csv"),sep=";")
