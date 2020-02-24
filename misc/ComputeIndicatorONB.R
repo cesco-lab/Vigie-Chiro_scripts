@@ -160,3 +160,36 @@ RawIndicator$WeightedIndicator_lse=Wsd0
 RawIndicator$WeightedIndicator_use=Wsd1
 fwrite(RawIndicator,paste0("IndicatorForONB_",Sys.Date(),".csv"),sep=";")
 
+
+BS_Indicator=list()
+for (g in 1:1000)
+{
+  Sample=unique(ATindw$espece)[sample.int(length(unique(ATindw$espece)))]
+  AT_BS=subset(ATindw,ATindw$espece %in% Sample)
+  WeightedIndicator=vector()
+for (j in 1:nrow(RawIndicator))
+{
+  Valj=subset(AT_BS,AT_BS$yearMean==RawIndicator$year[j])
+  if(Weight)
+  {
+    Indw=weighted.geomean(Valj$StandEstimates,w=Valj$weight/mean(Valj$weight))
+    Indw0=weighted.geomean(Valj$Standsdl,w=Valj$weight/mean(Valj$weight))
+    Indw1=weighted.geomean(Valj$Standsdu,w=Valj$weight/mean(Valj$weight))
+    Indlw=weighted.geomean(Valj$StandEstimates,w=log(Valj$weight+1)/mean(log(Valj$weight+1)))
+  }else{
+    Indw=weighted.geomean(Valj$StandEstimates,w=rep(1,nrow(Valj)))
+    Indw0=weighted.geomean(Valj$Standsdl,w=rep(1,nrow(Valj)))
+    Indw1=weighted.geomean(Valj$Standsdu,w=rep(1,nrow(Valj)))
+    Indlw=weighted.geomean(Valj$StandEstimates,w=rep(1,nrow(Valj)))
+    
+  }
+  WeightedIndicator=c(WeightedIndicator,Indw)
+  LogWeightedIndicator=c(LogWeightedIndicator,Indlw)
+  Wsd0=c(Wsd0,Indw0)
+  Wsd1=c(Wsd1,Indw1)
+}
+  BS_Indicator[[g]]=WeightedIndicator
+  if(g%%100==1){print(paste(g,Sys.time()))}
+}
+
+
