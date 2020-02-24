@@ -1,10 +1,14 @@
 library(data.table)
-#SpeciesIndicator=c("Pippip","Pipkuh","Nycnoc","Nyclei","Eptser","Myospp"
-#                  ,"Pippyg","Barbar","Myonat","Pipnat")
-SpeciesIndicator=c("Tetvir","Rusnit","Leppun","Phanan","Phogri","Plaalb"
-                   ,"Testes","Phafal")
-Weight=F
-SpeciesWeights=fread("NDataSp.csv")
+SpeciesIndicator=c("Pippip","Pipkuh","Nycnoc","Nyclei","Eptser","Myospp"
+                   ,"Pippyg","Barbar","Pipnat","Pleaur"
+                   ,"Pleaus","Hypsav")
+
+#SpeciesIndicator=c("Tetvir","Rusnit","Leppun","Phanan","Phogri","Plaalb"
+#                  ,"Testes","Phafal")
+Weight=T
+#SpeciesWeights=fread("NDataSp.csv")
+SpeciesWeights=fread("SynthesesTendances_bat.csv")
+ColW="vif_mean"
 AT=fread("./output/AT_BonTron_log1.csv")
 
 gm_mean = function(x, na.rm=TRUE){
@@ -16,19 +20,84 @@ weighted.geomean <- function(x, w, ...)
   return(prod(x^w, ...)^(1/sum(w)))
 }
 
+#linear inter and extrapolation of values for grouped years
 AT1=subset(AT,AT$yearRange==0)
 AT2=subset(AT,AT$yearRange>0)
 for (i in 1:nrow(AT2))
 {
   YearSeq=c((AT2$yearMean[i]-AT2$yearRange[i]/2):(AT2$yearMean[i]+AT2$yearRange[i]/2))
+  EstPrev=subset(AT,(AT$espece==AT2$espece[i])&(AT$yearMean<AT2$yearMean[i]))
+  EstNext=subset(AT,(AT$espece==AT2$espece[i])&(AT$yearMean>AT2$yearMean[i]))
   ATtemp=AT2[rep(i,length(YearSeq)),]
   ATtemp$yearMean=YearSeq
-  AT1=rbind(AT1,ATtemp)
+  CoefL=AT2$Standsdl[i]/AT2$StandEstimates[i]
+  CoefU=AT2$Standsdu[i]/AT2$StandEstimates[i]
+  if(!is.na(AT2$Standsdu[i]))
+  {
+    if((AT2$Standsdu[i]!=Inf))
+    {
+      if((nrow(EstPrev)>0)&(nrow(EstNext)>0))
+      {
+        DataTemp=rbind(EstPrev[(nrow(EstPrev)),],AT2[i,])
+        Mod1=lm(StandEstimates~yearMean,data=DataTemp)
+        #summary(Mod2)
+        ATtemp$StandEstimates=predict(Mod1
+                                      ,newdata=ATtemp)
+        
+        
+        DataTemp=rbind(EstNext[1,],AT2[i,])
+        Mod2=lm(StandEstimates~yearMean,data=DataTemp)
+        #summary(Mod2)
+        ATtemp$StandEstimates[
+          ((ceiling(nrow(ATtemp)/2)+1):
+             nrow(ATtemp))]=predict(Mod2
+                                    ,newdata=ATtemp)[
+                                      ((ceiling(nrow(ATtemp)/2)+1):
+                                         nrow(ATtemp))]
+        
+        
+      }else{
+        if(nrow(EstPrev)>0)
+        {
+          DataTemp=rbind(EstPrev[(nrow(EstPrev)),],AT2[i,])
+          Mod1=lm(StandEstimates~yearMean,data=DataTemp)
+          #summary(Mod2)
+          ATtemp$StandEstimates=predict(Mod1,newdata=ATtemp)
+          
+          
+        }else{
+          DataTemp=rbind(EstNext[1,],AT2[i,])
+          Mod2=lm(StandEstimates~yearMean,data=DataTemp)
+          #summary(Mod2)
+          ATtemp$StandEstimates=predict(Mod2,newdata=ATtemp)
+                  }
+      }
+      ATtemp$Standsdl=ATtemp$StandEstimates*CoefL
+      ATtemp$Standsdu=ATtemp$StandEstimates*CoefU      
+      AT1=rbind(AT1,ATtemp)
+    }
+  }
 }
 table(AT1$yearMean)
 table(AT1$yearMean,AT1$espece)
 
-ATind=subset(AT1,AT1$espece %in% SpeciesIndicator)
+#rescale first year to 1
+ATscale=AT1[0,]
+for (j in 1:length(unique(AT1$espece)))
+{
+  ATj=subset(AT1,AT1$espece==unique(AT1$espece)[j])
+  ATj=ATj[order(ATj$yearMean),]
+  ATj$StandEstimates=ATj$StandEstimates/ATj$StandEstimates[1]
+  ATj$Standsdl=ATj$Standsdl/ATj$StandEstimates[1]
+  ATj$Standsdu=ATj$Standsdu/ATj$StandEstimates[1]
+  
+  ATscale=rbind(ATscale,ATj)
+}
+
+
+
+
+ATind=subset(ATscale,ATscale$espece %in% SpeciesIndicator)
 table(ATind$yearMean)
 fwrite(ATind,paste0("AnnualTrendsDetail_",Sys.Date(),".csv"),sep=";")
 ATcast=dcast(data=ATind,yearMean~espece,fun.aggregate=mean
@@ -41,7 +110,9 @@ for (z in 2:(ncol(ATcast)-1))
 }
 fwrite(ATcast,paste0("AnnualTrendsSummary_",Sys.Date(),".csv"))
 
-ATindw=merge(ATind,SpeciesWeights,by.x="espece",by.y="species")
+test=match(ColW,names(SpeciesWeights))
+colnames(SpeciesWeights)[test]="weight"
+ATindw=merge(ATind,SpeciesWeights,by="espece")
 
 RawIndicator=aggregate(ATind$StandEstimates,by=list(ATind$yearMean),FUN=function(x) gm_mean(x))
 plot(RawIndicator$x)
