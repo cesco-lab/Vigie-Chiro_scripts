@@ -1,12 +1,12 @@
+#authors: Jean-François Julien and Yves Bas
+#rm(list = ls())
+#FileParticipation="./VigieChiro/exemples/TP_validationSaintEtienne2001/participation-A-observations.csv"
+AppFolder="C:/Users/Yves Bas/Documents/Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/AppShiny/participation"
+FileParticipation="C:/Users/Yves Bas/Downloads/participation-5e414c8f4252e1000e5b0977-observations.csv"
 packages <- c("dplyr", "ggplot2", "ggvis", "shiny","data.table","lubridate")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))
 }
-rm(list = ls())
-ConfigSyrinx=fread("exp384.dsp",sep=";")
-FileParticipation="C:/Users/Yves Bas/Downloads/participation-5d64c9617c91c5000d36211c-observations.csv"
-
-
 library(dplyr)
 library(ggplot2)
 library(ggvis)
@@ -16,6 +16,10 @@ library(lubridate)
 # options(graphics.record = TRUE)
 # windows(record = TRUE)
 SpeciesList=fread("SpeciesList.csv")
+#wavdir <- choose.dir()
+wavdir=""
+ConfigSyrinx=fread("exp384.dsp",sep=";")
+#ConfigSyrinx=""
 ms=4
 
 
@@ -30,7 +34,6 @@ especes=unique(SpeciesList$Esp)
 print("CHARGEMENT DE LA PARTICIPATIOn A ANALYSER")
 
 print("Choix du rÃ©pertoire contenant les sons au format *.wav")
-wavdir <- choose.dir()
 
 #find Syrinx location
 #if(dir.exists("C:/Program Files (x86)/"))
@@ -123,7 +126,7 @@ fichierslash <- gsub("\\\\", "/", FileParticipation)
 coupe <- unlist(strsplit(fichierslash,"/"))
 titre <- substr(coupe[length(coupe)], 1, nchar(coupe[length(coupe)])-4)
 fichiervu <- paste(titre, '_Vu.csv', sep = '')
-runApp("C:/Users/Yves Bas/Documents/Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/AppShiny/participation", launch.browser = TRUE)
+runApp(AppFolder, launch.browser = TRUE)
 write.csv2(AlleYoupi7,"AlleYoupi7.csv")
 # todo:
 # 1) contacts secondaires,
