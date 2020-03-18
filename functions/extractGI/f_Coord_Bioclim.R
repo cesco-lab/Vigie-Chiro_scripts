@@ -1,3 +1,4 @@
+test=T
 #'  Get bioclim data at given locations
 #'
 #' The function takes a observation points and a raster with climatic variables.
@@ -21,7 +22,8 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
     pts_path <- pts
     stopifnot(file.exists(pts_path))
     pts <- data.table::fread(pts_path)
-  }
+  plot=F
+    }
   
   # Remove pts with NA coordinates    
   na_pts_mask <- !is.na(pts[[longlat[1]]]) & !is.na(pts[[longlat[2]]])
@@ -69,54 +71,6 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
     }
   }
   
-  # Remove pts with NA coordinates
-  na_pts_mask <- !is.na(pts[[longlat[1]]]) & !is.na(pts[[longlat[2]]])
-  pts <- pts[na_pts_mask,]
-  ## Bioclimdir="C:/Users/Yves Bas/Documents/SIG/Bioclim_5m/" #where bioclim TIFF files are
-  
-  # Convert pts to sp obj
-  ## may be request directly a sp as pts
-  sp::coordinates(pts) <- longlat # May be change pts arg to spatial object
-  sp::proj4string(pts) <- sp::CRS("+init=epsg:4326") # WGS 84
-  message("Be careful, the function assumes that coordinates of pts are in WGS 84 projection")
-  
-  
-  stopifnot(sp::proj4string(clim) == sp::proj4string(pts))
-  
-  # Extract relevant clim data
-  clim_pts <- raster::extract(clim, pts, df = TRUE)
-  clim_pts$ID <- NULL
-  
-  # Rm NA from clim
-  clim_na_mask <- rowSums(is.na(clim_pts)) == 0
-  pts <- pts[clim_na_mask, ]
-  clim_pts <- clim_pts[clim_na_mask, , drop = FALSE]
-  
-  # Prepare output:
-  
-  # Necessary for f_biodiv_modgis.r:
-  names(clim_pts) <- paste0("SpBioC", c(1:ncol(clim_pts)))
-  
-  # merge
-  if (merge_data) {
-    
-    output <- data.frame(pts, clim_pts)
-  }  else {
-    output <- data.frame(sp::coordinates(pts), clim_pts)
-  }
-  
-  # Write output:
-  if (write) {
-    if (exists("pts_path")) {
-      data.table::fwrite(output, paste0(pts_path, "_Bioclim.csv"))
-      
-    } else {
-      if(is.null(id))
-        id <- Sys.Date()
-      data.table::fwrite(output, paste0(id,"_Bioclim.csv"))
-    }
-  }
-  
   # Plot
   if (plot) {
     
@@ -136,21 +90,18 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
     
     if (exists("pts_path")) {
       stopifnot(nrow(bioclim_plot) > 1)
-      png(paste0(pts_path, "_Bioclim.png"))
-      sp::spplot(bioclim_plot, zcol = clim_var, main = clim_var)
-      dev.off()
-    } else {
-      if(is.null(id)) {
-        id <- Sys.Date()
-      }
-      savePlot(paste0(id,"_Bioclim.png"))
+      #png(paste0(pts_path, "_Bioclim.png"))
+      print(sp::spplot(bioclim_plot, zcol = clim_var, main = clim_var))
+      #dev.off()
     }
+    #else {
+     # if(is.null(id)) {
+      #  id <- Sys.Date()
+    #  }
+     # savePlot(paste0(id,"_Bioclim.png"))
+    #}
   }
   
-  if (sp_output) {
-    sp::coordinates(output) <- longlat
-    sp::proj4string(output) <- sp::CRS("+init=epsg:4326")
-  }
   
   return(output)
 }
@@ -195,3 +146,24 @@ get_fr_worldclim_data <- function (path = ".", res = 0.5, var = "bio", ...)
 }
 ## Not run ##
 #get_fr_worldclim_data()
+if(test)
+{
+  extract_clim(
+    merge_data=T
+    ,
+    write = T
+    ,
+    clim=get_fr_worldclim_data()
+    ,
+    #pts = "PrioCoord_2020-03-07_Tetraena_gaetula.csv"
+    #pts = "./VigieChiro/GIS/coordWGS84_SpNuit2_50_DataLP_PF_exportTot.csv"
+    pts = "C:/wamp64/www/sites_localites.txt"
+    
+         ,        
+    #longlat = c("decimalLongitude", "decimalLatitude")
+    #longlat = c("Group.1", "Group.2")
+    longlat = c("longitude", "latitude")
+    
+      )
+                             
+}
