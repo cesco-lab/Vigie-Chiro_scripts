@@ -1,11 +1,17 @@
 library(data.table)
 library(raster)
 library(rgdal)
+library(sf)
 #Zone="C:/Users/Yves Bas/Documents/natura/jasses/domaine.shp"
+#Zone="C:/Users/Yves Bas/Documents/VigieChiro/GIS/SMPNR_AdminExpress.shp"
 Zone="C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp"
-Sample=1000
+#Zone="C:/Users/Yves Bas/Documents/SIG/Countries/World_L93.shp"
+Sample=300000
 SelDep=F
+Dep=c("France","Spain","Switzerland","Italy")
+#Dep=c("France","Italy")
 #Dep=c("34")
+#Dep=c("2A","2B") #corsica
 #Dep=c("09","12","31","32","46","65","81","82") #midipy
 #Dep=c("11","30","34","48","66") #lr
 #Dep=c("09","11","12","30","31","32","34","46","48","65","66","81","82") #occitanie
@@ -20,47 +26,62 @@ SelDep=F
   #    ,"93","94","95","60","80","02","59","62") #Grand Ouest
 #Dep=c("54","55","57","88","67","68","08","10","51","52","90","70","39","25"
  #     ,"58","71","21","89") #Grand Est
-Dep=c("09","11","12","30","31","32","34","46","48","65","66","81","82"
-      ,"2A","2B","13","83","84","04","05","06","07","26","69","42","38"
-      ,"73","74","01","03","63","43","15","19","23","87","86","79","17"
-      ,"16","33","40","47","64","24") #grand sud
+#Dep=c("09","11","12","30","31","32","34","46","48","65","66","81","82"
+ #     ,"2A","2B","13","83","84","04","05","06","07","26","69","42","38"
+  #    ,"73","74","01","03","63","43","15","19","23","87","86","79","17"
+   #   ,"16","33","40","47","64","24") #grand sud
 #Dep=c("30","34")
 #Dep=c("75")
 #Dep=c("75","77","78","91","92","93","94","95") #idf
-Rand=T
+#Dep=c("75","77","78","91","92","93","94","95","76","60","02","51","10","89"
+#      ,"45","28","27") #idf + 1 epaisseur
+
+Rand=F
 SelLongLat=F
-LatMin=6297000
-LatMax=6308000
-LongMin=755000
-LongMax=766000
-SelBuffer=T
-LatOrigin=6303000
+LatMin=4000000
+LatMax=8000000
+LongMin=-2000000
+LongMax=3000000
+SelBuffer=F
+LatOrigin=6303000 #nddl 
 LongOrigin=762000
+#LatOrigin=6306000 #toscane
+#LongOrigin=1300000
 #LatOrigin=6346000 # sisteron
 #LongOrigin=934000
 #LatOrigin=6546000 # roanne
 #LongOrigin=787000
 #LatOrigin=6600000 # la motte
 #LongOrigin=773000
-Radius=1000
+LatOrigin=6328000 # chezmathieu
+LongOrigin=699000
+Radius=10000
 
 
 #France_departement
 Sys.time()
 FranceD= shapefile(Zone)
-
 Sys.time()
 
 Suffix=""
 if(SelDep)
 {
-  FranceD=subset(FranceD,FranceD$DépARTEM0 %in% Dep)
-  for (i in 1:length(Dep))
+if("NAME_ENGL" %in% names(FranceD))
+{
+  FranceD=subset(FranceD,FranceD$NAME_ENGL %in% Dep)
+  
+}else{
+    FranceD=subset(FranceD,FranceD$DépARTEM0 %in% Dep)
+}
+    for (i in 1:length(Dep))
   {
     Suffix=paste(Suffix,Dep[i],sep="_")
   }
 }
 
+p=st_as_sf(FranceD)
+pbuf = st_buffer(p, 1000)
+FranceD=as(pbuf,'Spatial')
 #FranceD=subset(FranceD,select="OBJECT_ID")
 
 if(SelLongLat)
