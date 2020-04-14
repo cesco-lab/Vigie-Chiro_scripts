@@ -8,41 +8,41 @@ shinyUI(pageWithSidebar(
   # Sidebar with controls to select parameters to plot, group, species etc.
   # Note the use of the br()
   # element to introduce extra vertical spacing
-  sidebarPanel(width = 2,
+  sidebarPanel(width = 2,     #choix du paramètre afficher en ordonnée
                selectInput("paramschoix",
 
                            label = "Choisissez un paramÃ¨tre -> ordonnÃ©es).",
                            choices = params,
                            selected = "frequence_mediane")
                ,
-               selectInput("idchoix",
+               selectInput("idchoix", #groupe à afficher
                            "Groupe :",
                            c("Tous",
                              sort(unique(as.character(AlleYoupi5$groupe))))
                            ,selected = "Chauve-souris")
                ,
-               selectInput("especechoix",
+               selectInput("especechoix", #espèce à afficher
                            "EspÃ¨ce :",
                            c("Toutes",
                              sort(unique(as.character(AlleYoupi5$tadarida_taxon)))))
                ,
-               sliderInput("conf",
+               sliderInput("conf", #sélection sur le score de Tadarida
                            label = "Indice de confiance de l'espÃ¨ce :",
                            min = 0, max = 1, value = c(0.5, 1))
                ,
-               sliderInput("frequence_mediane",
+               sliderInput("frequence_mediane", #sélection sur la fréquence médiane
                            label = "Frequence mediane",
                            min = 0, max = 250, value = c(0, 120))
                
                
                ,
-               selectInput("espececorrige",
+               selectInput("espececorrige", #choix de validations
                            "EspÃ¨ce correction:",
                            c("Confirme", especes))
                ,
-               actionButton("submit","Valider")
+               actionButton("submit","Valider") #pour soumettre cette validation
                ,
-               downloadButton('downloadData', 'Sauver les corrections')
+               downloadButton('downloadData', 'Sauver les corrections') #sauver les corrections
                # # Pour appVigie-Chiro (sorties Tadarida.csv)
                # sliderInput("confg",
                # label = "Indice de confiance du groupe :",

@@ -1,13 +1,9 @@
-#authors: Jean-Fran�ois Julien and Yves Bas
-#rm(list = ls())
-#FileParticipation="./VigieChiro/exemples/TP_validationSaintEtienne2001/participation-A-observations.csv"
-AppFolder="C:/Users/Yves Bas/Documents/Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/AppShiny/participation"
-FileParticipation="C:/Users/Yves Bas/Downloads/participation-595f85ae0e7a7c7004056fb0-observations.csv"
-Syrinx=F
 packages <- c("dplyr", "ggplot2", "ggvis", "shiny","data.table","lubridate")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))
 }
+rm(list = ls())
+
 library(dplyr)
 library(ggplot2)
 library(ggvis)
@@ -17,10 +13,7 @@ library(lubridate)
 # options(graphics.record = TRUE)
 # windows(record = TRUE)
 SpeciesList=fread("SpeciesList.csv")
-wavdir <- choose.dir()
-#wavdir=""
-ConfigSyrinx=fread("exp384.dsp",sep=";")
-#ConfigSyrinx=""
+FileParticipation="C:/Users/Yves Bas/Downloads/participation-5d0c704c116cb1000ee08b34-observations.csv"
 ms=4
 
 
@@ -28,26 +21,14 @@ ms=4
 # Pour libérer un peu de mémoire, décommenter les 3 lignes suivantes:
 # liste <- subset(ls(), !grepl("batcalls", ls()))
 gc()
-groupes=unique(SpeciesList$GroupFR)
+groupes=unique(SpeciesList$Nesp)
 especes=unique(SpeciesList$Esp)
 
 #Chargement du fichier de sortie Tadarida Vigie-Chiro
 print("CHARGEMENT DE LA PARTICIPATIOn A ANALYSER")
 
 print("Choix du répertoire contenant les sons au format *.wav")
-
-#find Syrinx location
-#if(dir.exists("C:/Program Files (x86)/"))
-#{
- # SyrinxLoc="C:/Program Files (x86)/syrinx/Syrinx.exe"
-#}else{
- # SyrinxLoc="C:/Program Files/syrinx/Syrinx.exe"
-#}
-
-
-
-
-#wavdir <- "C:/wamp64/www"
+wavdir <- "C:/wamp64/www"
 ##### Chargement des identifs Tadarida
 AlleYoupi5=fread(FileParticipation)
 
@@ -56,7 +37,7 @@ AlleYoupi5=fread(FileParticipation)
 
 ####### Construction de la colonne DateHeure compatible POSIX
 DateHeure <- substr(AlleYoupi5$`nom du fichier`,nchar(AlleYoupi5$`nom du fichier`)-22+ms,nchar(AlleYoupi5$`nom du fichier`)-8+ms)
-DateHeure=ymd_hms(DateHeure,tz="Europe/Paris") 
+DateHeure=ymd_hms(DateHeure) 
   
   
   
@@ -108,15 +89,11 @@ print (actparheure)
 #Création de variables pour l'app Shiny
 AlleYoupi5$Affiche <- paste(AlleYoupi5$`nom du fichier`, " sp: ", AlleYoupi5$tadarida_taxon, "Confiance: ", as.character(round(AlleYoupi5$tadarida_probabilite,1), sep=""))
 AlleYoupi5$duree_sequence=AlleYoupi5$temps_fin-AlleYoupi5$temps_debut
-test=match(AlleYoupi5$tadarida_taxon,SpeciesList$Esp)
-AlleYoupi5$groupe=SpeciesList$GroupFR[test]
-
-
 params <- c("frequence_mediane", "duree_sequence","temps_debut", "temps_fin")
 AlleYoupi5=as.data.frame(AlleYoupi5)
-AlleYoupi7 <- cbind(Grpe_corrige = NA, Esp_corrige = NA, AlleYoupi5) #tableau avec validations � sauver
-AlleYoupi8 <- AlleYoupi7[0, ] #tableau qui s'affiche dans le dernier onglet de l'appli (validations faites)
-submit0 <- 0 #initialisation du fichier s�lectionner sur le graphe par click ?
+AlleYoupi7 <- cbind(Grpe_corrige = NA, Esp_corrige = NA, AlleYoupi5)
+AlleYoupi8 <- AlleYoupi7[0, ]
+submit0 <- 0
 gpnames <-append("Tous", sort(as.character(unique(AlleYoupi5$Groupe))))
 spnames <-append("Toutes", sort(as.character(unique(AlleYoupi5$tadarida_taxon))))
 timespan <- max(DateHeure) - min(DateHeure)
@@ -127,7 +104,7 @@ fichierslash <- gsub("\\\\", "/", FileParticipation)
 coupe <- unlist(strsplit(fichierslash,"/"))
 titre <- substr(coupe[length(coupe)], 1, nchar(coupe[length(coupe)])-4)
 fichiervu <- paste(titre, '_Vu.csv', sep = '')
-runApp(AppFolder, launch.browser = TRUE)
+runApp("C:/Users/Yves Bas/Documents/Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/AppShiny", launch.browser = TRUE)
 write.csv2(AlleYoupi7,"AlleYoupi7.csv")
 # todo:
 # 1) contacts secondaires,
@@ -135,4 +112,5 @@ write.csv2(AlleYoupi7,"AlleYoupi7.csv")
 # 3) détection des fichiers si dans le même dossier que le log ScanR.
 # 4) plusieurs tabs avec input (upload) du log ScanR et
 # lancement de Tadarida depuis shiny.
+
 
