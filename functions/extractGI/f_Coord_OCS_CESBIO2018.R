@@ -1,5 +1,7 @@
 Test=F
-Coord_OCS_CESBIO2018=function(points,names_coord,bs,bm,layer)
+keep=F # FALSE is default value: table saved by Coord_OCS_CESBIO2018() only contains OSO habitat columns and point coordinats.
+       # If TRUE, the table saved is the full points table loaded, to which OSO habitat columns were appended.
+Coord_OCS_CESBIO2018=function(points,names_coord,bs,bm,layer,keep)
 {
   library(data.table)
   library(sp)
@@ -12,7 +14,7 @@ Coord_OCS_CESBIO2018=function(points,names_coord,bs,bm,layer)
   BufferSmall=bs
   BufferMedium=bm
   #BufferLarge=5000 #too long
-  #récupération de la couche habitats et de sa nomenclature
+  #rÃ©cupÃ©ration de la couche habitats et de sa nomenclature
   Hab=raster(layer)
   #NomHab=fread("C:/Users/Yves Bas/Downloads/Nom_OSO.csv")
   
@@ -103,8 +105,14 @@ Coord_OCS_CESBIO2018=function(points,names_coord,bs,bm,layer)
   
   OccSL_ARajouter=subset(OccSL3,select=grepl("Sp",names(OccSL3)))
   
-  OCS=data.frame(cbind(coordinates(OccSL),as.data.frame(OccSL_ARajouter)))
-  fwrite(OCS,paste0(FOccSL,"_OCS2018bis.csv"),sep=";")
+  if(keep==FALSE){ # output table only contains points coordinates + the columns for the GI extracted
+    #OCS=data.frame(cbind(coordinates(OccSL),as.data.frame(OccSL_ARajouter))) # this led to duplicated columns for coordinates
+    OCS=as.data.frame(OccSL_ARajouter)
+    fwrite(OCS,paste0(FOccSL,"_OCS2018bis.csv"),sep=";")    
+  }else{ # if keep==TRUE, output table is keeping the original columns from the points table loaded
+    OCS=as.data.frame(OccSL3[,which(names(OccSL3)!="id")])
+    fwrite(OCS,paste0(FOccSL,"_OCS2018bis.csv"),sep=";")
+  }
   
   coordinates(OCS) <- CoordH
   
