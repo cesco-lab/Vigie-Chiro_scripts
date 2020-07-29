@@ -15,30 +15,32 @@ op <- options(digits.secs=3)
 #Saison=c("05","06","07") #obsolete
 
 
-args="GpNuit2_50_DataLP_PF_exportTot"
+Tag="50" #un tag pour identifier le modèle
+#args="GpNuit2_50_DataLP_PF_exportTot" 
+args="C:/wamp64/www/SpNuit2_50_DataLP_PF_exportTot" #la table qui contient les données d'activité
 #args="./VigieChiro/STOC-EPS/data_FrenchBBS_squarre_Diane_20180628_allSp_2001_2018"
 
-args[2]="GI_coordWGS84_SpNuit2_50_DataLP_PF_exportTot"
+args[2]="GI_coordWGS84_SpNuit2_50_DataLP_PF_exportTot (1)" #la table qui contient les variables SIG
 #args[2]="GI_coordWGS84_ALL"
-args[3]="SpeciesList.csv"
-args[3]=NA
+args[3]="SpeciesList.csv" #la table qui liste les espèces (téléchargeable ici : https://github.com/YvesBas/Tadarida-C/blob/master/tadaridaC_src/other_inputs/SpeciesList.csv)
+#args[3]=NA
 args[4]="Esp" #name of taxa column (useless if args[3] is specified)
 args[4]="espece" #name of taxa column (useless if args[3] is specified)
 #args[4]="code_sp" #name of taxa column (useless if args[3] is specified)
 args[5]="bat" #name of taxa group (useless if args[3] is specified)
-DataLoc=F
+DataLoc=F #id location is in the activity table
 args[6]="Group.3" #name of sampling event
 args[7]="carre" #name of locality in CoordSIG (if DataLoc)
 args[8]="id_carre_annee" #name of participation (=sampling event)
 args[9]=T #if date (=day-of-year) is provided or not
 #args[10]="abondance"
-args[10]="nb_contacts"
-#args[6]="longitude_grid_wgs84"
-#args[7]="latitude_grid_wgs84"
+args[10]="nb_contacts" #name of the activity variable
 args[11]=40 #number of coordinates projections (must be a division of 360)
-MinData=1
-GroupSel="bat"
-DM=F
+MinData=1 #data amount threshold under which a species is not considered
+GroupSel="bat" #if you want to select a specific group (NA if no selection)
+#GroupSel=NA
+DM=F #if you want to fit an additionnal model on the time delay after the sunset (or before sunrise)
+Output="./VigieChiro/ModPred" #where to put saved models
 
 #recupération des données chiros
 DataCPL3=fread(paste0(args[1],".csv"))
@@ -108,7 +110,8 @@ test3=apply(test,MARGIN=2,sum)
 plot(test2)
 plot(test3)
 
-CoordPS=subset(CoordPS,test2==0)
+CoordPS[is.na(CoordPS)]=0
+
 testPar=grepl(args[6],names(CoordPS))
 numPar=subset(c(1:length(testPar)),testPar)
 CoordPS$participation=as.data.frame(CoordPS)[,numPar[1]]
@@ -157,7 +160,7 @@ for (i in 1:length(ListSp))
   DataSp=subset(DataCPL3,DataCPL3$espece==ListSp[i])
   
   DataSpSL=merge(DataSp,SelParSL,by="participation")
-  fwrite(DataSpSL,paste0("./VigieChiro/DataSp/DataSpSL_",ListSp[i],".csv"))
+  #fwrite(DataSpSL,paste0("./VigieChiro/DataSp/DataSpSL_",ListSp[i],".csv"))
   
   print(paste(ListSp[i],nrow(DataSp),Sys.time()))
   #subset des données correspondant à l'espèce i
@@ -219,7 +222,9 @@ for (i in 1:length(ListSp))
                                 ,replace=T
                                 ,strata=paste(DataSaison$id_site,DataSaison$localite)
                                 ,importance=T
-                       ,mtry=5) #2.1 sec / tree
+                       ,mtry=5
+                       #,ntree=5
+                       ) #2.1 sec / tree
     Sys.time()
     
     varImpPlot(ModRF,cex=0.5,main=paste("Act",ListSp[i]))
@@ -233,8 +238,8 @@ for (i in 1:length(ListSp))
     test=match(ListSp[i],SpeciesList$Esp)
     Bat=(SpeciesList$Group[test]=="bat")
     
-    save (ModRF,file=paste0("./VigieChiro/ModPred/ModRFActLog_",ListSp[i]
-                            ,substr(args[1],nchar(args[1])-7,nchar(args[1]))
+    save (ModRF,file=paste0(Output,"/ModRFActLog_",ListSp[i]
+                            ,Tag
                             ,".learner")) 
     
     
@@ -258,9 +263,8 @@ for (i in 1:length(ListSp))
     Sys.time()
     #varImpPlot(ModRF_DM,cex=0.5,main=paste("DM",ListSp[i]))
     
-    save (ModRF_DM,file=paste0("./VigieChiro/ModPred/ModRFDecMin_",ListSp[i]
-                               ,substr(args[1],nchar(args[1])-7,nchar(args[1]))
-                               ,".learner")) 
+    save (ModRF_DM,file=paste0(Output,"ModRFDecMin_",ListSp[i]
+                               ,Tag,".learner")) 
     
     #DataSaisonDM$predDM=ModRF_DM$predicted
     #print(spplot(DataSaisonDM,zcol="predDM",main=paste(ListSp[i],"DM")))  
