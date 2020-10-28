@@ -1,114 +1,107 @@
+#new ui
+#authors: Jean-Fran?ois Julien and Yves Bas
+
 # ui.R pour TadaridaShinyVigie-Chiro
+library(ggvis)
 library(shiny)
-shinyUI(pageWithSidebar(
+library(data.table)
 
-  # Application title
-  headerPanel(""),# ("Analyse Tadarida"),
+SpeciesList <- fread("SpeciesList.csv", encoding = "Latin-1")
+SpeciesList$color=factor(SpeciesList$Esp)
+#groupes=unique(SpeciesList$GroupFR)
+especes=unique(SpeciesList$Esp)
 
-  # Sidebar with controls to select parameters to plot, group, species etc.
-  # Note the use of the br()
-  # element to introduce extra vertical spacing
-  sidebarPanel(width = 2,     #choix du paramËtre afficher en ordonnÈe
-               selectInput("paramschoix",
 
-                           label = "Choisissez un param√®tre -> ordonn√©es).",
-                           choices = params,
-                           selected = "frequence_mediane")
-               ,
-               selectInput("idchoix", #groupe ‡ afficher
-                           "Groupe :",
-                           c("Tous",
-                             sort(unique(as.character(AlleYoupi5$groupe))))
-                           ,selected = "Chauve-souris")
-               ,
-               selectInput("especechoix", #espËce ‡ afficher
-                           "Esp√®ce :",
-                           c("Toutes",
-                             sort(unique(as.character(AlleYoupi5$tadarida_taxon)))))
-               ,
-               sliderInput("conf", #sÈlection sur le score de Tadarida
-                           label = "Indice de confiance de l'esp√®ce :",
-                           min = 0, max = 1, value = c(0.5, 1))
-               ,
-               sliderInput("frequence_mediane", #sÈlection sur la frÈquence mÈdiane
-                           label = "Frequence mediane",
-                           min = 0, max = 250, value = c(0, 120))
-               
-               
-               ,
-               selectInput("espececorrige", #choix de validations
-                           "Esp√®ce correction:",
-                           c("Confirme", especes))
-               ,
-               actionButton("submit","Valider") #pour soumettre cette validation
-               ,
-               downloadButton('downloadData', 'Sauver les corrections') #sauver les corrections
-               # # Pour appVigie-Chiro (sorties Tadarida.csv)
-               # sliderInput("confg",
-               # label = "Indice de confiance du groupe :",
-               # min = 0, max = 10, value = c(0, 10)),
-               # sliderInput("nbcris",
-               # label = "Nombre de cris dans le contact :",
-               # min = 0, max = 10, value = c(0, 10)),
-               # sliderInput("buzz",
-               # label = "Indice de buzz :",
-               # min = 0, max = 10, value = c(0, 10)),
-               # sliderInput("social",
-               # label = "Indice de cri social :",
-               # min = 0, max = 10, value = c(0, 10))
-               # ,
-               # downloadButton('downloadData', 'Sauvegarder les contacts modifi√©s')
-               # ,
-               # verbatimTextOutput("rowno")
-  ),
-
-  # Show a tabset that includes a plot and a time slider.
-  mainPanel(
-    tabsetPanel(
-      tabPanel(titre,
-               shiny::column(9,
-                             ggvisOutput("plot")),
-               shiny::column(11, offset = 1,
-                             sliderInput("heures",
-                                         label = paste("Intervalle depuis: ", mintemps, "  jusqu'√† ", maxtemps, sep = ""),
-                                         min = 0, max = 100, value = c(0, 100), width = "89%"))
-              # ,
-               #shiny::column(12,
-                #             sliderInput("frequence_mediane",
+shinyUI(
+  pageWithSidebar(
+    # Application title
+    headerPanel(""),# ("Analyse Tadarida"),
+    # Sidebar with controls to select parameters to plot, group, species etc.
+    # Note the use of the br()
+    # element to introduce extra vertical spacing
+    sidebarPanel(width = 2,     
+                 # Input: Select a file ----
+                 fileInput("fileParticipation", "Importer votre fichier de participation",
+                           multiple = FALSE,
+                           accept = c("text/csv",
+                                      "text/comma-separated-values,text/plain",
+                                      ".csv")),
+                 #textInput("wavdirChoice", "Entrer le chemin d'acc√®s r√©pertoire son"),
+                 actionButton("do", "Valider"),
+                 uiOutput("paramschoix"),
+                 uiOutput("idchoix"),
+                 uiOutput("especechoix"),
+                 sliderInput("conf", #s?lection sur le score de Tadarida
+                             label = "Indice de confiance de l'esp√®ce :",
+                             min = 0, max = 1, value = c(0.5, 1))
+                 ,
+                 sliderInput("frequence_mediane", #s?lection sur la fr?quence m?diane
+                             label = "Frequence mediane",
+                             min = 0, max = 250, value = c(0, 120))
+                 
+                 
+                 ,
+                 #uiOutput("espececorrige")
+                 selectInput("espececorrige", #choix de validations
+                             "Espece correction:",
+                             c(especes))
+                 ,
+                 selectInput("probacorrige", #choix de validations
+                             "Confiance:",
+                             c("POSSIBLE","PROBABLE","SUR"))
+                 ,
+                 actionButton("submit","Valider") #pour soumettre cette validation
+                 ,
+                 downloadButton('downloadData', 'Sauver les corrections') #sauver les corrections
+    ),
+    mainPanel(
+      
+      tabsetPanel(
+        tabPanel("titre",
+                 shiny::column(9,
+                               ggvisOutput("plot")),
+                 shiny::column(11, offset = 1,
+                               uiOutput("heures")),
+                 tableOutput("testStr")
+                 # ,
+                 #shiny::column(12,
+                 #             sliderInput("frequence_mediane",
                  #                     min = 0, max = 130, value = c(0, 130)
-               
-      ),
-
-      tabPanel("Table", dataTableOutput(outputId="table")),
-      tabPanel("Dernier fichier ouvert"
-               ,
-               tableOutput(outputId="table2")
-               ,
-               dataTableOutput(outputId="table3")
-               # ,
-               # wellPanel(
-               # textInput('groupecorrige', "nouveau groupe","")
-               # ,
-               # textInput('espececorrige', "nouvelle esp√®ce","")
-               # ,
-               # actionButton("submit","Valider")
+                 
+        ),
+        
+        tabPanel("Table", dataTableOutput(outputId="table")),
+        tabPanel("Dernier fichier ouvert"
+                 ,
+                 tableOutput(outputId="table2")
+                 ,
+                 dataTableOutput(outputId="table3")
+                 # ,
+                 # wellPanel(
+                 # textInput('groupecorrige', "nouveau groupe","")
+                 # ,
+                 # textInput('espececorrige', "nouvelle esp√®ce","")
+                 # ,
+                 # actionButton("submit","Valider")
+        )
+        # shiny::column(3,
+        # selectInput("groupecorrige",
+        # "Groupe :",
+        # c("Tous",
+        # groupes)))
+        # ,
+        # shiny::column(3, offset = 4,
+        # selectInput("espececorrige",
+        # "Esp√®ce :",
+        # c("Toutes",
+        # colnames(seqScores))))
+        # ,
+        # shiny::column(3, offset = 3,
+        # actionButton("update", "Valider la correction"))
+        #       ,
+        #      tableOutput(outputId="table3")
       )
-      # shiny::column(3,
-      # selectInput("groupecorrige",
-      # "Groupe :",
-      # c("Tous",
-      # groupes)))
-      # ,
-      # shiny::column(3, offset = 4,
-      # selectInput("espececorrige",
-      # "Esp√®ce :",
-      # c("Toutes",
-      # colnames(seqScores))))
-      # ,
-      # shiny::column(3, offset = 3,
-      # actionButton("update", "Valider la correction"))
-      #       ,
-      #      tableOutput(outputId="table3")
+      
     )
-  ))
+  )
 )

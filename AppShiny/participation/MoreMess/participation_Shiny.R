@@ -3,8 +3,9 @@
 #FileParticipation="./VigieChiro/exemples/TP_validationSaintEtienne2001/participation-A-observations.csv"
 AppFolder="C:/Users/Yves Bas/Documents/Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/AppShiny/participation"
 FileParticipation="C:/Users/Yves Bas/Downloads/participation-595f85ae0e7a7c7004056fb0-observations.csv"
+FileParticipation="C:/Users/Yves Bas/Downloads/participation-5f79cde5bf20810010a52fb4-observations.csv"
 Syrinx=F
-packages <- c("dplyr", "ggplot2", "ggvis", "shiny","data.table","lubridate")
+packages <- c("dplyr", "ggplot2", "ggvis", "shiny","data.table","lubridate","clipr")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))
 }
@@ -14,13 +15,18 @@ library(ggvis)
 library(shiny)
 library(data.table)
 library(lubridate)
+library(clipr)
 # options(graphics.record = TRUE)
 # windows(record = TRUE)
 SpeciesList=fread("SpeciesList.csv")
+if(Syrinx){
 wavdir <- choose.dir()
-#wavdir=""
 ConfigSyrinx=fread("exp384.dsp",sep=";")
-#ConfigSyrinx=""
+}else{
+  wavdir=""
+  ConfigSyrinx=""
+  
+}
 ms=4
 
 
