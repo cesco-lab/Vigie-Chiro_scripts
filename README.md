@@ -9,7 +9,7 @@ Website with {pkgdown} for documentation: https://cesco-lab.github.io/Vigie-Chir
 
 ## Summary
 
-The workflows are summarized [here](https://drive.google.com/open?id=1LV-Li36kZvC18UaklBbJp0hjeumf1fCh) (slides 6 to 20)
+The workflows are summarized [here](https://drive.google.com/file/d/1vqO1XifSbj-5rQ11uemK4ghhlfW4XwRn/view?usp=sharing)
 R scripts are colored blue, php scripts in yellow, manually edited inputs in green, and script outputs in white.
 Scripts and files that are consuming a lot of memory are shown in a red box.
 
