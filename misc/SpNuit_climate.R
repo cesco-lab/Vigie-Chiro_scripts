@@ -1,10 +1,11 @@
 library(data.table)
-library(climateExtract)
-library(ncdf4)
-FAct="C:/git/VigieChiro/data/DataRP_SpTron_90.csv"
+#library(climateExtract)
+#library(ncdf4)
+library(RNCEP)
+FAct="C:/wamp64/www/DataRP_SpTron_90.csv"
 #FTempMean="C:/Users/Yves Bas/Downloads/tg_0.25deg_reg_v17.0.nc"
 #AnneeDerniere=2018
-Particip=read.csv2("C:/git/VigieChiro/data/p_export.csv")
+Particip=read.csv2("C:/wamp64/www/VigieChiro/data/p_export.csv")
 SiteLoc=fread("C:/git/VigieChiro/data/sites_localites.txt")
 
 SpNuit=fread(FAct)
