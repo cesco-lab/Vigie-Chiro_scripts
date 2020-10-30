@@ -4,6 +4,7 @@ AnomNCEP=fread("./VigieChiro/Weather/Ano_NCEP.csv")
 Particip=fread("C:/wamp64/www/p_export.csv",encoding="UTF-8")
 SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
 SpNuit=fread("C:/wamp64/www/SpNuit2_50_DataLP_PF_exportTot.csv")
+NCEP=F
 
 
 ListPartPF=levels(as.factor(SpNuit$participation))
@@ -23,8 +24,13 @@ SLPN$Lat25NCEP=(round(SLPN$latitude*0.4)/0.4)
 SLP_C=merge(SLPN,AnomClimate,by.x=c("Long25","Lat25","Nuit")
             ,by.y=c("Long25","Lat25","V3"))
 
+if(NCEP)
+{
 SLP_W=merge(SLP_C,AnomNCEP,by.x=c("Long25NCEP","Lat25NCEP","Nuit")
             ,by.y=c("Long25NCEP","Lat25NCEP","V3"))
+}else{
+  SLP_W=SLP_C
+}
 
 SLP_W$protocoleGroup="PF"
 
@@ -59,9 +65,13 @@ test=subset(SLRP_C,is.na(SLRP_C$TX_0_0))
 
       
       #substr(SLRP_C$Nuit,1,4))
-
+if(NCEP){
+  
 SLRP_W=merge(SLRP_C,AnomNCEP,by.x=c("Long25NCEP","Lat25NCEP","Nuit")
             ,by.y=c("Long25NCEP","Lat25NCEP","V3"),all.x=T)
+}else{
+  SLRP_W=SLRP_C
+}
 
 table((SLRP_W$protocole))
 
@@ -78,5 +88,11 @@ boxplot(SLAll_W$Long25~SLAll_W$protocole,ylim=c(-10,10))
 boxplot(SLAll_W$Lat25~SLAll_W$protocole,ylim=c(40,55))
 summary(is.na(SLAll_W$participation))
 
+if(NCEP)
+{
 fwrite(SLP_W,"./VigieChiro/Weather/SLP_W.csv",sep=";")
 fwrite(SLAll_W,"./VigieChiro/Weather/SLAll_W.csv",sep=";")
+}else{
+  fwrite(SLP_W,"./VigieChiro/Weather/SLP_NETCDF.csv",sep=";")
+  fwrite(SLAll_W,"./VigieChiro/Weather/SLAll_NETCDF.csv",sep=";")
+}
