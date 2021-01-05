@@ -5,10 +5,10 @@ FPF="C:/wamp64/www/SpNuit2_50_DataLP_PF_exportTot.csv"
 #AnneeDerniere=2018
 Particip=fread("C:/wamp64/www/p_export.csv",encoding="UTF-8")
 SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
-Var="TX"
+Var="RR"
 DayWindow=c(99,0)
-LogT=F # to log-transform (e.g. for rainfall) = log(x+1,10)
-Raw=F #to compute raw values instead of anomalies (e.g. for rainfall)
+LogT=T # to log-transform (e.g. for rainfall) = log(x+1,10)
+Raw=T #to compute raw values instead of anomalies (e.g. for rainfall)
 
 
 FLLU=list.files("./VigieChiro/Weather",pattern=paste0(Var,"_LLU"),full.names=T)
