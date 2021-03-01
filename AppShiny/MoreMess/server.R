@@ -7,6 +7,7 @@ library(data.table)
 library(lubridate)
 library(clipr)
 
+options(shiny.maxRequestSize=30*1024^2)
 
 # Define server logic required to draw a scatter plot
 shinyServer(function(input, output,session) {
