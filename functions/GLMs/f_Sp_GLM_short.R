@@ -1,5 +1,4 @@
 test=F
-#adapted from Charlotte Roemer's script
 
 #' a relatively generic function to fit multiple regression with glmmTMB, scaling numeric variables, supporting interactions and conversion of numeric variables to factors
 #' @param dataFile data file location
@@ -18,13 +17,39 @@ test=F
 #' @param output to get a multiple object from the function, by default FALSE
 #' @param doBeep TRUE to do a beep after model fitting
 #' @param printFormula TRUE to print the formula
+#' @param woInt TRUE to suppress the intercept in the model formula
 #' @return write 5 files: (1) a .glm to save model fit in R format; (2) a "XXX_coefs.csv" table giving estimates and vif coefficients of the model; (3) a "XXX.log" to keep track of the formula of the model; (4) a "XXX_Res.csv" a table giving the residuals value; (5) a "forBackTransform_XXX.csv" table giving the mean and standard deviation value of numeric explanatory variables, to allow back transformation to real values when predicting
 #' @example see at the end of this code
-#' @author Yves Bas & Romain Lorrilliere
-Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
-                      ,formulaRandom="+1",selSample=1e10,tagModel=""
-                      ,family="nbinom2",asfactor=NA,
-                      data=NULL,repout=NULL,checkRepout=TRUE,saveFig=FALSE,output=FALSE,doBeep=TRUE,printFormula=TRUE)
+#' @author Yves Bas, Charlotte Roemer and Romain Lorrilliere
+Sp_GLM_short=function(dataFile,varInterest,listEffects,
+                      interactions=NA
+                      ,
+                      formulaRandom="+1"
+                      ,
+                      selSample=1e10
+                      ,
+                      tagModel=""
+                      ,
+                      family="nbinom2"
+                      ,
+                      asfactor=NA
+                      ,
+                      data=NULL
+                      ,
+                      repout=NULL
+                      ,
+                      checkRepout=TRUE
+                      ,
+                      saveFig=FALSE
+                      ,
+                      output=FALSE
+                      ,
+                      doBeep=TRUE
+                      ,
+                      printFormula=TRUE
+                      ,
+                      woInt=F
+                      )
 {
 
   library(data.table)
@@ -57,7 +82,13 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
   familyMod=family
   ## Modèle minimal
   ##FormulaFix_TtSp="nb_contacts~(Jour+I(Jour^2)+I(Jour^3)+I(Jour^4)+I(Jour^5))*DecOT+(AT81+I(AT81^2))+((AT1+I(AT1^2))+(AT9+I(AT9^2)))+SpBioc12+SpHO1S+SpHO2S+SpHO4S+SpWS_S+SpWC_S"
-  FormulaY=paste0(VarAbondance,"~1")
+  if(woInt)
+  {
+  FormulaY=paste0(VarAbondance,"~-1")
+  }else{
+    FormulaY=paste0(VarAbondance,"~1")
+    
+  }
   FormulaXList=VarSimple
 
   ##pour afficher les milisecondes
@@ -89,7 +120,7 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
   {
     FormulaFix_TtSp=paste(FormulaFix_TtSp,FormulaXList[i],sep="+")
   }
-  if(!is.na(Interactions))
+  if(!is.na(Interactions[1]))
   {
     for (i in 1:length(Interactions))
     {
@@ -101,8 +132,12 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     }
   }
 
-  if(is.null(data)) SpNuit=fread(FAct) else SpNuit <- data
-
+  if(is.null(data)) 
+    {
+    SpNuit=fread(FAct) 
+    }else{
+    SpNuit <- data
+}
 
   if(!is.na(asfactor))
   {
@@ -193,9 +228,9 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
 
     SpNuit_SLPAGN=as.data.frame(SpNuitwoNA)
 
-    OtherVariables=subset(names(SpNuit),!(names(SpNuit) %in% VarSimple))
+    #OtherVariables=subset(names(SpNuit),!(names(SpNuit) %in% VarSimple))
 
-    SpNuit_Scale=subset(SpNuit_SLPAGN,select=OtherVariables)
+    SpNuit_Scale=SpNuit_SLPAGN
 
 
     Mean=vector()
@@ -210,16 +245,17 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     for (i in 1:length(VarSimple))
     {
       cat(i,"")
-      if(substr(VarSimple[i],1,5)=="poly(")
+      if(grepl("^",VarSimple[i]))
       {
-        Var=gsub("poly","",VarSimple[i])
-        Terms=tstrsplit(Var,split=",")
-        VarTemp=substr(Terms[[1]],2,nchar(Terms[[1]]))
-      }else{
+        #Var=gsub("poly","",VarSimple[i])
+        #Terms=tstrsplit(Var,split=",")
+        #VarTemp=substr(Terms[[1]],2,nchar(Terms[[1]]))
+        VarTemp=tstrsplit(VarSimple[i],split="\\+")[[1]]
+        }else{
         VarTemp=VarSimple[i]
       }
       VarList=c(VarList,VarTemp)
-      Vinit=(SpNuit_SLPAGN)[,VarTemp]
+      Vinit=SpNuit_SLPAGN[,VarTemp]
       if(is.numeric(Vinit))
       {
 
@@ -231,6 +267,7 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
         Mean=c(Mean,NA)
         Sdev=c(Sdev,NA)
       }
+      SpNuit_Scale[,VarTemp]=NULL
       SpNuit_Scale=cbind(SpNuit_Scale,Vscale)
       names(SpNuit_Scale)[ncol(SpNuit_Scale)]=VarTemp
       if(i%%10==1 & i != 1){
@@ -251,7 +288,7 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     cat("      ", format(end, "%d-%m-%Y %HH%M")," -> ",diff,"\n\n")
 
     forBackTransform=data.frame(cbind(VarList,Mean,Sdev))
-
+    forBackTransform=unique(forBackTransform,by="VarList")
 
     csvfile <- paste0(repoutBackTransform,TagModel,".csv")
     cat("  --> [CSV]:",csvfile)
@@ -261,20 +298,20 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     ColNumTest=unlist(lapply(SpNuit_Scale[1,],FUN=function(x) is.numeric(x)))
     ColNum=subset(names(SpNuit_Scale),ColNumTest)
     SpNuit_ColNum=subset(SpNuit_Scale,select=ColNum)
-    MatCor=cor(SpNuit_ColNum)
+    #MatCor=cor(SpNuit_ColNum)
 
 
-    if(saveFig){
-      pngfile <- paste0(repfig,"corrplot","_",tagModel,".png")
-      cat("  --> [PNG]:",pngfile)
-      png(pngfile)
-    }
-    corrplot(MatCor)
-    if(saveFig){
-      dev.off()
-      cat("    DONE !\n")
+    #if(saveFig){
+    #  pngfile <- paste0(repfig,"corrplot","_",tagModel,".png")
+     # cat("  --> [PNG]:",pngfile)
+      #png(pngfile)
+    #}
+    #corrplot(MatCor)
+    #if(saveFig){
+     # dev.off()
+      #cat("    DONE !\n")
 
-    }
+    #}
 
     Formula=as.formula(paste0(FormulaFix_TtSp
                               ,FormulaRandom))
@@ -290,7 +327,7 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     start <- Sys.time() ## heure de demarage
     cat("  ",format(start, "%d-%m-%Y %HH%M"),"  ...  ")
 
-    if(printFormula) cat("\nglmmTMB(Formula= ",as.character(Formula)[2]," ",as.character(Formula)[1]," ",as.character(Formula)[3],", familiy= ",familyMod,")\n",sep="")
+    if(printFormula) cat("\nglmmTMB(Formula= ",as.character(Formula)[2]," ",as.character(Formula)[1]," ",as.character(Formula)[3],", family= ",familyMod,")\n",sep="")
 
 
 
@@ -338,10 +375,21 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,interactions=NA
     save(ModSp,file=glmfile)
     cat("    DONE !\n")
 
-    VIFMod=c(1,vif.mer(ModSp))
+    if(woInt)
+    {
+    VIFMod=vif.mer(ModSp)
+    }else{
+      VIFMod=c(1,vif.mer(ModSp))
+      
+    }
     Estimates$VIF=VIFMod
 
-    Suffix=tstrsplit(basename(as.character(FAct)),split="[.]")[[1]]
+    if(FAct!="")
+      {
+      Suffix=tstrsplit(basename(as.character(FAct)),split="[.]")[[1]]
+    }else{
+      Suffix=tagModel
+    }
 
     csvfile <- paste0(repoutSummary,TagModel,"_",Suffix,"_Coefs.csv")
     cat("  --> [CSV]:",csvfile)
