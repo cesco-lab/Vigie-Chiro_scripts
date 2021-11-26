@@ -341,7 +341,12 @@ main.glm <- function(id=NULL
           
             myListEffect = VarEffect
           if(without_exp | without_direct) myListEffect <- setdiff(myListEffect,"expansion_direct")
-          md_c <- try(Sp_GLM_short(dataFile=id,varInterest=col_nbcontact
+          if(length(unique(d$mat))==1){myListEffect <- setdiff(myListEffect,"mat")}
+            #myListEffect <- setdiff(myListEffect,"SpBioC1")
+            #myListEffect <- setdiff(myListEffect,"SpBioC12")
+            if(length(unique(d$NWN_NCEP_0_0))==1){myListEffect <- setdiff(myListEffect,"NWM_NCEP_0_0")}
+            
+            md_c <- try(Sp_GLM_short(dataFile=id,varInterest=col_nbcontact
                                    ,listEffects=myListEffect,interactions=NA
                                    ,formulaRandom=RandomTerm
                                    ,selSample=1e10

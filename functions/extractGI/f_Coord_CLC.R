@@ -8,8 +8,15 @@ library(sp)
 library(raster)
 library(maptools)
 library(rgeos)
-  FOccSL=points
-  OccSL=fread(paste0(FOccSL,".csv"))
+  if(grepl(".csv",points))
+  {
+    FOccSL=points
+    
+  }else{
+    FOccSL=paste0(points,".csv")    
+  }
+    
+  OccSL=fread(FOccSL)
   CoordH=names_coord
   #library(Rnightlights)
   BufferMedium=bm
@@ -229,7 +236,7 @@ CLC=data.frame(cbind(coordinates(OccSL),as.data.frame(OccSL_ARajouter)))
 #{
 #  NewName=paste0(FOccSL,"_CLC_",Start,"_",End,".csv")
 #}else{
-NewName=paste0(FOccSL,"_CLC.csv")
+NewName=paste0(gsub(".csv","",FOccSL),"_CLC.csv")
 #}
 fwrite(CLC,NewName)
 
@@ -245,8 +252,8 @@ if(Test)
 {
 #for testing
 Coord_CLC(
-  points="./vigiechiro/GIS/PA_Thymus nitens" #table giving coordinates in WGS84
-  ,names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving 
+  points="SysGrid__10.csv" #table giving coordinates in WGS84
+  ,names_coord=c("Group.1","Group.2") #vector of two values giving 
   ,bm=500
   ,bl=5000
   ,layer="C:/Users/Yves Bas/Downloads/CLC/CLC12_FR_RGF.shp"

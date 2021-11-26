@@ -6,7 +6,7 @@ library(FNN)
 PartSelG=fread("PartSelG.csv")
 Zone="C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp"
 Sample=10000
-SelDep=F
+SelDep=T
 Dep=c("11","30","34","48","66") #LR
 ExclDep=T
 DepE=c("76","14","50","61","27","29","56","22","35","59","62","08","10","51"

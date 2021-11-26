@@ -1,3 +1,7 @@
+test=F
+
+if(exists("Pipeline")){test=F}
+
 combineGIS=function(points,names_coord,layerlist)
 {
 library(data.table)
@@ -17,6 +21,8 @@ for (i in 1:length(listGI))
 {
   tab2=fread(paste0(Points,"_",listGI[i],".csv"))
   tab2=unique(tab2,by=Coord)
+  NamesToKeep=subset(names(tab2),!(names(tab2) %in% names(tab1)))
+  tab2=subset(tab2,select=c(NamesToKeep,Coord))
   tab1=merge(tab1,tab2,by=Coord)
 }
 
@@ -25,4 +31,16 @@ coordinates(tab1)=Coord
 SelCol=sample(names(tab1),1)
 spplot(tab1,zcol=SelCol,main=SelCol)
 
+}
+
+if(test)
+{
+  combineGIS(
+    points="PrioCoord_2020-02-20_Fulica_cristata"
+    ,
+    names_coord=c("decimalLongitude","decimalLatitude")
+    ,
+    layerlist=c("Bioclim","ALAN","CLCraster")
+    )
+    
 }

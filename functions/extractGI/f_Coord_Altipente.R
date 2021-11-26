@@ -3,8 +3,11 @@
 ##########INPUTS################
 # points = the name of csv, with its path -> randomized (RandXXX) or non-randomized (SysSampleXXX) sampling points OR participation points (CoordWGS84)
 
-
 Test=T
+
+if(exists("Pipeline")){Test=F}
+
+
 Coord_Alti=function(points,names_coord,bm,bl,layer)
 {
   library(data.table)
@@ -63,6 +66,7 @@ Coord_Alti=function(points,names_coord,bm,bl,layer)
   #######
   Sys.time()
   SpAltiM=extract(AltiTot,OccSL_L93,buffer=BufferMedium,fun=mean) # 0.01 sec / points
+  SpAltiM[is.na(SpAltiM)]=0
   OccSL=spCbind(OccSL,SpAltiM)
   spplot(OccSL,zcol="SpAltiM",main="SpAltiM")
   
@@ -71,6 +75,8 @@ Coord_Alti=function(points,names_coord,bm,bl,layer)
   #######
   Sys.time()
   SpAltiL=extract(AltiTot,OccSL_L93,buffer=BufferLarge,fun=mean) # 0.02 sec / points
+  SpAltiM[is.na(SpAltiM)]=0
+  
   Sys.time()
   
   OccSL=spCbind(OccSL,SpAltiL)
@@ -86,6 +92,12 @@ Coord_Alti=function(points,names_coord,bm,bl,layer)
   
   
   Coord=as.data.frame(OccSL_L93) #extraire les colonnes x, Group1 et Group2
+  Coord$Group.1=as.data.frame(subset(Coord
+                                     ,select=names_coord[1]))[,1]
+  Coord$Group.2=as.data.frame(subset(Coord
+                                     ,select=names_coord[2]))[,1]
+  
+  
   ListePointCard=data.frame()
   for (k in 1:nrow(Coord)){
     
@@ -97,13 +109,14 @@ Coord_Alti=function(points,names_coord,bm,bl,layer)
     ListePointCard=rbind(ListePointCard,PointsCard)
   }
   
-  coordinates(ListePointCard) <- CoordH
+  coordinates(ListePointCard) <- c("Group.1","Group.2")
   proj4string(ListePointCard) <- CRS("+init=epsg:2154")
   
   #######
   #Buffer S
   #######
   AltiListePointCard=extract(AltiTot,ListePointCard) #liste altitudes des points Cardinaux
+  AltiListePointCard[is.na(AltiListePointCard)]=0
   
   #calcul de la SpPen maximale (en degr�)
   SpPenS=vector()
@@ -139,11 +152,12 @@ Coord_Alti=function(points,names_coord,bm,bl,layer)
     PointsCard=data.frame(x,Group.1,Group.2)
     ListePointCard=rbind(ListePointCard,PointsCard)
   }
-  coordinates(ListePointCard) <- CoordH
+  coordinates(ListePointCard) <- c("Group.1","Group.2")
   proj4string(ListePointCard) <- CRS("+init=epsg:2154")
   
   
   AltiListePointCard=extract(AltiTot,ListePointCard)
+  
   for (z in 1:length(AltiListePointCard))
   {
   if(is.na(AltiListePointCard[z]))
@@ -151,6 +165,7 @@ Coord_Alti=function(points,names_coord,bm,bl,layer)
     AltiListePointCard[z]=SpAltiS[floor(z/8)+1]
   }
   }
+  AltiListePointCard[is.na(AltiListePointCard)]=0
   
   #calcul de la SpPen maximale (en degr�)
   SpPenM=vector()
@@ -187,11 +202,12 @@ Coord_Alti=function(points,names_coord,bm,bl,layer)
     PointsCard=data.frame(x,Group.1,Group.2)
     ListePointCard=rbind(ListePointCard,PointsCard)
   }
-  coordinates(ListePointCard) <- CoordH
+  coordinates(ListePointCard) <- c("Group.1","Group.2")
   proj4string(ListePointCard) <- CRS("+init=epsg:2154")
   
   
   AltiListePointCard=extract(AltiTot,ListePointCard)
+  
   for (z in 1:length(AltiListePointCard))
   {
     if(is.na(AltiListePointCard[z]))
@@ -199,6 +215,7 @@ Coord_Alti=function(points,names_coord,bm,bl,layer)
       AltiListePointCard[z]=SpAltiS[floor(z/8)+1]
     }
   }
+  AltiListePointCard[is.na(AltiListePointCard)]=0
   
   
   #calcul de la SpPen maximale (en degr�)
@@ -246,14 +263,17 @@ if(Test)
 {
   #for test
   Coord_Alti(
-    points="./VigieChiro/GIS/SysGrid__1000" #table giving coordinates in WGS84
+    #points="./VigieChiro/GIS/SysGrid__1000" #table giving coordinates in WGS84
+    points="C:/wamp64/www/sites_localites" #table giving coordinates in WGS84
     ,
-    names_coord=c("Group.1","Group.2") #vector of two values giving 
-    ,
+    #names_coord=c("Group.1","Group.2") #vector of two values giving 
+    names_coord=c("longitude","latitude") #vector of two values giving 
+    
+      ,
     bm=500 #range of first buffer in meters
     ,
     bl=5000 #range of second buffer in meters  
     ,
-    layer="C:/wamp64/www/BDALTIV2_MNT_75M_ASC_LAMB93_IGN69_FRANCE"
-    )
+    layer="E:/BDALTI/BDALTIV2_2-0_75M_ASC_LAMB93-IGN69_FRANCE_2018-01-15/BDALTIV2/1_DONNEES_LIVRAISON_2018-01-00245/BDALTIV2_MNT_75M_ASC_LAMB93_IGN69_FRANCE"
+  )
 }

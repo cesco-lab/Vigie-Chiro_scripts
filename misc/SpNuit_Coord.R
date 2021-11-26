@@ -13,7 +13,7 @@ Particip=fread("C:/wamp64/www/p_export.csv")
 #récupération des localités
 SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
 
-args="SpNuit2_50_DataLP_PF_exportTot"
+args="C:/wamp64/www/SpNuit2_50_DataLP_PF_exportTot"
 #args="ALL"
 
 if(args=="ALL")
@@ -34,5 +34,5 @@ CoordCPL3=aggregate(SelParSL$participation
                 ,by=c(list(SelParSL$longitude),list(SelParSL$latitude))
                 ,FUN=length)
 
-fwrite(CoordCPL3,paste0("./VigieChiro/GIS/coordWGS84_",args,".csv"))
+fwrite(CoordCPL3,paste0("./VigieChiro/GIS/coordWGS84_",basename(args),".csv"))
 

@@ -30,9 +30,9 @@ gbif_listsp=function(countrylist,group,rank){
   #{
   #for (i in 1:nrow(Group))
   #{
-   # #NOcc[i]=NOcc[i]+occ_count(taxonKey=Group$key[i], country=CountryFilter[1])
-    #NOcc=c(NOcc,occ_count(taxonKey=Group$key[i], country=CountryFilter[1]))
-    #if(i%%1000==1){print(paste(i,nrow(Group),Sys.time()))}
+  # #NOcc[i]=NOcc[i]+occ_count(taxonKey=Group$key[i], country=CountryFilter[1])
+  #NOcc=c(NOcc,occ_count(taxonKey=Group$key[i], country=CountryFilter[1]))
+  #if(i%%1000==1){print(paste(i,nrow(Group),Sys.time()))}
   #}
   
   #}
@@ -47,6 +47,7 @@ gbif_listsp=function(countrylist,group,rank){
   }else{
     Kids_sp=Kids
   }
+  print(GroupName)
   print("number of species:")
   print(nrow(Kids_sp))
   
@@ -57,8 +58,10 @@ gbif_listsp=function(countrylist,group,rank){
   {
     for (i in 1:nrow(Kids_sp)) #1000 species per minute
     {
-      Ndata=occ_count(taxonKey = Kids_sp$key[i], country=CountryFilter[h]
-                      ,georeferenced=T)
+      Ndata=occ_count(taxonKey = Kids_sp$key[i]
+                      , country=CountryFilter[h]
+                      #,georeferenced=T
+      )
       Ntot=c(Ntot,Ndata)
       country=c(country,CountryFilter[h])
       species=c(species,Kids_sp$canonicalName[i])

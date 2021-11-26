@@ -68,11 +68,18 @@ if(Test)
 {
 #for test
 Coord_Alti(
-  points="./vigiechiro/GIS/PA_Thymus nitens" #table giving coordinates in WGS84
-  ,names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving 
-  ,bm=500 #range of first buffer in meters
-  ,bl=5000 #range of second buffer in meters  
-  ,layer="C:/wamp64/www/BDALTIV2_MNT_75M_ASC_LAMB93_IGN69_FRANCE"
+  #points="./vigiechiro/GIS/PA_Thymus nitens" #table giving coordinates in WGS84
+  points="C:/wamp64/www/sites_localites" #table giving coordinates in WGS84
+  
+  ,
+  #names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving 
+  names_coord=c("longitude","latitude") #vector of two values giving 
+  ,
+  bm=500 #range of first buffer in meters
+  ,
+  bl=5000 #range of second buffer in meters  
+  ,
+  layer="E:/BDALTI/BDALTIV2_2-0_75M_ASC_LAMB93-IGN69_FRANCE_2018-01-15/BDALTIV2/1_DONNEES_LIVRAISON_2018-01-00245/BDALTIV2_MNT_75M_ASC_LAMB93_IGN69_FRANCE"
 )
 
 }

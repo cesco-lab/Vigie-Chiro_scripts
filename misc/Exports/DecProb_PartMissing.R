@@ -1,0 +1,16 @@
+library(data.table)
+library(lubridate)
+Particip=fread("C:/wamp64/www/p_export.csv")
+Data=fread("C:/wamp64/www/DecProb.csv")
+
+Particip$Export=(Particip$participation %in% Data$Group.1)
+summary(Particip$Export)
+Particip$Data=Particip$nb_don>0
+table(Particip$Export,Particip$Data)
+Particip$DataMissing=(!Particip$Export&Particip$Data)
+summary(Particip$DataMissing)
+Particip$JourTraitement=as.Date(dmy_hm(Particip$trait_debut))
+plot(Particip$JourTraitement,Particip$DataMissing)
+table(Particip$JourTraitement,Particip$DataMissing)
+fwrite(as.data.frame(dcast(Particip$JourTraitement~Particip$DataMissing))
+       ,"test.csv",sep=";")

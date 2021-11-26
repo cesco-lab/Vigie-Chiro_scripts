@@ -1,8 +1,8 @@
 library(data.table)
 library(sp)
 library(raster)
-GroupName="POACEAE"
-SpTarget="Phyllostachys nigra"
+GroupName="MAMMALIA"
+SpTarget="Dama dama"
 LimitF="C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp"
 
 ListGroup=list.files("./VigieChiro/gbifData/DataGroup",pattern=GroupName

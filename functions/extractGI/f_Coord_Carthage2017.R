@@ -1,4 +1,7 @@
 Test=T
+
+if(exists("Pipeline")){Test=F}
+
 Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
 {
   
@@ -39,9 +42,14 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
   #coordinates(OccSL) <- c("decimalLongitude", "decimalLatitude")
   coordinates(OccSL) <- CoordH
   proj4string(OccSL) <- CRS("+init=epsg:4326") # WGS 84
-  
+  proj4string(CarthageP) <- CRS("+init=epsg:4326") # WGS 84
+  proj4string(CarthageC) <- CRS("+init=epsg:4326") # WGS 84
+  CarthageP=spTransform(CarthageP,CRS("+init=epsg:2154"))
+  CarthageC=spTransform(CarthageC,CRS("+init=epsg:2154"))
+    
   #CRS.new <- CRS(proj4string(CarthageP))
-  OccSL_L93=spTransform(OccSL,CRS(proj4string(CarthageC)))
+  #OccSL_L93=spTransform(OccSL,CRS(proj4string(CarthageC)))
+  OccSL_L93=spTransform(OccSL,CRS("+init=epsg:2154"))
   
   #subset des points d'eau douce
   #CarthagePP=CarthageP[CarthageP$NATURE=="Eau douce permanente",]
@@ -92,7 +100,7 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
                         ,FUN=function(x) sum(x)/BufferSmall^2/pi)
       names(AreaAgg)[ncol(AreaAgg)]="SpWS_S"
       Sys.time()
-      OccSL_L93PP=merge(OccSL_L93,AreaAgg,by.x="id",by.y="Group.1",all.x=T)
+      OccSL_L93PP=merge(OccSL_L93PP,AreaAgg,by.x="id",by.y="Group.1",all.x=T)
       OccSL_L93PP$SpWS_S[is.na(OccSL_L93PP$SpWS_S)]=0
       spplot(OccSL_L93PP,zcol="SpWS_S",col="transparent")
       
@@ -302,10 +310,12 @@ if(Test)
 {
   #for testing
   Coord_Carthage(
-    points="./Vigiechiro/GIS/SysGrid__3e+05" #table giving coordinates in WGS84
+    #points="./Vigiechiro/GIS/SysGrid__3e+05" #table giving coordinates in WGS84
+    points="C:/wamp64/www/sites_localites" #table giving coordinates in WGS84
     ,
     #  names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving 
-    names_coord=c("Group.1","Group.2") #vector of two values giving 
+    #names_coord=c("Group.1","Group.2") #vector of two values giving 
+    names_coord=c("longitude","latitude") #vector of two values giving 
     
     ,
     bs=50

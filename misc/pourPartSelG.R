@@ -1,8 +1,8 @@
 library(data.table)
 #récupération des données participation
-Particip=fread("C:/wamp64/www/p_export.csv")
+Particip=fread("./www/p_export.csv")
 #récupération des localités
-SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
+SiteLoc=fread("./www/sites_localites.txt")
 FiltConfid=F
 if(FiltConfid)
 {

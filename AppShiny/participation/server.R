@@ -17,7 +17,8 @@ shinyServer(function(input, output,session) {
     donneesParticipation <- reactive({
       ms = 4
       SpeciesList <- fread("SpeciesList.csv", encoding = "Latin-1")
-      SpeciesList$color=factor(SpeciesList$Esp)
+      SpeciesList$color=factor(SpeciesList$Couleur)
+      SpeciesList$shpe=factor(SpeciesList$Forme)
       groupes=unique(SpeciesList$GroupFR)
       especes=unique(SpeciesList$Esp)
       infile <- input$fileParticipation
@@ -39,7 +40,9 @@ shinyServer(function(input, output,session) {
       AlleYoupi5$duree_sequence=AlleYoupi5$temps_fin-AlleYoupi5$temps_debut
       test=match(AlleYoupi5$tadarida_taxon,SpeciesList$Esp)
       AlleYoupi5$groupe=SpeciesList$GroupFR[test]
+      AlleYoupi5$label=SpeciesList$Esp[test]
       AlleYoupi5$color=SpeciesList$color[test]
+      AlleYoupi5$shpe=SpeciesList$shpe[test]
       params <- c("frequence_mediane", "duree_sequence","temps_debut", "temps_fin")
       AlleYoupi5=as.data.frame(AlleYoupi5)
       AlleYoupi7 <- AlleYoupi5 #tableau avec validations ? sauver
@@ -151,13 +154,16 @@ shinyServer(function(input, output,session) {
       sp() %>%
         ggvis(~DateHeure, ~parametre, key:= ~Affiche) %>%
         
-        layer_points(size = ~tadarida_probabilite*20, fill = ~color, stroke = 1, shape = ~color) %>%
+        layer_points(size = ~tadarida_probabilite*20, fill = ~color, stroke = 1, shape = ~shpe) %>%
         #layer_points(size = ~tadarida_probabilite*2, fill = ~factor(tadarida_taxon), stroke = 1) %>%
         set_options(width = 820, height = 540, padding = padding(5, 90, 40, 120)) %>%
         hide_legend("stroke") %>%
         hide_legend("size") %>%
-        add_legend(c("shape","fill"),
-                   title = "Especes") %>% #l?gende des formes/groupes
+        add_legend(
+      c("fill","shape"),
+                  title = "Especes"
+                   #,values=label
+                   )    %>% #l?gende des formes/groupes
         hide_legend("size") %>%
         add_tooltip(function(data){
           soundexe <- paste(unlist(strsplit(data$Affiche, " ")[1])[1], ".wav", sep="");

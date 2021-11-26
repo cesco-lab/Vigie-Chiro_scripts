@@ -1,16 +1,15 @@
+library(data.table)
 #A EDITER en fonction de la localisation des fichiers .tc
 #TC_path="C:/Users/Yves Bas/Documents/txt"
 #get arguments from the command line
 args <- commandArgs(trailingOnly = TRUE)
 #uncomment the following line if you prefer to do not use R in command line
-#args="C:/Users/yves/Downloads/TC - nuit_du_13-08-2017_au_14-08-2017"
 if(length(args)==0){
-  print("usage: Rscript TadaridaC.r <directory>")
-  q()
+  args="D:/DataTestVeolia/nuit_du_23-06-2019_au_24-06-2019"
+  #q()
 }
 TC_path=args[1]
-library(data.table)
-Ref_coef=fread("RefPF_Coef.csv")
+Ref_coef=fread("RefPF_Coef (5).csv")
 DataCalibr=fread("DataCalibr.csv")
 
 alogit <- function(x) 
@@ -46,7 +45,7 @@ if(nrow(SpMax3)==0)
 
   test2=match(levels(as.factor(SpMax3$Id)),Sub_Ref_coef$Code)
   
-  
+fwrite(Sub_Ref_coef,"/log0.csv",sep=";")
   
 if (exists("DataInd")){rm(DataInd)}
 ListSp=vector()  
@@ -64,12 +63,17 @@ for (i in 1:nlevels(as.factor(SpMax3$Id)))
   AbBrute=c(AbBrute,nrow(Datasub))
   if (exists("DataInd")){DataInd=rbind(DataInd,cbind(Ind_S,Ind_L,Ind_A,Ind_E,AbStand))}else{DataInd=cbind(Ind_S,Ind_L,Ind_A,Ind_E,AbStand)}
   print(paste(levels(as.factor(SpMax3$Id))[i],nrow(Datasub),Ind_S,Ind_L,Ind_A,Ind_E,AbStand))
-  }
+}
+
+fwrite(DataInd,"/log1.csv",sep=";")
+
 
 DataInd[is.na(DataInd)]=0
 DataInd=as.data.frame(DataInd)
 DataInd=subset(DataInd,(DataInd$AbStand!=Inf)&(DataInd$AbStand>0))
 
+fwrite(DataInd,"/log2.csv",sep=";")
+fwrite(DataCalibr,"/log3.csv",sep=";")
 
 
   Indicateur_Spec=alogit(((sum(DataInd[,1])/sum(DataInd[,5]))-DataCalibr[1,1])/DataCalibr[1,2])*20

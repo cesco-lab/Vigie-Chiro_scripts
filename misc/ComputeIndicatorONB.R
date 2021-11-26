@@ -1,15 +1,18 @@
 library(data.table)
+
 SpeciesIndicator=c("Pippip","Pipkuh","Nycnoc","Nyclei","Eptser","Myospp"
-                   ,"Pippyg","Barbar","Pipnat","Pleaur"
-                   ,"Pleaus","Hypsav")
+                   ,"Pipnat","Pippyg","Hypsav","Barbar","Plespp") #bats
 
 #SpeciesIndicator=c("Tetvir","Rusnit","Leppun","Phanan","Phogri","Plaalb"
-#                  ,"Testes","Phafal")
+ #                 ,"Testes","Phafal"
+  #                ,"Cyrscu","Epheph","Isopyr","Roeroe","Urosp","Yerray") #bush-crickets
 Weight=T
 #SpeciesWeights=fread("NDataSp.csv")
 SpeciesWeights=fread("SynthesesTendances_bat.csv")
+#SpeciesWeights=fread("SynthesesTendances_bush-cricket.csv")
 ColW="vif_mean"
-AT=fread("./output/AT_BonTron_log1.csv")
+AT=fread("./output/AT_MAJ200515Total.csv")
+AT$espece=tstrsplit(AT$espece,split="_")[[2]]
 
 gm_mean = function(x, na.rm=TRUE){
   exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
@@ -104,6 +107,7 @@ ATcast=dcast(data=ATind,yearMean~espece,fun.aggregate=mean
              ,value.var = "StandEstimates")
 
 plot(ATcast$yearMean,as.data.frame(ATcast)[,2],type="l",ylim=c(0,2))
+
 for (z in 2:(ncol(ATcast)-1))
 {
   lines(ATcast$yearMean,as.data.frame(ATcast)[,z+1],col=z) 
@@ -196,12 +200,28 @@ LowInt=apply(BS_Indicator[,2:ncol(BS_Indicator)],MARGIN=1
              ,FUN=function(x) quantile(x,0.025))
 UpInt=apply(BS_Indicator[,2:ncol(BS_Indicator)],MARGIN=1
              ,FUN=function(x) quantile(x,0.975))
+MedInt=apply(BS_Indicator[,2:ncol(BS_Indicator)],MARGIN=1
+             ,FUN=function(x) quantile(x,0.5))
+
+
 
 
 RawIndicator$LowInt=LowInt
 RawIndicator$UpInt=UpInt
-plot(RawIndicator$year,WeightedIndicator,type="l",ylim=c(0,2))
+plot(RawIndicator$year,MedInt,type="l",ylim=c(0,2))
 lines(RawIndicator$year,RawIndicator$UpInt,lty=2)
 lines(RawIndicator$year,RawIndicator$LowInt,lty=2)
 abline(1,0,col=2)
+
+gg=ggplot(RawIndicator,aes(year,MedInt))+
+  geom_line()+
+  geom_pointrange(aes(ymin=LowInt, ymax=pmin(UpInt)))+
+  ylim(0,max(UpInt))+
+  ggtitle("Indicateur ONB Chiroptères")+
+  labs(x="Année",y="")
+
+print(gg)
+
+
+
 fwrite(RawIndicator,paste0("IndicatorForONB_",Sys.Date(),".csv"),sep=";")

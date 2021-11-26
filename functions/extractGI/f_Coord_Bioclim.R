@@ -1,4 +1,8 @@
 test=T
+
+if(exists("Pipeline")){test=F}
+
+library(raster)
 #'  Get bioclim data at given locations
 #'
 #' The function takes a observation points and a raster with climatic variables.
@@ -37,14 +41,51 @@ extract_clim <- function (pts = NULL, longlat = c("long", "lat"),
   message("Be careful, the function assumes that coordinates of pts are in WGS 84 projection")
   #stopifnot(sp::proj4string(clim) == sp::proj4string(pts)) #weird stuff about proj4string being different despite being the same CRS
   
+  #subset points within the clim data
+  pts=crop(pts,bbox(clim))
+  
   # Extract relevant clim data
   clim_pts <- raster::extract(clim, pts, df = TRUE)
+    
+  # Rm NA from clim 
+test=sum(is.na(clim_pts))
+for (i in 1:nrow(clim_pts))
+{
+  if(is.na(clim_pts[i,2]))
+  {
+    Good=0
+    jitter=0
+    while(Good==0)
+    {
+    jitter=jitter+0.01
+      newpoints=pts[i,]
+    newpoints=rbind(newpoints,newpoints,newpoints,newpoints)
+    #
+    ToModify=coordinates(newpoints)
+    ToModify[1,1]=coordinates(pts)[i,1]+jitter
+    ToModify[2,1]=coordinates(pts)[i,1]-jitter
+    ToModify[3,2]=coordinates(pts)[i,2]+jitter
+    ToModify[4,2]=coordinates(pts)[i,2]-jitter
+    newpoints=as.data.frame(newpoints)
+        coordinates(newpoints)=ToModify
+    clim_new <- raster::extract(clim, newpoints, df = TRUE)
+    climNonNA=subset(clim_new,!is.na(clim_new$layer.1))
+    if(nrow(climNonNA)>0)
+    {
+      clim_pts[i,]=climNonNA[1,]
+      Good=1
+    }
+      print(jitter)
+    }
+  }
+}
+  test=sum(is.na(clim_pts))
+  
   clim_pts$ID <- NULL
   
-  # Rm NA from clim 
-  clim_na_mask <- rowSums(is.na(clim_pts)) == 0
-  pts <- pts[clim_na_mask, ]
-  clim_pts <- clim_pts[clim_na_mask, , drop = FALSE]
+  #clim_na_mask <- rowSums(is.na(clim_pts)) == 0
+  #pts <- pts[clim_na_mask, ]
+  #clim_pts <- clim_pts[clim_na_mask, , drop = FALSE]
   
   # Prepare output:
   
@@ -155,15 +196,16 @@ if(test)
     ,
     clim=get_fr_worldclim_data()
     ,
-    #pts = "PrioCoord_2020-03-07_Tetraena_gaetula.csv"
-    #pts = "./VigieChiro/GIS/coordWGS84_SpNuit2_50_DataLP_PF_exportTot.csv"
-    pts = "C:/wamp64/www/sites_localites.txt"
+    #pts = "PrioCoord_2020-02-25_Hemicycla_pouchet.csv"
+    pts = "./VigieChiro/GIS/SysGrid_Radius_810000_690000_2e+05.csv"
+    #pts = "C:/wamp64/www/sites_localites.csv"
+    #pts = "./VigieChiro/GIS/Coordonnee_listes_EPOC.csv"
     
          ,        
     #longlat = c("decimalLongitude", "decimalLatitude")
-    #longlat = c("Group.1", "Group.2")
-    longlat = c("longitude", "latitude")
-    
+    longlat = c("Group.1", "Group.2")
+    #longlat = c("longitude", "latitude")
+    #longlat = c("Lon_WGS84_bary","Lat_WGS84_bary")
       )
                              
 }

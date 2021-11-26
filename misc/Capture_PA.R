@@ -8,7 +8,7 @@ NomGroupe="MyoAqu"
 NomGroupe="RhiEH"
 NomGroupe="MyoGT"
 #NomGroupe="NlTt"
-#NomGroupe="Serot"
+NomGroupe="Serot"
 
 
 
@@ -21,10 +21,12 @@ NomGroupe="MyoGT"
     #     ,"Myotis mystacinus","Myotis nattereri","Myotis punicus")
 #ListSp=c("Myotis capaccinii","Myotis daubentonii")
 #ListSp=c("Rhinolophus euryale","Rhinolophus hipposideros")
-ListSp=c("Myotis blythii","Myotis myotis","Myotis punicus")
+#ListSp=c("Myotis blythii","Myotis myotis","Myotis punicus")
 #ListSp=c("Nyctalus lasiopterus","Tadarida teniotis")
 #ListSp=c("Nyctalus noctula","Nyctalus leisleri","Eptesicus serotinus"
      #    ,"Vespertilio murinus","Eptesicus nilssonii")
+ListSp=c("Nyctalus leisleri","Eptesicus serotinus"
+    ,"Vespertilio murinus")
 
 
 Captures$TAXON[Captures$TAXON=="Myotis latipennis"]="Myotis nattereri"

@@ -1,7 +1,8 @@
 library(data.table)
-LT=fread("./output/LT_BonTron_log1.csv")
+LT=fread("./output/LT_MAJ200515Total.csv")
 SpeciesList=fread("SpeciesList.csv")
 Group="bat"
+#Group="bush-cricket"
 PriorityFields=c("espece","nom_espece","pourcentage_variation"
 ,"pourcentage_variation_sl","pourcentage_variation_ul","categorie_tendance_EBCC"
 ,"valide","raison_incertitude","p_value","TRaw"

@@ -3,7 +3,7 @@ library(raster)
 
 GI=fread("C:/wamp64/www/GI_sites_localites.csv")
 NomenclatureOSO=fread("NomenclatureOSO.csv")
-HabitatToExclude=c("eau","autres","surfaces routes")
+#HabitatToExclude=c("eau","autres","surfaces routes")
 Biogeo=shapefile("./SIG/BiogeoRegions2016.shp")
 Regions=shapefile("./SIG/Limite_administrative/contours-geographiques-des-nouvelles-regions-metropole"
                   ,encoding="UTF-8",use_iconv=TRUE)

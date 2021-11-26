@@ -355,9 +355,10 @@ Sp_GLM_short=function(dataFile,varInterest,listEffects,
 
     Estimates <- merge(Estimates,forBackTransform,by="term",all.x=TRUE)
 
+    #PROBLEM: link is not log for binomial but logit, rather extract link function in glm object itself
     if(family %in% c("nbinom","nbinom2","poisson","binomial")) Estimates$coef_raw <- exp(Estimates$Estimate) else Estimates$coef_raw <- Estimates$Estimate
 
-    Estimates$coef <- ifelse(is.na(Estimates$bt_sd),Estimates$coef_raw,Estimates$coef_raw^(1/Estimates$bt_sd))
+    Estimates$coef <- ifelse(is.na(Estimates$bt_sd),Estimates$coef_raw,Estimates$coef_raw^(1/Estimates$bt_sd)) #backtransforme les coefficients de variables traitées comme numériques (pas de modif sinon)
 
 
     mdIC <- as.data.frame(confint(ModSp)[,1:2])

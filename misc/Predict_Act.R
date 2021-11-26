@@ -75,8 +75,11 @@ Coord=subset(Coord,select=c("Group.1","Group.2","pred","err"))
 
 #print(spplot(DataSaison,zcol="pred",main=ListSp[i]))  
 
+DateForFile=gsub("/","_",args[3])
+DateForFile=gsub("2020","",DateForFile)
+
 FilName=paste0("./VigieChiro/ModPred/"
-       ,args[1],"_Act_",substr(args[3],4,5),"_"
+       ,args[1],"_Act_",DateForFile
        ,args[2])
 
 fwrite(Coord,paste0(FilName,".csv"))

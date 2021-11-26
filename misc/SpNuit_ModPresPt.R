@@ -16,12 +16,13 @@ op <- options(digits.secs=3)
 
 
 #args="ETV_filtree"
-args="./VigieChiro/GIS/PA/PA_Phyllostachys nigra"
+args="./VigieChiro/GIS/PA/PA_Dama dama"
+args="./VigieChiro/GIS/PA/PATot_FR4___130"
 #args="./VigieChiro/GIS/Capture/PA_PKPN_Pipistrellus kuhlii"
 #args="./VigieChiro/GIS/Capture/PA_Plecos_Plecotus austriacus"
 #args="./VigieChiro/GIS/Capture/Myotis"
 #args[2]="GI_coordWGS84_SpNuit2_Seuil50_DataLP_PF_exportTot_Lat41.45_51.61_Long-5.9_9.73"
-args[2]="PA/GI_PA_Phyllostachys nigra" #coordSIG table
+args[2]="PA/GI_PATot_FR4___130" #coordSIG table
 #args[2]="Capture/GI_site_capture_chiro"
 args[3]="SpeciesList.csv"
 args[4]="Esp" #name of taxa column
@@ -134,6 +135,8 @@ for (h in 1:length(ListData))
   }
   
   CoordPS$individualCount=NULL
+  CoordPS$individualCount.y=NULL
+  CoordPS$individualCount.x=NULL
   CoordPS$presence=NULL
   CoordPS$coordinateUncertaintyInMeters=NULL
   CoordPS$canonicalName=NULL
@@ -278,7 +281,7 @@ for (h in 1:length(ListData))
       
       print(nrow(DataSaison))
       
-      Predictors$SpAltiS[is.na(Predictors$SpAltiS)]=0
+      #Predictors$SpAltiS[is.na(Predictors$SpAltiS)]=0
       
       testNA=apply(Predictors,MARGIN=2,FUN=function(x) sum(is.na(x)))
       

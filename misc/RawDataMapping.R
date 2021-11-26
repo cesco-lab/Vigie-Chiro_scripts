@@ -14,7 +14,7 @@ op <- options(digits.secs=3)
 #Saison=c("05","06","07") #obsolete
 
 
-args="SpNuit2_90_DataLP_PF_exportTot"
+args="C:/wamp64/www/SpNuit2_90_DataLP_PF_exportTot"
 #args="./VigieChiro/STOC-EPS/data_FrenchBBS_squarre_Diane_20180628_allSp_2001_2018"
 
 args[3]="SpeciesList.csv"
@@ -34,6 +34,7 @@ args[10]="nb_contacts"
 args[11]=40 #number of coordinates projections (must be a division of 360)
 #FLimite="France_dep_L93_09_11_12_30_31_32_34_46_48_65_66_81_82_2A_2B_13_83_84_04_05_06_07_26_69_42_38_73_74_01_03_63_43_15_19_23_87_86_79_17_16_33_40_47_64_24.shp"
 FLimite="France_dep_L93.shp"
+#FLimite="SMPNR_AdminExpress.shp"
 w0=T
 
 
@@ -130,7 +131,7 @@ for (i in 1:length(ListSp))
     if(!w0)
     {
     fwrite(DataSpSL,paste0("./VigieChiro/DataSp/DataSpSL_",ListSp[i],"_"
-                           ,substr(args[1],9,15),".csv"))
+                           ,substr(basename(args[1]),9,15),".csv"))
     }
     print(paste(ListSp[i],nrow(DataSp),Sys.time()))
     #subset des données correspondant à l'espèce i
@@ -142,8 +143,8 @@ for (i in 1:length(ListSp))
     
     if(w0)
     {
-      fwrite(DataSpSL_w0,paste0("./VigieChiro/DataSp/DataSpSL_",ListSp[i],"_"
-                             ,substr(args[1],9,15),".csv"))
+      fwrite(DataSpSL_w0,paste0("./VigieChiro/DataSp/DataSpSLw0_",ListSp[i],"_"
+                             ,substr(basename(args[1]),9,15),".csv"))
     }
     
     
@@ -166,7 +167,7 @@ for (i in 1:length(ListSp))
     Size=(DataSpL93$nb_contacts/max(DataSpL93$nb_contacts))^(0.5)
     #plotting abundances
     GraphName=paste0("./VigieChiro/Maps/Raw/",ListSp[i],"_"
-                     ,substr(args[1],9,15),"_Raw.png")
+                     ,substr(basename(args[1]),9,15),"_Raw.png")
     png(GraphName,width = 600, height = 600)
     
     p=spplot(DataSpL93,zcol="nb_contacts",sp.layout = LimiteL
@@ -182,3 +183,4 @@ for (i in 1:length(ListSp))
     dev.off()
   }
 }
+

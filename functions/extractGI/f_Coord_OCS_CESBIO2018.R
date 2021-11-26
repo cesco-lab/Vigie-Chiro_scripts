@@ -1,4 +1,7 @@
 Test=F
+
+if(exists("Pipeline")){Test=F}
+
 Coord_OCS_CESBIO2018=function(points,names_coord,bs,bm,layer)
 {
   library(data.table)
@@ -29,8 +32,8 @@ Coord_OCS_CESBIO2018=function(points,names_coord,bs,bm,layer)
   
   #CRS.new <- CRS(proj4string(CarthageP))
   OccSL_L93=spTransform(OccSL,CRS("+init=epsg:2154"))
-  OccSL_L93=crop(OccSL_L93,Hab)
-  OccSL=subset(OccSL,OccSL$id %in% OccSL_L93$id)
+  #OccSL_L93=crop(OccSL_L93,Hab)
+  #OccSL=subset(OccSL,OccSL$id %in% OccSL_L93$id)
   
   
   
@@ -117,9 +120,10 @@ if(Test)
 {
 #for test
 Coord_OCS_CESBIO2018(
-  points="./vigiechiro/GIS/PA_Thymus nitens" #table giving coordinates in WGS84
+  #points="./vigiechiro/GIS/PA_Thymus nitens" #table giving coordinates in WGS84
+  points="C:/wamp64/www/sites_localites" #table giving coordinates in WGS84
   ,
-  names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving 
+  names_coord=c("longitude","latitude") #vector of two values giving 
   ,
   bs=50
   ,

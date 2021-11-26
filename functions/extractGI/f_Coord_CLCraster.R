@@ -1,4 +1,7 @@
-Test=F
+Test=T
+
+if(exists("Pipeline")){Test=F}
+
 Coord_CLCraster=function(points,names_coord,bm,bl,layer)
 {
   library(data.table)
@@ -198,7 +201,7 @@ if(Test)
 {
   #for test
   Coord_CLCraster(
-    points="PrioCoord_2020-02-20" #table giving coordinates in WGS84
+    points="donnees_tela240esp_bis" #table giving coordinates in WGS84
     ,
     names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving 
     ,

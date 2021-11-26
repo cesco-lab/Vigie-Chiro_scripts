@@ -6,11 +6,11 @@ shinyServer(function(input, output) {
     AlleYoupi6 <- cbind(AlleYoupi5,parametre)
     mintemps <- min(AlleYoupi6$DateHeure) + timespan*input$heures[1]/100
     maxtemps <- min(AlleYoupi6$DateHeure) + timespan*input$heures[2]/100
-    toplot <- subset(AlleYoupi6, AlleYoupi6$DateHeure >= mintemps & AlleYoupi6$DateHeure <= maxtemps & AlleYoupi6$SuccessProb >= input$conf[1] &  AlleYoupi6$SuccessProb <= input$conf[2])
+    toplot <- subset(AlleYoupi6, AlleYoupi6$DateHeure >= mintemps & AlleYoupi6$DateHeure <= maxtemps & AlleYoupi6$tadarida_probabilite >= input$conf[1] &  AlleYoupi6$tadarida_probabilite <= input$conf[2])
     if (input$idchoix != "Tous")  subset(toplot, toplot$Id == input$idchoix)
     else {
         if (input$especechoix != "Toutes")
-        {subset(toplot, toplot$SpMaxF2 == input$especechoix)
+        {subset(toplot, toplot$tadarida_taxon == input$especechoix)
           }else {  toplot }
   }
     })
@@ -34,8 +34,8 @@ observe({
   sp() %>%
     ggvis(~DateHeure, ~parametre, key:= ~Affiche) %>%
 
-   layer_points(size = ~SuccessProb*20, fill = ~factor(SpMaxF2), stroke = 1, shape = ~factor(SpMaxF2)) %>%
-    #layer_points(size = ~SuccessProb*2, fill = ~factor(SpMaxF2), stroke = 1) %>%
+   layer_points(size = ~tadarida_probabilite*20, fill = ~factor(tadarida_taxon), stroke = 1, shape = ~factor(tadarida_taxon)) %>%
+    #layer_points(size = ~tadarida_probabilite*2, fill = ~factor(tadarida_taxon), stroke = 1) %>%
     set_options(width = 820, height = 540, padding = padding(5, 90, 40, 120)) %>%
     hide_legend("stroke") %>%
     hide_legend("size") %>%
@@ -70,10 +70,10 @@ observe({
       data <- data[data$Groupe == input$groupechoix,]
     }
     if (input$especechoix != "Toutes"){
-      data <- data[data$SpMaxF2 == input$especechoix,]
+      data <- data[data$tadarida_taxon == input$especechoix,]
     }
 
-    data <- data[data$SuccessProb >= input$conf[1] & data$SuccessProb <= input$conf[2],]
+    data <- data[data$tadarida_probabilite >= input$conf[1] & data$tadarida_probabilite <= input$conf[2],]
     addRadioButtons <- paste0('<input type="radio" name="rown" value="', 1:nrow(data), '">')
     cbind(Ouvrir=addRadioButtons, data)
   },

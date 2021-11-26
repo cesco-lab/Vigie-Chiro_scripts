@@ -1,9 +1,9 @@
-# ui.R pour SonochiroShinyBIOTOPE
+# ui.R pour TadaridaShinyVigie-Chiro
 library(shiny)
 shinyUI(pageWithSidebar(
 
   # Application title
-  headerPanel(""),# ("Analyse Sonochiro"),
+  headerPanel(""),# ("Analyse Tadarida"),
 
   # Sidebar with controls to select parameters to plot, group, species etc.
   # Note the use of the br()
@@ -13,17 +13,17 @@ shinyUI(pageWithSidebar(
 
                            label = "Choisissez un paramètre -> ordonnées).",
                            choices = params,
-                           selected = "FreqC")
+                           selected = "frequence_mediane")
                ,
                selectInput("idchoix",
                            "id-tadarida :",
                            c("Tous",
-                             sort(unique(as.character(AlleYoupi5$SpMaxF2)))))
+                             sort(unique(as.character(AlleYoupi5$tadarida_taxon)))))
                ,
                selectInput("especechoix",
                            "Espèce :",
                            c("Toutes",
-                             sort(unique(as.character(AlleYoupi5$SpMaxF2)))))
+                             sort(unique(as.character(AlleYoupi5$tadarida_taxon)))))
                ,
                sliderInput("conf",
                            label = "Indice de confiance de l'espèce :",
@@ -36,7 +36,7 @@ shinyUI(pageWithSidebar(
                actionButton("submit","Valider")
                ,
                downloadButton('downloadData', 'Sauver les corrections')
-               # # Pour appBiotope (sorties Sonchiro.csv)
+               # # Pour appVigie-Chiro (sorties Tadarida.csv)
                # sliderInput("confg",
                # label = "Indice de confiance du groupe :",
                # min = 0, max = 10, value = c(0, 10)),

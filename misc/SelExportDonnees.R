@@ -25,13 +25,15 @@ if(args[1]=="PrefPart")
   PrefPart=substr(DataTot$participation,1,3)
   }
   DataExp=subset(DataTot,PrefPart %in% args[2])
-}
+  fwrite(DataExp,paste0(args[10],"/export_",args[2][[1]],".csv"))
+  }
 
 if(args[1]=="Valid")
 {
   args[2]=paste0("validtot",substr(Sys.time(),1,10))
   DataExp=subset(DataTot,(DataTot$obs.espece!="")
                  |(DataTot$valid.espece!=""))
-}
+  fwrite(DataExp,paste0("export_",args[2][[1]],".csv"))
+  
+  }
 
-fwrite(DataExp,paste0(args[10],"/export_",args[2][[1]],".csv"))

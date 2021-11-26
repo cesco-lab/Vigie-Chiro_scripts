@@ -1,4 +1,7 @@
 Test=F
+
+if(exists("Pipeline")){Test=F}
+
 Coord_ALAN=function(points,names_coord,bl,layer)
 {
   

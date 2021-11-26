@@ -1,5 +1,7 @@
 Test=T
 
+if(exists("Pipeline")){Test=F}
+
 ##########INPUTS################
 #layers : download on : http://www.professionnels.ign.fr/route500#tab-3
 # points = the name of csv, with its path -> randomized (RandXXX) or non-randomized (SysSampleXXX) sampling points OR participation points (CoordWGS84)

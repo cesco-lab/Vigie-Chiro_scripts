@@ -1,5 +1,7 @@
 Test=T
 
+if(exists("Pipeline")){Test=F}
+
 ##########INPUTS################
 #layers : made by Charlotte ROEMER
 # points = the name of csv, with its path -> randomized (RandXXX) or non-randomized (SysSampleXXX) sampling points OR participation points (CoordWGS84)
@@ -7,7 +9,9 @@ Test=T
 
 " extraction of data"
 
-Coord_eol=function(points,names_coord,bs,bm,bl,layer1,layer2)
+Coord_eol=function(points,names_coord,bs,bm,bl,layer1,layer2,layer3,layer5
+                   ,layer6,layer7,layer8,layer9,layer10,layer11,layer12
+                   ,layer13)
 {
   
   
@@ -31,7 +35,7 @@ Coord_eol=function(points,names_coord,bs,bm,bl,layer1,layer2)
   Sys.time()
   R2=shapefile(layer2) 
   R3=shapefile(layer3)
-  R4=shapefile(layer4)
+  #R4=shapefile(layer4)
   R5=shapefile(layer5)
   R6=shapefile(layer6)
   R7=shapefile(layer7)
@@ -43,11 +47,11 @@ Coord_eol=function(points,names_coord,bs,bm,bl,layer1,layer2)
   R12=shapefile(layer12)
   R13=shapefile(layer13)
   Sys.time()
-  plot(R8)
+  #plot(R8)
   testH=match(CoordH,names(OccSL))
   OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[1]]))
   OccSL=subset(OccSL,!is.na(as.data.frame(OccSL)[,testH[2]]))
-  
+  OccSL$x=1
   OccSL$id=c(1:nrow(OccSL))
   
   #coordinates(OccSL) <- c("decimalLongitude", "decimalLatitude")
@@ -59,7 +63,7 @@ Coord_eol=function(points,names_coord,bs,bm,bl,layer1,layer2)
   proj4string(R1)<-CRS("+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
   proj4string(R2)<-CRS("+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
   proj4string(R3)<-CRS("+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-  proj4string(R4)<-CRS("+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+  #proj4string(R4)<-CRS("+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
   proj4string(R5)<-CRS("+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
   proj4string(R6)<-CRS("+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
   proj4string(R7)<-CRS("+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
@@ -73,23 +77,53 @@ Coord_eol=function(points,names_coord,bs,bm,bl,layer1,layer2)
   OccSL_L93=spTransform(OccSL,CRS(proj4string(R1)))
   
   #rename the height variable of the wind turbine
-  R4<-data.frame(R4)
-  R4$ht_max=R4$hauteur
-  R5<-data.frame(R5)
-  R5$ht_max=R5$HT_MAX
-  R6<-data.frame(R6)
-  R6$ht_max=R6$hauteur
-  R9<-data.frame(R9)
-  R9$ht_max=R9$hauteur
+  #R4<-data.frame(R4)
+  #R4$ht_max=R4$hauteur
+  ListLayerWT=list(R1,R2,R3,R5,R6,R7,R8,R9,R10,R11,R12,R13)
+  
+  for (i in 1:length(ListLayerWT))
+  {
+    if(!("ht_max") %in% names(ListLayerWT[[i]])){
+      if(("HT_MAX") %in% names(ListLayerWT[[i]])){
+        ListLayerWT[[i]]$ht_max=ListLayerWT[[i]]$HT_MAX
+      }else{
+        if(("hauteur") %in% names(ListLayerWT[[i]])){
+        ListLayerWT[[i]]$ht_max=ListLayerWT[[i]]$hauteur
+        }else{
+          ListLayerWT[[i]]$ht_max=80
+        }
+      }
+    }
+  }
+  #R5<-data.frame(R5)
+  #R5$ht_max=R5$HT_MAX
+  #R6<-data.frame(R6)
+  #R6$ht_max=R6$hauteur
+  #R9<-data.frame(R9)
+  #R9$ht_max=R9$hauteur
   
   #3 regions do not have data on the height of wind turbines. R8,R10,R12 : Nouvelle-Aquitaine, Grand-Est, Ile de France
-  Eol_ht_max=rbind(data.frame(R1)[,c("ht_max","coords.x1","coords.x2")],data.frame(R2)[,c("ht_max","coords.x1","coords.x2")],data.frame(R3)[,c("ht_max","coords.x1","coords.x2")],data.frame(R4)[,c("ht_max","coords.x1","coords.x2")]
-                   ,data.frame(R5)[,c("ht_max","coords.x1","coords.x2")],data.frame(R6)[,c("ht_max","coords.x1","coords.x2")],data.frame(R7)[,c("ht_max","coords.x1","coords.x2")],data.frame(R9)[,c("ht_max","coords.x1","coords.x2")]
-                   ,data.frame(R11)[,c("ht_max","coords.x1","coords.x2")],data.frame(R13)[,c("ht_max","coords.x1","coords.x2")])
+  Eol_ht_max=rbind(data.frame(ListLayerWT[[1]])[,c("ht_max","coords.x1","coords.x2")],data.frame(ListLayerWT[[2]])[,c("ht_max","coords.x1","coords.x2")],data.frame(ListLayerWT[[3]])[,c("ht_max","coords.x1","coords.x2")]
+          ,data.frame(ListLayerWT[[4]])[,c("ht_max","coords.x1","coords.x2")]
+          ,data.frame(ListLayerWT[[5]])[,c("ht_max","coords.x1","coords.x2")]
+          ,data.frame(ListLayerWT[[6]])[,c("ht_max","coords.x1","coords.x2")]
+          ,data.frame(ListLayerWT[[7]])[,c("ht_max","coords.x1","coords.x2")]
+       ,data.frame(ListLayerWT[[8]])[,c("ht_max","coords.x1","coords.x2")]
+       ,data.frame(ListLayerWT[[9]])[,c("ht_max","coords.x1","coords.x2")]
+       ,data.frame(ListLayerWT[[10]])[,c("ht_max","coords.x1","coords.x2")]
+       ,data.frame(ListLayerWT[[11]])[,c("ht_max","coords.x1","coords.x2")]
+       ,data.frame(ListLayerWT[[12]])[,c("ht_max","coords.x1","coords.x2")])
   
-  Eol=rbind(data.frame(R1)[,c("coords.x1","coords.x2")],data.frame(R2)[,c("coords.x1","coords.x2")],data.frame(R3)[,c("coords.x1","coords.x2")],data.frame(R4)[,c("coords.x1","coords.x2")],data.frame(R5)[,c("coords.x1","coords.x2")]
-            ,data.frame(R6)[,c("coords.x1","coords.x2")],data.frame(R7)[,c("coords.x1","coords.x2")],data.frame(R8)[,c("coords.x1","coords.x2")],data.frame(R9)[,c("coords.x1","coords.x2")],data.frame(R10)[,c("coords.x1","coords.x2")]
-            ,data.frame(R11)[,c("coords.x1","coords.x2")],data.frame(R12)[,c("coords.x1","coords.x2")],data.frame(R13)[,c("coords.x1","coords.x2")])
+  Eol=rbind(data.frame(ListLayerWT[[1]])[,c("coords.x1","coords.x2")],data.frame(ListLayerWT[[2]])[,c("coords.x1","coords.x2")],data.frame(ListLayerWT[[3]])[,c("coords.x1","coords.x2")]
+            ,data.frame(ListLayerWT[[4]])[,c("coords.x1","coords.x2")]
+            ,data.frame(ListLayerWT[[5]])[,c("coords.x1","coords.x2")]
+            ,data.frame(ListLayerWT[[6]])[,c("coords.x1","coords.x2")]
+            ,data.frame(ListLayerWT[[7]])[,c("coords.x1","coords.x2")]
+            ,data.frame(ListLayerWT[[8]])[,c("coords.x1","coords.x2")]
+            ,data.frame(ListLayerWT[[9]])[,c("coords.x1","coords.x2")]
+            ,data.frame(ListLayerWT[[10]])[,c("coords.x1","coords.x2")]
+            ,data.frame(ListLayerWT[[11]])[,c("coords.x1","coords.x2")]
+            ,data.frame(ListLayerWT[[12]])[,c("coords.x1","coords.x2")])  
   Eol=data.frame(Eol,x1=rep(1,length(Eol$coords.x1)))
   coordinates(Eol) <- c("coords.x1","coords.x2")
   proj4string(Eol) <- CRS("+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
@@ -121,15 +155,14 @@ Coord_eol=function(points,names_coord,bs,bm,bl,layer1,layer2)
   {
     PC_50=aggregate(SpEol$x,by=list(SpEol$id),FUN=sum)
     names(PC_50)[ncol(PC_50)]="SpRo_S"
-  OccSL_L93Re=merge(OccSL_L93,PC_50,by.x="id",by.y="Group.1",all.x=T)
-  OccSL_L93Re$SpRo_S[is.na(OccSL_L93Re$SpRo_S)]=0
-  spplot(OccSL_L93Re,zcol="SpRo_S",col="transparent")
-  
+    OccSL_L93Re=merge(OccSL_L93,PC_50,by.x="id",by.y="Group.1",all.x=T)
+    OccSL_L93Re$SpRo_S[is.na(OccSL_L93Re$SpRo_S)]=0
+    #spplot(OccSL_L93Re,zcol="SpRo_S",col="transparent")
+    
   }else{
     OccSL_L93Re=OccSL_L93
     OccSL_L93Re$SpRo_S=0
   }
-  
   
   ########
   #Buffer M
@@ -141,79 +174,87 @@ Coord_eol=function(points,names_coord,bs,bm,bl,layer1,layer2)
   
   SpEol=SpEollistM # 0.05 sec / pol
   
+  
   LengthB=gLength(SpEol,byid=T)
   if(length(LengthB)>0)
   {
     
-  Sys.time()
+    Sys.time()
     PC_50=aggregate(SpEol$x,by=list(SpEol$id),FUN=sum)
     names(PC_50)[ncol(PC_50)]="SpRo_M"
-  OccSL_L93Re=merge(OccSL_L93Re,PC_50,by.x="id",by.y="Group.1",all.x=T)
-  OccSL_L93Re$SpRo_M[is.na(OccSL_L93Re$SpRo_M)]=0
-  spplot(OccSL_L93Re,zcol="SpRo_M",col="transparent")
-  
+    OccSL_L93Re=merge(OccSL_L93Re,PC_50,by.x="id",by.y="Group.1",all.x=T)
+    OccSL_L93Re$SpRo_M[is.na(OccSL_L93Re$SpRo_M)]=0
+    #spplot(OccSL_L93Re,zcol="SpRo_M",col="transparent")
+    
   }else{
     OccSL_L93Re$SpRo_M=0
   }
+
+########
+#Buffer L
+########
+BufferL=gBuffer(OccSL_L93,width=BufferLarge,byid=T)
+SpEollistL=intersect(Eol,BufferL) # 0.05 sec / pol
+
+
+SpEol=SpEollistL # 0.05 sec / pol
+
+
+
+Sys.time()
+LengthB=gLength(SpEol,byid=T)
+Sys.time()
+if(length(LengthB)>0)
+{
   
-  ########
-  #Buffer L
-  ########
-  BufferL=gBuffer(OccSL_L93,width=BufferLarge,byid=T)
-  SpEollistL=intersect(Eol,BufferL) # 0.05 sec / pol
-  
-  
-  SpEol=SpEollistL # 0.05 sec / pol
-  Sys.time()
-  LengthB=gLength(SpEol,byid=T)
-  Sys.time()
-  if(length(LengthB)>0)
-  {
-    
   PC_50=aggregate(SpEol$x,by=list(SpEol$id),FUN=sum)
   names(PC_50)[ncol(PC_50)]="SpRo_L"
   OccSL_L93Re=merge(OccSL_L93Re,PC_50,by.x="id",by.y="Group.1",all.x=T)
   OccSL_L93Re$SpRo_L[is.na(OccSL_L93Re$SpRo_L)]=0
-  spplot(OccSL_L93Re,zcol="SpRo_L",col="transparent")
+  #spplot(OccSL_L93Re,zcol="SpRo_L",col="transparent")
   
-  }else{
-    OccSL_L93Re$SpRo_L=0
-  }
-  
-  
-  
-  
-  ##########################################
-  ##########################################
-  #############  Reseaux   #################
-  ##########################################
-  ##########################################
-  
-  #
-  
-  OccSL_ARajouter=subset(OccSL_L93Re,select=grepl("Sp",names(OccSL_L93Re)))
-  
-  Reseau=data.frame(cbind(coordinates(OccSL),as.data.frame(OccSL_ARajouter)))
-  
-  NewName=paste0(FOccSL,"_Reseau.csv")
-  
-  fwrite(Reseau,NewName)
-  
-  coordinates(Reseau) <- CoordH
-  
-  SelCol=sample(names(OccSL_ARajouter),1)
-  spplot(Reseau,zcol=SelCol,main=SelCol)
-  class(Reseau)
-  
+}else{
+  OccSL_L93Re$SpRo_L=0
+}
+
+
+
+
+##########################################
+##########################################
+#############  Reseaux   #################
+##########################################
+##########################################
+
+#
+
+OccSL_ARajouter=subset(OccSL_L93Re,select=grepl("Sp",names(OccSL_L93Re)))
+
+Reseau=data.frame(cbind(coordinates(OccSL),as.data.frame(OccSL_ARajouter)))
+
+NewName=paste0(FOccSL,"_Reseau.csv")
+
+fwrite(Reseau,NewName)
+
+coordinates(Reseau) <- CoordH
+
+SelCol=sample(names(OccSL_ARajouter),1)
+#spplot(Reseau,zcol=SelCol,main=SelCol)
+class(Reseau)
+
 }
 
 if(Test)
 {
   #for testing
   Coord_eol(
-    points="./VigieChiro/GIS/SysGrid__10" #table giving coordinates in WGS84
+    #points="./VigieChiro/GIS/SysGrid__10" #table giving coordinates in WGS84
+    points="C:/wamp64/www/sites_localites" #table giving coordinates in WGS84
+    
     ,
-    names_coord=c("Group.1","Group.2") #vector of two values giving 
+    #    names_coord=c("Group.1","Group.2") #vector of two values giving 
+    names_coord=c("longitude","latitude") #vector of two values giving 
+    
     ,
     bs=50
     ,
@@ -223,7 +264,7 @@ if(Test)
     ,layer1="C:/wamp64/www/eoliennes/Parcs_eoliens_Auvergne-Rhone-Alpes_en_service.shp"
     ,layer2="C:/wamp64/www/eoliennes/Parcs_eoliens_Bourgogne-Franche-Comte_en_service.shp"
     ,layer3="C:/wamp64/www/eoliennes/Parcs_eoliens_Bretagne_en_service.shp"
-    ,layer4="C:/wamp64/www/eoliennes/Parcs_eoliens_Corse_en_service.shp"
+    #,layer4="C:/wamp64/www/eoliennes/Parcs_eoliens_Corse_en_service.shp"
     ,layer5="C:/wamp64/www/eoliennes/Parcs_eoliens_Centre-Val-de-Loire_en_service.shp"
     ,layer6="C:/wamp64/www/eoliennes/Parcs_eoliens_Corse_en_service.shp"
     ,layer7="C:/wamp64/www/eoliennes/Parcs_eoliens_Hauts-de-France_en_service.shp"

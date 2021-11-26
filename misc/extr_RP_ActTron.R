@@ -1,12 +1,12 @@
 library(data.table)
-SeuilFiable=90 #à éditer 
+SeuilFiable=0 #à éditer 
+Sectorized=T
 #SeuilFiable=""
-
 #ETAPE 0 - IMPORT DES TABLES
 #bien renommer les chemins en fonction de l'ordi utilisé
 #table "données"
 Sys.time()
-DataLP=fread("DataLP_RP.csv")
+DataLP=fread("DataLP_RP_Sectorized_Valid.csv")
 Sys.time()
 #table "seuils"
 #RefSeuils=fread("Referentiel_seuils_ProbEspHF_1510_Cir.csv")
@@ -90,15 +90,31 @@ if(SeuilFiable=="")
     #test=DataFiable[1:100000,]
   }
 }
+
+if(Sectorized)
+{
 Sys.time()
 DataRP_ActTron=aggregate(DataFiable$donnee
                          ,by=list(DataFiable$participation
                                   ,DataFiable$Session
+                                  ,DataFiable$Secteur
                                   ,DataFiable$Datamicro
                                   ,DataFiable$espece
                          )
                          ,FUN=length) # 2 min
 Sys.time()
+Sys.time()
+DataRP_MaxProb=aggregate(DataFiable$probabilite
+                         ,by=list(DataFiable$participation
+                                  ,DataFiable$Session
+                                  ,DataFiable$Secteur
+                                  ,DataFiable$Datamicro
+                                  ,DataFiable$espece
+                         )
+                         ,FUN=max) # 2 min
+Sys.time()
+
+
 DataRP_TimeTron=aggregate(DataLPG$TimeTron
                           ,by=list(DataLPG$participation
                                    ,DataLPG$Session
@@ -110,7 +126,8 @@ DataRP_SpTron=merge(DataRP_ActTron,DataRP_TimeTron
                     ,by=c("Group.1","Group.2"))
 
 
-colnames(DataRP_SpTron)=c("participation","Tron","num_micro","espece"
+colnames(DataRP_SpTron)=c("participation","Tron","Secteur","num_micro"
+                          ,"espece"
                           ,"nb_contacts","temps_enr")
 
 DataRP_SpTron=merge(DataRP_SpTron,Q90PipDur,by.x=c("participation","num_micro")
@@ -121,6 +138,47 @@ DataRP_SpTron=merge(DataRP_SpTron,Q90PipProb,by.x=c("participation","num_micro")
              ,by.y=c("Group.1","Group.2"),all.x=T)
 DataRP_SpTron$x[is.na(DataRP_SpTron$x)]=0
 colnames(DataRP_SpTron)[ncol(DataRP_SpTron)]="IndiceProbPip"
+DataRP_SpTron=merge(DataRP_SpTron,DataRP_MaxProb,by.x=c("participation","Tron","Secteur","num_micro"
+                                                        ,"espece")
+                    ,by.y=c("Group.1","Group.2","Group.3","Group.4"
+                            ,"Group.5"),all.x=T)
+colnames(DataRP_SpTron)[ncol(DataRP_SpTron)]="score_max"
 
-fwrite(DataRP_SpTron,paste0("DataRP_SpTron_",SeuilFiable,".csv"))
+fwrite(DataRP_SpTron,paste0("DataRP_SpSecteur_",SeuilFiable,".csv"))
 
+}else{
+  Sys.time()
+  DataRP_ActTron=aggregate(DataFiable$donnee
+                           ,by=list(DataFiable$participation
+                                    ,DataFiable$Session
+                                    ,DataFiable$Datamicro
+                                    ,DataFiable$espece
+                           )
+                           ,FUN=length) # 2 min
+  Sys.time()
+  DataRP_TimeTron=aggregate(DataLPG$TimeTron
+                            ,by=list(DataLPG$participation
+                                     ,DataLPG$Session
+                            )
+                            ,FUN=max)
+  Sys.time()
+  
+  DataRP_SpTron=merge(DataRP_ActTron,DataRP_TimeTron
+                      ,by=c("Group.1","Group.2"))
+  
+  
+  colnames(DataRP_SpTron)=c("participation","Tron","num_micro","espece"
+                            ,"nb_contacts","temps_enr")
+  
+  DataRP_SpTron=merge(DataRP_SpTron,Q90PipDur,by.x=c("participation","num_micro")
+                      ,by.y=c("Group.1","Group.2"),all.x=T)
+  DataRP_SpTron$x[is.na(DataRP_SpTron$x)]=0
+  colnames(DataRP_SpTron)[ncol(DataRP_SpTron)]="IndiceDurPip"
+  DataRP_SpTron=merge(DataRP_SpTron,Q90PipProb,by.x=c("participation","num_micro")
+                      ,by.y=c("Group.1","Group.2"),all.x=T)
+  DataRP_SpTron$x[is.na(DataRP_SpTron$x)]=0
+  colnames(DataRP_SpTron)[ncol(DataRP_SpTron)]="IndiceProbPip"
+  
+  fwrite(DataRP_SpTron,paste0("DataRP_SpTron_",SeuilFiable,".csv"))
+  
+}

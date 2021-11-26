@@ -9,14 +9,15 @@ PP=c("55","56","57","58","59","5a","5b","5c","5d","5e","5f")
 
 
 args="Valid"
-Thresholds=c(90,50)
-args[10]="E:/VigieChiro/Raw/New"
+Thresholds=c(0)
+args[10]="D:/VigieChiro/Raw/New"
 args[12]=""
 args[13]=""
 args[14]=""
-FRaw="E:/VigieChiro/Raw"
-FDT="C:/wamp64/www/export_200512_200616.txt"
-#FDT="E:/exporttot200409.txt"
+FRaw="D:/VigieChiro/Raw"
+FDT="C:/wamp64/www/export_201109_201209.txt"
+#FDT="D:/VigieChiro/Raw/export_579.csv"
+#FDT="D:/Data2.csv"
 
 args[3]=Thresholds[1]
 

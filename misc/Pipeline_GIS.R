@@ -1,13 +1,10 @@
 folderfun="C:/Users/Yves Bas/Documents/Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/functions/extractGI"
-FCoord="./VigieChiro/GIS/PA/PA_Vandenboschia speciosa"
-#FCoord="./VigieChiro/GIS/PA/PATot__310"
-#FCoord="./VigieChiro/GIS/RandPts_France_dep_L93Radius_ 97000_1000"
-#FCoord="./VigieChiro/GIS/SysGrid__11_30_34_48_66_15000"
-#FCoord="./VigieChiro/GIS/SysGrid__29_22_35_56_44_49_53_72_85_61_14_50_76_27_28_37_36_41_45_18_79_86_16_17_75_77_78_91_92_93_94_95_60_80_02_59_62_10000"
-#FCoord="./VigieChiro/GIS/Capture/site_capture_chiro"
-Coord_Headers=c("Group.1","Group.2")
-#Coord_Headers=c("X_CENTROID","Y_CENTROID")
-Coord_Headers=c("decimalLongitude","decimalLatitude")
+
+Pipeline="exists"
+FCoord="./mnhn/Veolia/Sites_Veolia2008"
+#Coord_Headers=c("Group.1","Group.2")
+Coord_Headers=c("longitude","latitude")
+#Coord_Headers=c("decimalLongitude","decimalLatitude")
 BS=50
 BM=500
 BL=5000
@@ -15,10 +12,15 @@ Layer_ALAN="C:/Users/Yves Bas/Downloads/SVDNB_npp_20161201-20161231_75N060W_vcms
 Layer_Alti="C:/wamp64/www/BDALTIV2_MNT_75M_ASC_LAMB93_IGN69_FRANCE"
 Layer_Carthage_P="C:/wamp64/www/CARTHAGE_PLAN/HYDROGRAPHIE_SURFACIQUE.shp"
 Layer_Carthage_C="C:/wamp64/www/CARTHAGE_COURS/TRONCON_HYDROGRAPHIQUE.shp"
-Layer_CLC="C:/Users/Yves Bas/Downloads/CLC/CLC12_FR_RGF.shp"
+Layer_CLC="./SIG/clc2018_clc2018_v2018_20_raster100m/CLC2018_CLC2018_V2018_20.tif"
 Layer_OCS="C:/Users/Yves Bas/Downloads/OCS_2018_CESBIO.tif"
-ListLayer=c("ALAN","Alti","Bioclim","Carthage","CLC","OCS2018bis")
-
+Layer_ROUTE="C:/wamp64/www/Route500/R500_3-0_SHP_LAMB93_FXX-ED191/RESEAU_ROUTIER/TRONCON_ROUTE.shp"
+Layer_FERRE="C:/wamp64/www/Route500/R500_3-0_SHP_LAMB93_FXX-ED191/RESEAU_FERRE/TRONCON_VOIE_FERREE.shp"
+Layer_eoliennes="C:/wamp64/www/eoliennes/"
+ListLayer=c("ALAN","Alti","Bioclim","Carthage","CLCraster","OCS2018bis"
+            ,"Reseau","Transports")
+ListLayer=c("Bioclim","CLCraster"
+            ,"Reseau","Transports")
 
 listfun=list.files(folderfun,full.names=T,pattern=".R$")
 for (i in 1:length(listfun))
@@ -26,12 +28,23 @@ for (i in 1:length(listfun))
   source(listfun[i])
 }
 
+
+
+
 Sys.time()
-Coord_Bioclim(
-  points=FCoord
-              ,
-  names_coord=Coord_Headers
-)
+extract_clim(
+  pts = paste0(FCoord,".csv")
+  , 
+  longlat = Coord_Headers
+  ,
+  merge_data=T
+  ,
+               write = T
+  ,
+  clim=get_fr_worldclim_data()
+  )
+
+
 
 Sys.time()
 Coord_ALAN(points=FCoord
@@ -61,7 +74,7 @@ Coord_Carthage(
   carthagec=Layer_Carthage_C
 )
 Sys.time()
-Coord_CLC(points=FCoord
+Coord_CLCraster(points=FCoord
           ,names_coord=Coord_Headers
           ,bm=BM
           ,bl=BL
@@ -74,7 +87,34 @@ Coord_OCS_CESBIO2018(points=FCoord
                ,layer=Layer_OCS
 )
 Sys.time()
-combineGIS(
+ListLE=list.files(Layer_eoliennes,pattern=".shp$",full.names=T)
+ListLE=subset(ListLE,grepl("en_service.shp",ListLE))
+
+Coord_eol(points=FCoord
+                     ,names_coord=Coord_Headers
+                     ,bs=BS
+                     ,bm=BM
+                     ,bl=BL
+                     ,layer1=ListLE[1]
+                ,layer2=ListLE[2],layer3=ListLE[3],layer5=ListLE[4]
+                ,layer6=ListLE[5],layer7=ListLE[6],layer8=ListLE[7]
+                ,layer9=ListLE[8],layer10=ListLE[9],layer11=ListLE[10]
+                ,layer12=ListLE[11],layer13=ListLE[12]
+                )
+Sys.time()
+Coord_Route(points=FCoord
+                ,names_coord=Coord_Headers
+                ,bs=BS
+                ,bm=BM
+                ,bl=BL
+                ,layer1=Layer_ROUTE
+                ,layer2=Layer_FERRE
+            )
+Sys.time()
+
+
+
+combineGIS_FR(
   points=FCoord
            ,
   names_coord=Coord_Headers

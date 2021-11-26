@@ -35,7 +35,7 @@ if(!SelGite)
 
 
 SuffixSave=Suffix
-for (h in 1:length(SelHab))
+for (h in 56:length(SelHab))
 {
   print(SelHab[h])
   Suffix=SuffixSave
@@ -91,8 +91,8 @@ for (h in 1:length(SelHab))
   for (i in 1:nlevels(as.factor(SpNuit$espece)))
   {
     Datasub=subset(SpNuit,SpNuit$espece==levels(as.factor(SpNuit$espece))[i])
-    Data90=subset(SpNuit90,SpNuit90$espece==levels(as.factor(SpNuit$espece))[i])
-    Datasub=subset(Datasub,Datasub$participation %in% Data90$participation)
+    #Data90=subset(SpNuit90,SpNuit90$espece==levels(as.factor(SpNuit$espece))[i])
+    #Datasub=subset(Datasub,Datasub$participation %in% Data90$participation)
     #calcul des quantiles d'activité
     if(nrow(Datasub)>0)
     {
@@ -118,35 +118,40 @@ for (h in 1:length(SelHab))
   
   Ref=data.frame(Espece,MoyG,EtypG,MoySiP,EtypSiP,Q25,Q75,Q98,nbocc
                  ,DM25,DM10,DM02)  
-  
-  if(Suffix==""){Suffix="Total"}
- Suffix=gsub("/","_",Suffix)
-   fwrite(Ref,paste0("./VigieChiro/Referentiels/refPF_",Suffix
-                    ,".csv"),sep=";")
-  
-  RefShort=subset(Ref,select=c("Espece","nbocc","Q25","Q75","Q98"))
-  
-  RefSp=merge(RefShort,SpeciesList,by.x="Espece",by.y="Esp")
-  RefSp=subset(RefSp,select=c("GroupFR","NomFR","Scientific name","Espece"
-                              ,"nbocc","Q25","Q75","Q98"))
-  
-  RefSp$Index=match(RefSp$GroupFR,IndexGroupe)
-  RefSp=RefSp[with(RefSp
-                   ,order(Index,decreasing=T)),]
-  RefSp=subset(RefSp,RefSp$nbocc>SeuilMini)
-  names(RefSp)=c("Groupe","Nom francais","Nom scientifique"
-                 ,"Code","N","Q25","Q75","Q98")
-  print(nrow(RefSp))
-  if(nrow(RefSp)>0)
+  if(nrow(Ref)>0)
   {
-    SummHTML=datatable(RefSp, rownames = FALSE) %>%
-      formatStyle(columns = c("Groupe","Nom francais","Nom scientifique"
-                              ,"Code","N","Q25","Q75","Q98"),valueColumns="N", 
-                  background = styleInterval(c(40, 100, 500), c("orange", "khaki", "greenyellow", "limegreen"))) 
+    Ref$Confiance=cut(Ref$nbocc,c(0,40,100,500,Inf),labels=c("Faible","Moderee"
+                                                             ,"Bonne","Tres bonne"))
     
-    saveWidget(SummHTML
-               ,paste0("C:/Users/Yves Bas/Documents/VigieChiro/Referentiels/output-html/refPF_"
-                       ,Suffix
-                       ,".html"))
+    if(Suffix==""){Suffix="Total"}
+    Suffix=gsub("/","_",Suffix)
+    fwrite(Ref,paste0("./VigieChiro/Referentiels/refPF_",Suffix
+                      ,"_",Sys.Date(),".csv"),sep=";")
+    
+    RefShort=subset(Ref,select=c("Espece","nbocc","Q25","Q75","Q98"))
+    
+    RefSp=merge(RefShort,SpeciesList,by.x="Espece",by.y="Esp")
+    RefSp=subset(RefSp,select=c("GroupFR","NomFR","Scientific name","Espece"
+                                ,"nbocc","Q25","Q75","Q98"))
+    
+    RefSp$Index=match(RefSp$GroupFR,IndexGroupe)
+    RefSp=RefSp[with(RefSp
+                     ,order(Index,decreasing=T)),]
+    RefSp=subset(RefSp,RefSp$nbocc>SeuilMini)
+    names(RefSp)=c("Groupe","Nom francais","Nom scientifique"
+                   ,"Code","N","Q25","Q75","Q98")
+    print(nrow(RefSp))
+    if(nrow(RefSp)>0)
+    {
+      SummHTML=datatable(RefSp, rownames = FALSE) %>%
+        formatStyle(columns = c("Groupe","Nom francais","Nom scientifique"
+                                ,"Code","N","Q25","Q75","Q98"),valueColumns="N", 
+                    background = styleInterval(c(40, 100, 500), c("orange", "khaki", "greenyellow", "limegreen"))) 
+      
+      saveWidget(SummHTML
+                 ,paste0("C:/Users/Yves Bas/Documents/VigieChiro/Referentiels/output-html/refPF_"
+                         ,Suffix,"_",Sys.Date()
+                         ,".html"))
+    }
   }
 }

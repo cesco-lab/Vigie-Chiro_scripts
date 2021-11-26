@@ -1,6 +1,8 @@
 library(data.table)
 NCEPdata=fread("./VigieChiro/Weather/point_TWT.csv")
+NCEPdata=fread("./VigieChiro/Weather/point_TNCEP.csv")
 Tag="W"
+Tag="Temp"
 
 WeatherNCEP=dcast(NCEPdata,V3~paste(V1,V2),value.var="value")
 WeatherNCEP$date_extract=gsub("_","-",substr(WeatherNCEP$V3,1,10))

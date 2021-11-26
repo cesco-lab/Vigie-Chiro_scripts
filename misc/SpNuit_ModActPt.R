@@ -17,17 +17,17 @@ op <- options(digits.secs=3)
 
 Tag="50" #un tag pour identifier le modèle
 #args="GpNuit2_50_DataLP_PF_exportTot" 
-args="C:/wamp64/www/SpNuit2_50_DataLP_PF_exportTot" #la table qui contient les données d'activité
+args="C:/wamp64/www/SpNuit2_5090_DataLP_PF_exportTot" #la table qui contient les données d'activité
 #args="./VigieChiro/STOC-EPS/data_FrenchBBS_squarre_Diane_20180628_allSp_2001_2018"
 
-args[2]="GI_coordWGS84_SpNuit2_50_DataLP_PF_exportTot (1)" #la table qui contient les variables SIG
+args[2]="GI_sites_localites_MOS" #la table qui contient les variables SIG
 #args[2]="GI_coordWGS84_ALL"
 args[3]="SpeciesList.csv" #la table qui liste les espèces (téléchargeable ici : https://github.com/YvesBas/Tadarida-C/blob/master/tadaridaC_src/other_inputs/SpeciesList.csv)
 #args[3]=NA
 args[4]="Esp" #name of taxa column (useless if args[3] is specified)
 args[4]="espece" #name of taxa column (useless if args[3] is specified)
 #args[4]="code_sp" #name of taxa column (useless if args[3] is specified)
-args[5]="bat" #name of taxa group (useless if args[3] is specified)
+args[5]="bush-cricket" #name of taxa group (useless if args[3] is specified)
 DataLoc=F #id location is in the activity table
 args[6]="Group.3" #name of sampling event
 args[7]="carre" #name of locality in CoordSIG (if DataLoc)
@@ -40,7 +40,9 @@ MinData=1 #data amount threshold under which a species is not considered
 GroupSel="bat" #if you want to select a specific group (NA if no selection)
 #GroupSel=NA
 DM=F #if you want to fit an additionnal model on the time delay after the sunset (or before sunrise)
-Output="./VigieChiro/ModPred" #where to put saved models
+Output="./VigieChiro/ModPredMOS" #where to put saved models
+SelDep=c("75","77","78","91","92","93","94","95")
+
 
 #recupération des données chiros
 DataCPL3=fread(paste0(args[1],".csv"))
@@ -66,6 +68,18 @@ if(!DataLoc)
   #récupération des données participation
   Particip=fread("C:/wamp64/www/p_export.csv")
   #récupération des localités
+  if(SelDep!="")
+  {
+    SelDep2=paste0("Fixe-",SelDep)
+    test=rep(0,nrow(Particip))
+    for (z in 1:length(SelDep2))
+    {
+      testz=grepl(SelDep2[z],Particip$site)
+      test=pmax(test,testz)
+    }
+    Particip=subset(Particip,test==1)
+  }
+  
   SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
   Gite=mapply(function(x,y) 
     ((grepl(paste0(y,"="),x))|(grepl(paste0(y," ="),x)))
@@ -102,8 +116,14 @@ names(CoordPar)[4]="Group.3"
 
 
 
+if("Group.1" %in% names(CoordSIG))
+{
 CoordPS=merge(CoordPar,CoordSIG,by=c("Group.1","Group.2"))
-
+}else{
+  CoordPS=merge(CoordPar,CoordSIG,by.x=c("Group.1","Group.2")
+                ,by.y=c("longitude","latitude"))
+  
+}
 test=(is.na(CoordPS))
 test2=apply(test,MARGIN=1,sum)
 test3=apply(test,MARGIN=2,sum)
