@@ -1,7 +1,7 @@
 library(data.table)
 library(raster)
-FDataSelRare="./VigieChiro/gbifData/DataSelDate/DataSelRare_Plant_280.csv"
-Radius=40
+FDataSelRare="C:/Users/yvesb/Documents/VigieChiro/gbifData/DataSelDate/DataSelRare_Vocal_335.csv"
+Radius=15
 #lou deves
 LongOrigin=3.7671
 LatOrigin=43.8231
@@ -25,7 +25,7 @@ ncount=vector()
 datepic=vector()
 for (i in 1:nlevels(as.factor(DataSelRare$Group)))
 {
-  FileDG=paste0("./VigieChiro/gbifData/DataGroup/done/DataGroup2_"
+  FileDG=paste0("C:/Users/yvesb/Documents/VigieChiro/gbifData/DataGroup/done/DataGroup2_"
                 ,levels(as.factor(DataSelRare$Group))[i],"_FR.csv")
   if(file.exists(FileDG)){
     DataGroup=fread(FileDG)  
