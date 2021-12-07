@@ -19,10 +19,10 @@ Idfiles=list.files(IdDir,pattern="Identifiants",full.names=T)
 Idlist=list()
 for (i in 1:length(Idfiles))
 {
-Idlist[[i]]=fread(Idfiles[i])
+  Idlist[[i]]=fread(Idfiles[i])
 }
 IdLast=rbindlist(Idlist)
-  
+
 PSLPF=merge(Particip,SiteLoc,by.x=c("site","point"),by.y=c("site","nom"))
 
 OccSpPF=fread(FOccSpPF)
@@ -49,8 +49,8 @@ OccSpPF$nom_gite=PSLPF$nom_gite[test]
 testD=match(paste(OccSpPF$participation,OccSpPF$Nuit)
             ,paste(DurEnr$Group.1,DurEnr$Group.2))
 summary(testD)
-print(paste("%age participations supprimées :",
-      round(sum(is.na(testD))/nrow(OccSpPF)*100,1)))
+print(paste("%age participations supprim?es :",
+            round(sum(is.na(testD))/nrow(OccSpPF)*100,1)))
 OccSpPF$nb_heures_enregistrement=DurEnr$duree_enregistrement[testD]
 OccSpPF$nuit_complete=DurEnr$nuit_complete[testD]
 
@@ -72,7 +72,7 @@ OccSpPF$temperature_debut=PSLPF$temperature_debut[test]
 OccSpPF$temperature_fin=PSLPF$temperature_fin[test]
 OccSpPF$couverture_nuageuse=PSLPF$couverture[test]
 OccSpPF$vent=PSLPF$vent[test]
-#tagger intérieur gite / sorties gites
+#tagger int?rieur gite / sorties gites
 OccSpPF$type_suivi_gite=ifelse(OccSpPF$gite,ifelse(OccSpPF$hauteur_micro>=0
                                                    ,"sortie"
                                                    ,"interieur")
@@ -95,69 +95,69 @@ summary(is.na(testMic        ))
 OccSpPF$probleme_micro=DMtot$probleme_micro[testMic]
 table(OccSpPF$probleme_micro)
 
-#VIRER durées négatives
+#VIRER dur?es n?gatives
 OccSpPF=subset(OccSpPF,OccSpPF$nb_heures_enregistrement>=0)
 
-#VIRER participations supprimées
+#VIRER participations supprim?es
 OccSpPF=subset(OccSpPF,!is.na(OccSpPF$nb_heures_enregistrement))
 
-#VIRER participations non mise à jour
+#VIRER participations non mise ? jour
 PartMAJ=subset(DecProb$Group.1,DecProb$x<3)
 OccSpPF=subset(OccSpPF,OccSpPF$participation %in% PartMAJ)
 
 
 #UniquePF=subset(OccSpPF,select=c("espece","Nuit","longitude","latitude"))
 
-OccSpRP=fread(FOccSpRP)
-PRP=subset(Particip,!grepl("Fixe",Particip$site))
-PRP$Nuit=paste(substr(PRP$date_debut,7,10),substr(PRP$date_debut,4,5)
-               ,substr(PRP$date_debut,1,2),sep="-")
-PSLRP=merge(PRP,SiteLoc,by.x=c("site"),by.y=c("site"),allow.cartesian=TRUE)
-test=match(OccSpRP$participation,PSLRP$participation)
-Protocole=PSLRP$protocole[test]
-NomSecteur=ifelse(Protocole=="ROUTIER"
-                  ,paste("T",OccSpRP$Tron,OccSpRP$Secteur)
-             ,OccSpRP$Tron)
-OccSpRP$Nuit=PSLRP$Nuit[test]
-OccSpRP$precision=ifelse(Protocole=="ROUTIER",200,25)
-OccSpRP$protocole=ifelse(Protocole=="ROUTIER"
-                         ,"transect routier - section de 400 m"
-                         ,"point fixe de 6 minutes")
-
-OccSpRP$type=ifelse(PSLRP$canal_expansion_temps[test]=="GAUCHE"&
-                      OccSpRP$num_micro==F
-                    ,"expansion de temps a declenchement automatique"
-                    ,ifelse(PSLRP$canal_expansion_temps[test]=="DROITE"&
-                              OccSpRP$num_micro==T
-                            ,"expansion de temps a declenchement automatique"
-        ,ifelse(PSLRP$canal_enregistrement_direct[test]=="DROITE"&
-                                      OccSpRP$num_micro==T
-                                    ,"enregistrement continu"
-                ,ifelse(PSLRP$canal_enregistrement_direct[test]=="GAUCHE"&
-                          OccSpRP$num_micro==F
-                        ,"enregistrement continu","inconnu"
-                    ))))
-
-OccSpRP$enregistreur=PSLRP$detecteur_enregistreur_type[test]
-OccSpRP$type_micro=PSLRP$micro0_type[test]
-OccSpRP$hauteur_micro=PSLRP$micro0_hauteur[test]
-
-
-table(NomSecteur)
-test2=match(paste(OccSpRP$participation,NomSecteur)
-            ,paste(PSLRP$participation,PSLRP$nom))
-OccSpRP$longitude=PSLRP$longitude[test2]
-OccSpRP$latitude=PSLRP$latitude[test2]
-OccSpRP$obs=PSLRP$observateur.x[test2]
-table(OccSpRP$obs)[order(table(OccSpRP$obs))]
-OccSpRP=subset(OccSpRP,OccSpRP$type!="inconnu")
-OccSpRP$gite=0
 
 if(!FilterOutRP){
-CommonNames=subset(names(OccSpPF),names(OccSpPF) %in% names(OccSpRP))
-OccSpPFs=subset(OccSpPF,select=CommonNames)
-OccSpRPs=subset(OccSpRP,select=CommonNames)
-OccTot=rbind(OccSpRPs,OccSpPFs)
+  OccSpRP=fread(FOccSpRP)
+  PRP=subset(Particip,!grepl("Fixe",Particip$site))
+  PRP$Nuit=paste(substr(PRP$date_debut,7,10),substr(PRP$date_debut,4,5)
+                 ,substr(PRP$date_debut,1,2),sep="-")
+  PSLRP=merge(PRP,SiteLoc,by.x=c("site"),by.y=c("site"),allow.cartesian=TRUE)
+  test=match(OccSpRP$participation,PSLRP$participation)
+  Protocole=PSLRP$protocole[test]
+  NomSecteur=ifelse(Protocole=="ROUTIER"
+                    ,paste("T",OccSpRP$Tron,OccSpRP$Secteur)
+                    ,OccSpRP$Tron)
+  OccSpRP$Nuit=PSLRP$Nuit[test]
+  OccSpRP$precision=ifelse(Protocole=="ROUTIER",200,25)
+  OccSpRP$protocole=ifelse(Protocole=="ROUTIER"
+                           ,"transect routier - section de 400 m"
+                           ,"point fixe de 6 minutes")
+  
+  OccSpRP$type=ifelse(PSLRP$canal_expansion_temps[test]=="GAUCHE"&
+                        OccSpRP$num_micro==F
+                      ,"expansion de temps a declenchement automatique"
+                      ,ifelse(PSLRP$canal_expansion_temps[test]=="DROITE"&
+                                OccSpRP$num_micro==T
+                              ,"expansion de temps a declenchement automatique"
+                              ,ifelse(PSLRP$canal_enregistrement_direct[test]=="DROITE"&
+                                        OccSpRP$num_micro==T
+                                      ,"enregistrement continu"
+                                      ,ifelse(PSLRP$canal_enregistrement_direct[test]=="GAUCHE"&
+                                                OccSpRP$num_micro==F
+                                              ,"enregistrement continu","inconnu"
+                                      ))))
+  
+  OccSpRP$enregistreur=PSLRP$detecteur_enregistreur_type[test]
+  OccSpRP$type_micro=PSLRP$micro0_type[test]
+  OccSpRP$hauteur_micro=PSLRP$micro0_hauteur[test]
+  
+  
+  table(NomSecteur)
+  test2=match(paste(OccSpRP$participation,NomSecteur)
+              ,paste(PSLRP$participation,PSLRP$nom))
+  OccSpRP$longitude=PSLRP$longitude[test2]
+  OccSpRP$latitude=PSLRP$latitude[test2]
+  OccSpRP$obs=PSLRP$observateur.x[test2]
+  table(OccSpRP$obs)[order(table(OccSpRP$obs))]
+  OccSpRP=subset(OccSpRP,OccSpRP$type!="inconnu")
+  OccSpRP$gite=0
+  CommonNames=subset(names(OccSpPF),names(OccSpPF) %in% names(OccSpRP))
+  OccSpPFs=subset(OccSpPF,select=CommonNames)
+  OccSpRPs=subset(OccSpRP,select=CommonNames)
+  OccTot=rbind(OccSpRPs,OccSpPFs)
 }else{
   OccTot=OccSpPF  
 }
@@ -183,8 +183,8 @@ OccOld=subset(OccTot,!is.na(OccTot$idnum))
 OccNew=subset(OccTot,is.na(OccTot$idnum))
 if(nrow(OccNew)>0)
 {
-OccNew$idnum=c((Idinit+1):(Idinit+nrow(OccNew)))
-OccTot=rbind(OccOld,OccNew)
+  OccNew$idnum=c((Idinit+1):(Idinit+nrow(OccNew)))
+  OccTot=rbind(OccOld,OccNew)
 }
 
 fwrite(OccTot,"C:/wamp64/www/DataToti.csv",sep=";")
@@ -198,11 +198,11 @@ test=subset(Utilisateurs
             ,Utilisateurs$identifiant=="5a61fffea7644b000d4a8e19")
 UClose=subset(Utilisateurs,Utilisateurs$confidentiel=="oui")
 test1=subset(UClose
-            ,UClose$identifiant=="5a61fffea7644b000d4a8e19")
+             ,UClose$identifiant=="5a61fffea7644b000d4a8e19")
 
 UOpen=subset(Utilisateurs,Utilisateurs$confidentiel!="oui")
 test1b=subset(UOpen
-             ,UOpen$identifiant=="5a61fffea7644b000d4a8e19")
+              ,UOpen$identifiant=="5a61fffea7644b000d4a8e19")
 
 test2=("5a61fffea7644b000d4a8e19" %in% UOpen$identifiant)
 

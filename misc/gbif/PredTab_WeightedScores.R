@@ -1,13 +1,13 @@
 library(data.table)
 library(readxl)
 
-GroupeSp=read_xlsx("GroupeSp.xlsx")
+GroupeSp=read_xlsx("C:/Users/yvesb/Documents/GroupeSp.xlsx")
 FList=list.files("C:/Users/yvesb/Documents/VigieChiro/gbifData/ListSp",full.names=T)
-SpeciesAll=fread("SpeciesAll.csv",h=T,sep=";")
+SpeciesAll=fread("C:/Users/yvesb/Documents/SpeciesAll.csv",h=T,sep=";")
 DirPT="C:/Users/yvesb/Downloads"
 FPT=list.files(DirPT,pattern="PredTab_",full.names=T)
 ListDay=unique(tstrsplit(basename(FPT),split="_")[[2]])
-ListDay="315"
+ListDay="345"
 
 #FPT=FPT[1]
 for (h in 1:length(ListDay)){
@@ -65,7 +65,7 @@ for (i in 1:nrow(GroupeSp))
     }  
   }
 }
-hist(ScoreTot)
+#hist(ScoreTot)
 ScoreTab=data.frame(longitude=PredTab$Group.1,latitude=PredTab$Group.2,ScoreTot,ScoreRatio)
 fwrite(ScoreTab,paste0("ScoreTab",Day,"_local.csv"),sep=";")
 }

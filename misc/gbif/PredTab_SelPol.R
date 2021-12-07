@@ -3,17 +3,17 @@ library(raster)
 library(rgdal)
 
 SpeciesAll=fread("SpeciesAll.csv",sep=";")
-EsPro=fread("./natura/especes_protegees.csv",sep=";")
-PredTabNum=315
-#SelPol=shapefile("./SIG/lien&oxylane.shp")
-#SelPol=shapefile("./SIG/CapDeCreus.shp")
-SelPol=shapefile("./SIG/R12.shp")
-OutputName="./www/PT315"
+EsPro=fread("C:/Users/yvesb/Documents/natura/especes_protegees.csv",sep=";")
+PredTabNum=345
+#SelPol=shapefile("C:/Users/yvesb/Documents/SIG/lien&oxylane.shp")
+#SelPol=shapefile("C:/Users/yvesb/Documents/SIG/CapDeCreus.shp")
+SelPol=shapefile("C:/Users/yvesb/Documents/SIG/R12.shp")
+OutputName="C:/Users/yvesb/Documents/www/PT345"
 FSA=T #SpeciesAll sinon Espro
 FMaj=F
 MinPT=1
 MAXPT=1
-ProbMin=0.3
+ProbMin=0.1
 PTdir="C:/Users/yvesb/Downloads"
 
 PTfiles=list.files(PTdir,pattern=paste0("PredTab_",PredTabNum),full.names=T)
