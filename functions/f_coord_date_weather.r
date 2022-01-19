@@ -28,7 +28,7 @@
 ##' @importFrom ncdf4
 ##' @importFrom dyplr innerjoin
 ##' @author Romain Lorrilliere and Yves Bas
-get_sample_weather <- function(dsample=NULL,first_year=NULL,last_year=NULL,temp_windows=c(0,3,9),
+get_sample_weather <- function(dsample=NULL,first_year=NULL,last_year=NULL,time_windows=c(0,3,9),
                                nc_local=TRUE,nc_extract=FALSE,
                                nc_data="C:/git/Vigie-Chiro_scripts/data_weather/table_weather_RDS_names.csv",
                                nc_ref_file="C:/git/Vigie-Chiro_scripts/data_weather/normal_weather_precipitation_mean_temp_1950-2000.rds",nc_rep="C:/git/Vigie-Chiro_scripts/data_weather",
@@ -133,12 +133,12 @@ get_sample_weather <- function(dsample=NULL,first_year=NULL,last_year=NULL,temp_
 
 
     weather <- list()
-    nbOfCol <- length(temp_windows)
+    nbOfCol <- length(time_windows)
     for(v in var){
         weather[[v]] <- list()
         for(l in c("raw","anomaly","anomaly_st","ref_mean","ref_sd")){
             weather[[v]][[l]] <- data.frame(matrix(NA,nrow(dsample),nbOfCol))
-            colnames(weather[[v]][[l]]) <- paste("tw",temp_windows,sep="_")
+            colnames(weather[[v]][[l]]) <- paste("tw",time_windows,sep="_")
         } # END for(l in c("raw","anomaly","anomaly_st","ref_mean","ref_sd")){
     } # END for(v in var){
 
@@ -174,8 +174,8 @@ get_sample_weather <- function(dsample=NULL,first_year=NULL,last_year=NULL,temp_
 
             point.TM$julian=yday(point.TM$date_extract)
 
-            theColnames <- paste(paste(rep(var,each=3),rep(c("raw","ano","ano_st"),length(var)),temp_windows))
-            nbOfCol <- length(temp_windows)
+            theColnames <- paste(paste(rep(var,each=3),rep(c("raw","ano","ano_st"),length(var)),time_windows))
+            nbOfCol <- length(time_windows)
 
             ii <- i
             year_ii <- year_i
@@ -184,7 +184,7 @@ get_sample_weather <- function(dsample=NULL,first_year=NULL,last_year=NULL,temp_
                 if (ii%%500==1){print(paste(ii,Sys.time()))}
 
                 date_j0 <- dsample$date[ii]
-                for(tw in temp_windows) {
+                for(tw in time_windows) {
                     dates <- as_date((as_date(date_j0) - tw + 1):(as_date(date_j0)))
                     dates_julian<- yday(dates)
 
