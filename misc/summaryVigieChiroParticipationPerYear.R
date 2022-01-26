@@ -2,15 +2,15 @@ library(data.table)
 library(ggplot2)
 library(lubridate)
 
-SpNuit=fread("./www/SpNuit2_0_DataLP_PF_exportTot.csv")
-SpeciesList=fread("SpeciesList.csv")
-DataRP=fread("./vrac_md_dell2021/DataRP_SpSecteur_0.csv")
-Particip=fread("./www/p_export_forLinux.csv")
-SiteLoc=fread("./www/sites_localites.txt")
-Sites=fread("./www/sites.txt")
+SpNuit=fread("C:/Users/yvesb/Documents/www/SpNuit2_0_DataLP_PF_exportTot.csv")
+SpeciesList=fread("C:/Users/yvesb/Documents/SpeciesList.csv")
+DataRP=fread("C:/Users/yvesb/Documents/vrac_md_dell2021/DataRP_SpSecteur_0.csv")
+Particip=fread("C:/Users/yvesb/Documents/www/p_export_forLinux.csv")
+SiteLoc=fread("C:/Users/yvesb/Documents/www/sites_localites.txt")
+Sites=fread("C:/Users/yvesb/Documents/www/sites.txt")
 ListVar=c("participation","nb_contacts")
-ArchiveW=fread("./www/archivees_wav.txt",h=F)
-ArchiveT=fread("./www/archivees_ta.txt",h=F)
+ArchiveW=fread("C:/Users/yvesb/Documents/www/archivees_wav.txt",h=F)
+ArchiveT=fread("C:/Users/yvesb/Documents/www/archivees_ta.txt",h=F)
 
 BatList=subset(SpeciesList,SpeciesList$Group=="bat")
 BatNuit=subset(SpNuit,SpNuit$espece %in% BatList$Esp)
@@ -133,7 +133,7 @@ test=aggregate(PF_Bat$nb_contacts,by=c(list(PF_Bat$year),list(PF_Bat$site),list(
                ,FUN=length)
 test2=aggregate(test$Group.1,by=c(list(test$Group.2),list(test$Group.3)),FUN=length)
 summary(test2$x>1)
-sum(subset(test2$x,test2$x>1))/sum(test2$x) #%age de points répétés
+sum(subset(test2$x,test2$x>1))/sum(test2$x) #%age de points r?p?t?s
 Points_Representatifs=substr(PF_Bat$point,1,1)!="Z"
 mean(Points_Representatifs)
 

@@ -4,16 +4,16 @@ library(rgdal)
 
 SpeciesAll=fread("SpeciesAll.csv",sep=";")
 EsPro=fread("C:/Users/yvesb/Documents/natura/especes_protegees.csv",sep=";")
-PredTabNum=345
+PredTabNum=20
 #SelPol=shapefile("C:/Users/yvesb/Documents/SIG/lien&oxylane.shp")
 #SelPol=shapefile("C:/Users/yvesb/Documents/SIG/CapDeCreus.shp")
 SelPol=shapefile("C:/Users/yvesb/Documents/SIG/R12.shp")
-OutputName="C:/Users/yvesb/Documents/www/PT345"
+OutputName="C:/Users/yvesb/Documents/www/PT365"
 FSA=T #SpeciesAll sinon Espro
 FMaj=F
 MinPT=1
 MAXPT=1
-ProbMin=0.1
+ProbMin=0.05
 PTdir="C:/Users/yvesb/Downloads"
 
 PTfiles=list.files(PTdir,pattern=paste0("PredTab_",PredTabNum),full.names=T)

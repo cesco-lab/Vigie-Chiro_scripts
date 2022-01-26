@@ -7,7 +7,7 @@ SpeciesAll=fread("C:/Users/yvesb/Documents/SpeciesAll.csv",h=T,sep=";")
 DirPT="C:/Users/yvesb/Downloads"
 FPT=list.files(DirPT,pattern="PredTab_",full.names=T)
 ListDay=unique(tstrsplit(basename(FPT),split="_")[[2]])
-ListDay="345"
+ListDay="20"
 
 #FPT=FPT[1]
 for (h in 1:length(ListDay)){

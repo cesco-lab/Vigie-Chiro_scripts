@@ -6,23 +6,21 @@ library(raster)
 library(rgeos)
 library(lubridate)
 
-Particip=fread("C:/wamp64/www/p_export.csv",encoding="UTF-8")
-#SiteLoc=fread("C:/wamp64/www/sites_localites.txt",encoding="UTF-8")
-SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
-
-#SelDep=T
+Particip=fread("C:/Users/yvesb/Documents/www/p_export_forLinux.csv",encoding="UTF-8")
+#SiteLoc=fread("C:/Users/yvesb/Documentswww/sites_localites.txt",encoding="UTF-8")
+SiteLoc=fread("C:/Users/yvesb/Documents/www/sites_localites.txt")
+SelDep=F
 #Dep=c("24","33","40","47","64")
 Sys.time()
-FranceD= shapefile("C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp")
+FranceD= shapefile("C:/Users/yvesb/Documents/SIG/Limite_administrative/France_dep_L93.shp")
 Sys.time()
-
 StartYear=2011
-EndYear=2018
+EndYear=2021
 
 
 if(SelDep)
 {
-  FranceD=subset(FranceD,FranceD$DépARTEM0 %in% Dep)
+  FranceD=subset(FranceD,FranceD$D?pARTEM0 %in% Dep)
 }
 
 SiteLoc0=SiteLoc
@@ -91,6 +89,9 @@ ggplot(dd) +
 
 SiteProt=aggregate(SiteLoc$localite,by=list(SiteLoc$protocole),FUN=length)
 
+SiteProtP=aggregate(Particip$Proto333,by=c(list(Particip$Proto333),list(Particip$site),list(Particip$point)),FUN=length)
+SiteProtP2=aggregate(SiteProtP$Group.1,by=list(SiteProtP$Group.1),length)
+
 SiteProt$Group.1[1]="PEDESTRE"
 
 barplot(SiteProt$x,names.arg=SiteProt$Group.1,main="nb localites"
@@ -118,3 +119,7 @@ YNights=subset(YNights,YNights$Group.1>=StartYear)
 YNights=subset(YNights,YNights$Group.1<=EndYear)
 
 barplot(YNights$x,names.arg=YNights$Group.1,xlab="Year",ylab="n nights")
+
+UProtP=aggregate(Particip$Proto333,by=c(list(Particip$Proto333),list(Particip$observateur)),FUN=length)
+UProtP2=aggregate(UProtP$Group.1,by=list(UProtP$Group.1),length)
+UProtP2

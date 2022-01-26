@@ -2,15 +2,15 @@ library(data.table)
 library(rjson)
 library(Hmisc)
 
-Scores=fread("ScoreTab315_local.csv")
-takeout="C:/Users/yvesb/Downloads/takeout-20211106T170200Z-001.zip"
+Scores=fread("ScoreTab20_local.csv")
+takeout="C:/Users/yvesb/Downloads/takeout-20211128T132904Z-001.zip"
 CoordO=c(43.83,3.77) # LD
 #CoordO=c(43.869010, 3.741057) # LD_LA
 #CoordO=c(43.762189, 3.864203) #SJDC
 Tag="LD"
+StarredPlaces <- fromJSON(file = "./TakeOut/Maps (vos adresses)/Adresses enregistrÃ©es.json")
 
 unzip(takeout)
-StarredPlaces <- fromJSON(file = "./TakeOut/Maps (vos adresses)/Adresses enregistrées.json")
 head(StarredPlaces[[2]][[5]]$`geometry`$`coordinates`)
 
 Long=vector()
