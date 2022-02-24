@@ -2,7 +2,7 @@ library(data.table)
 library(rjson)
 library(Hmisc)
 
-Scores=fread("ScoreTab20_local.csv")
+Scores=fread("ScoreTab50_local.csv")
 takeout="C:/Users/yvesb/Downloads/takeout-20211128T132904Z-001.zip"
 CoordO=c(43.83,3.77) # LD
 #CoordO=c(43.869010, 3.741057) # LD_LA

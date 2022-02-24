@@ -1,7 +1,7 @@
 library(data.table)
 library(raster)
-FDataSelRare="C:/Users/yvesb/Documents/VigieChiro/gbifData/DataSelDate/DataSelRare_Vocal_335.csv"
-Radius=15
+FDataSelRare="C:/Users/yvesb/Documents/VigieChiro/gbifData/DataSelDate/DataSelRare_Plant_56.csv"
+Radius=9
 #lou deves
 LongOrigin=3.7671
 LatOrigin=43.8231
