@@ -1,7 +1,9 @@
 *.csv
-Takeout\*
+Takeout/*
 *.xlsx
 *.zip
+Pmax.csv
+PredNew.csv
 SpNuit_GLMsanssel.R
 SpNuit_GLMsanssel.R
 .Rproj.user
