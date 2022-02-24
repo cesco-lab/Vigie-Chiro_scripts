@@ -1,4 +1,7 @@
-*.csv
+Dat*.csv
+Score*.csv
+SP*.csv
+Urandom.csv
 Takeout/*
 *.xlsx
 *.zip
