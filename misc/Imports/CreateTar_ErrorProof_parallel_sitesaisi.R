@@ -2,8 +2,8 @@ library(data.table)
 library(tools)
 library(foreach)
 
-ParDir="E:/SONS/A_TRIER/MINES_MAZAUGUES/WAV/A_FORMATTER"
-OutputDir="E:/SONS/A_TRIER/upload"
+ParDir="K:/PI_Jaur2206"
+OutputDir="K:/upload"
 #irodsDir="C:\\wamp64\\www\\.icommands"
 #SiteLoc=fread("C:/Users/Arthur/kDrive/Shared/BOITE A OUTIL/TADARIDA/sites_localites.txt")
 #irodsDest="/ccin2p3/home/ybas/transferts"
@@ -17,7 +17,7 @@ dir.create(OutputDir,showWarnings = F)
 for (h in 1:length(ListSite))
 {
   ListPar=dir(ListSite[h],full.names=T)
-  
+  print(ListSite[h])
   #check participations codes
   llp=(nchar(basename(ListPar)))
   if(mean(llp)!=24){
@@ -26,6 +26,8 @@ for (h in 1:length(ListSite))
   
   for (i in 1:length(ListPar))
   {
+    print(ListPar[i])
+    print(Sys.time())
     ListWtot=list.files(ListPar[i],full.names=T,pattern=".wav$"
                         ,ignore.case = T)
     ListWtot=ListWtot[order(basename(ListWtot))]
@@ -43,6 +45,7 @@ for (h in 1:length(ListSite))
                                ,"/wav")
                         ,pattern=".tar")
     
+    
     if(length(ListRec)>0)
     {
       
@@ -52,7 +55,8 @@ for (h in 1:length(ListSite))
         if(length(TarGZtot)==0)
         {
           #case -1A : blocks all created
-          if(length(ListWtot)==0){
+          if(length(ListWtot)==0)
+            {
             for (z in 1:length(ListBloc))
             {
               Wavz=list.files(ListBloc[z],full.names=T)
@@ -66,7 +70,7 @@ for (h in 1:length(ListSite))
                 dir.create(dirname(TarName),showWarnings = F)
                 #tar(TarName,files=Listj)
                 #tar(TarGZName,files=Listj,compression="gzip")
-                Sys.time()
+                print(Sys.time())
                 system(paste0("7z a -ttar ",TarName," ",ListBloc[z]
                               ,"/*.*")) #65 secondes
                 Sys.time()
@@ -80,7 +84,17 @@ for (h in 1:length(ListSite))
                                  ,"/wav/liste2.txt"),col.names=F)
             
           }else{
-            stop("rare case not coded yet: no tars and incomplete blocks")
+            #stop("rare case not coded yet: no tars and incomplete blocks")
+            for (a in 1:length(ListBloc)){
+              Wb=list.files(ListBloc[a],full.names=T)
+              Wdest=paste0(ListPar[i],"/",basename(Wb))
+              file.rename(from=Wb,to=Wdest)
+              Bnum=0
+              ListWav=list.files(ListPar[i],full.names=T,pattern=".wav$")
+              ListWav2=list.files(ListPar[i],full.names=T,pattern=".WAV$")
+              ListWtot=c(ListWav,ListWav2)
+              ListWtot=ListWtot[order(basename(ListWtot))]
+            }
           }
         }else{
           #case 0 : dealing with failed last block
@@ -91,7 +105,8 @@ for (h in 1:length(ListSite))
           LlB=list.files(LastBloc)
           
           #case 1 : block uncomplete
-          if(length(LlB)<1000){
+          if((length(LlB)<1000)&(length(ListWtot)>0))
+            {
             NumGet=1000-length(LlB)
             WaveGet=ListWtot[1:NumGet]
             WaveDest=paste0(LastBloc,"/",basename(WaveGet))
@@ -146,6 +161,7 @@ for (h in 1:length(ListSite))
             }else{
               test=length(untar(TarName,list=T))
               if(test<1000){ #tar uncomplete
+                file.remove(TarName)
                 Sys.time()
                 system(paste0("7z a -ttar ",TarName," ",LastBloc,"/*.*")) #6.5 secondes
                 Sys.time()
