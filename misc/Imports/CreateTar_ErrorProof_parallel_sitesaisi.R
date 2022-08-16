@@ -2,8 +2,8 @@ library(data.table)
 library(tools)
 library(foreach)
 
-ParDir="K:/PI_Jaur2206"
-OutputDir="K:/upload"
+ParDir="G:/PI_Cassandre"
+OutputDir="G:/upload_ready"
 #irodsDir="C:\\wamp64\\www\\.icommands"
 #SiteLoc=fread("C:/Users/Arthur/kDrive/Shared/BOITE A OUTIL/TADARIDA/sites_localites.txt")
 #irodsDest="/ccin2p3/home/ybas/transferts"
@@ -126,9 +126,9 @@ for (h in 1:length(ListSite))
             dir.create(dirname(TarName))
             #tar(TarName,files=Listj)
             #tar(TarGZName,files=Listj,compression="gzip")
-            Sys.time()
+            print(Sys.time())
             system(paste0("7z a -ttar ",TarName," ",LastBloc,"/*.*")) #6.5 secondes
-            Sys.time()
+            print(Sys.time())
             #  system(paste0("7z a -tgzip ",TarGZName," ",TarName)) #12.4 secondes
             # Sys.time()
             
@@ -151,9 +151,9 @@ for (h in 1:length(ListSite))
               dir.create(dirname(TarName))
               #tar(TarName,files=Listj)
               #tar(TarGZName,files=Listj,compression="gzip")
-              Sys.time()
+              print(Sys.time())
               system(paste0("7z a -ttar ",TarName," ",LastBloc,"/*.*")) #6.5 secondes
-              Sys.time()
+              print(Sys.time())
               #system(paste0("7z a -tgzip ",TarGZName," ",TarName)) #12.4 secondes
               #Sys.time()
               
@@ -162,9 +162,9 @@ for (h in 1:length(ListSite))
               test=length(untar(TarName,list=T))
               if(test<1000){ #tar uncomplete
                 file.remove(TarName)
-                Sys.time()
+                print(Sys.time())
                 system(paste0("7z a -ttar ",TarName," ",LastBloc,"/*.*")) #6.5 secondes
-                Sys.time()
+                print(Sys.time())
                 
               }
               # case 3 : block complete and zipped
@@ -193,10 +193,10 @@ for (h in 1:length(ListSite))
                                                ,ListPar[i],"deja traite"))}
           dir.create(BlocDir)
           Newj=paste0(BlocDir,"/",basename(Listj))
-          Sys.time()
+          print(Sys.time())
           test=file.rename(from=Listj,to=Newj) #6 sec
           if(mean(test)!=1){stop(paste("ERREUR : copie fichier wave non permise"))}
-          Sys.time()
+          print(Sys.time())
           #ecriture liste.txt
           TarName=paste0(OutputDir,"/",DirSite,"/",basename(ListPar[i])
                          ,"/wav/"
@@ -210,9 +210,9 @@ for (h in 1:length(ListSite))
           dir.create(dirname(TarName))
           #tar(TarName,files=Listj)
           #tar(TarGZName,files=Listj,compression="gzip")
-          Sys.time()
+          print(Sys.time())
           system(paste0("7z a -ttar ",TarName," ",BlocDir,"/*.*")) #65 secondes
-          Sys.time()
+          print(Sys.time())
           #system(paste0("7z a -tgzip ",TarGZName," ",TarName)) #12.4 secondes
           #Sys.time()
           
