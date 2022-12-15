@@ -11,11 +11,9 @@ library(rjson)
 
 
 mongo=fread("mongos.txt",sep="$",h=F)
-test=F
+test=F #T si base de test, F si base de prod
 #MetadataBMRE=fread("C:/Users/yvesb/Downloads/Thomas_Busschaert_Metadata_table.csv")
-MetadataBMRE=fread("MissingPoints2022-07-19.csv")
-#id_observateur="5e9886c590250e001113d95d" #VC mnhn
-#id_observateur="558acd059dcbdc000e0793ee" #Yves Bas
+MetadataBMRE=fread("MissingPoints2022-07-19.csv") #table avec les points à créer
 CoordNames=c("X","Y")
 
 if(test){
