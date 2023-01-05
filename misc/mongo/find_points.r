@@ -10,11 +10,17 @@ library(jsonlite)
 library(rjson)
 
 
-mongo=fread("mongos.txt",sep="$",h=F)
+mongo=fread("mongos.txt",sep="$",h=F) #hack
 test=F #T si base de test, F si base de prod
 #MetadataBMRE=fread("C:/Users/yvesb/Downloads/Thomas_Busschaert_Metadata_table.csv")
-MetadataBMRE=fread("MissingPoints2022-07-19.csv") #table avec les points à créer
+#MetadataBMRE=fread("MissingPoints2022-07-19.csv") #table avec les points à créer
+MetadataBMRE=fread("C:/Users/yvesb/Downloads/Fiche_terrain_COS_WGS84_pourVigieChiro.csv") #table avec les points à créer
+ParticipanteSpecified="tiphainedevaux@gmail.com"
+ToleranceDoublon=20
+
 CoordNames=c("X","Y")
+CoordNames=c("xcoord","ycoord")
+
 
 if(test){
   connection_string=mongo$V1[2]
@@ -37,6 +43,25 @@ alldatasites <- sites$find(query=paste0('{"protocole" : {"$oid":"54bd090f1d41c81
 Sys.time() #~1sec / 1e3 sites
 
 test=sites$find(query = '{"titre" : "Vigiechiro - Point Fixe-340818"}',fields='{}') 
+sllist=list()
+for (i in 1:nrow(alldatasites)){
+  if(!is.null(alldatasites$localites[[i]])){
+    sllist[[i]]=as.data.table(alldatasites$localites[[i]])
+    sllist[[i]]$longitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][2]
+    sllist[[i]]$latitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][1]
+    sllist[[i]]$titre=alldatasites$titre[i]
+    row.names(sllist[[i]])=c()
+    print(i)
+  }
+}
+SiteLoc=rbindlist(sllist,use.names=T,fill=T)
+
+Sys.time()
+
+SiteLocGI=SiteLoc
+coordinates(SiteLocGI)=c("longitude","latitude")
+proj4string(SiteLocGI) <- CRS("+init=epsg:4326")
+SiteLocL2E=spTransform(SiteLocGI,CRS("+init=epsg:27572"))
 
 
 
@@ -54,7 +79,12 @@ allcoordst$id=alldatagrid$'_id'
 
 #r?cup?rer les nouvelles coordonn?es
 NewCoord=unique(MetadataBMRE,by=CoordNames)
-CoordOnly=subset(NewCoord,select=CoordNames)
+testC=match(CoordNames,names(NewCoord))
+names(NewCoord)[testC[1]]="X"
+names(NewCoord)[testC[2]]="Y"
+CoordOnly=subset(NewCoord,select=c("X","Y"))
+if(ncol(CoordOnly)!=2){stop("bad coord names")}
+
 
 #FILTRER la grille autour des sites
 summary(CoordOnly)
@@ -89,7 +119,7 @@ StocH2=elide(CentroidsStoc, shift=c(250,-750))
 
 
 NewCoordGI=NewCoord
-coordinates(NewCoordGI)=CoordNames
+coordinates(NewCoordGI)=c("X","Y")
 proj4string(NewCoordGI) <- CRS("+init=epsg:4326")
 NewCoordL2E=spTransform(NewCoordGI,CRS("+init=epsg:27572"))
 
@@ -97,25 +127,7 @@ Sys.time()
 #SiteLoc=as.data.frame(do.call(rbind,alldatasites$localites))
 
 
-sllist=list()
-for (i in 1:nrow(alldatasites)){
-  if(!is.null(alldatasites$localites[[i]])){
-    sllist[[i]]=as.data.table(alldatasites$localites[[i]])
-    sllist[[i]]$longitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][2]
-    sllist[[i]]$latitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][1]
-    sllist[[i]]$titre=alldatasites$titre[i]
-    row.names(sllist[[i]])=c()
-    print(i)
-  }
-}
-SiteLoc=rbindlist(sllist,use.names=T,fill=T)
 
-Sys.time()
-
-SiteLocGI=SiteLoc
-coordinates(SiteLocGI)=c("longitude","latitude")
-proj4string(SiteLocGI) <- CRS("+init=epsg:4326")
-SiteLocL2E=spTransform(SiteLocGI,CRS("+init=epsg:27572"))
 
 
 
@@ -124,26 +136,36 @@ test=gDistance(NewCoordL2E, NewCoordL2E,byid=TRUE)
 testSansDiag=test[-seq(1,(nrow(test)^2),nrow(test)+1)]
 Closest=min(testSansDiag)
 print(Closest)
-if(Closest<30){stop("points doublons dans input table")}
+if(Closest<ToleranceDoublon){
+  AllDoublons=subset(testSansDiag,testSansDiag<ToleranceDoublon)
+  ValU=unique(AllDoublons)
+  for (z in 1:length(ValU))
+  {
+    Doublon1=which(test==ValU[z],arr.ind=TRUE)
+    PointsDoublon=as.data.frame(MetadataBMRE)[Doublon1,]
+    print(PointsDoublon)
+  }
+  stop("points doublons dans input table")
+}
 
-
-#test 1 : point existant ?
+ 
+#test 1 : point existant ? A RECODER EN UTILISANT coord en WGS84
 test=gDistance(NewCoordL2E, SiteLocL2E,byid=TRUE)  
 Closest=apply(test,2,min)
 summary(Closest)
 
 
-if(min(Closest)<=40)
+if(min(Closest)<=ToleranceDoublon)
 {
   #stop("recoder point d?j? existant")
-  Existing=subset(NewCoord,Closest<40)
+  Existing=subset(NewCoord,Closest<ToleranceDoublon)
   dim(Existing)
   Wclosest=apply(test,2,which.min)
-  WclosestE=subset(Wclosest,Closest<40)
+  WclosestE=subset(Wclosest,Closest<ToleranceDoublon)
   Existing$titre=SiteLocL2E$titre[WclosestE]
   Existing$Point=SiteLocL2E$nom[WclosestE]
-  NewCoordL2E=subset(NewCoordL2E,Closest>=40)
-  NewCoord=subset(NewCoord,Closest>=40)
+  NewCoordL2E=subset(NewCoordL2E,Closest>=ToleranceDoublon)
+  NewCoord=subset(NewCoord,Closest>=ToleranceDoublon)
 }else{
   Existing=NewCoordL2E[0,]
 }
@@ -154,7 +176,7 @@ ClosestY=apply(test2,2,min)
 summary(ClosestY)
 
 
-if(min(ClosestY)<=40)
+if(min(ClosestY)<=ToleranceDoublon)
 {
   stop("coder points doublons")
 }
@@ -187,7 +209,7 @@ NewSq=vector()
 TemplateAddData=alldatasites[1,]
 TemplateAddData$'_id'=NULL
 #tester la grille repr?sentative
-for (i in 1:nrow(NewCoordL2E))
+for (i in 4:nrow(NewCoordL2E))
 {
   print(i)
   #coordinates(NewCoordL2E[i,])
@@ -244,9 +266,9 @@ for (i in 1:nrow(NewCoordL2E))
       
       
       #sites$update(query = paste0('{"titre" : "Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
-       #            ,paste0('{"$set":{"localites":[{ "nom" : "Z1", "geometries" : { "type" : "GeometryCollection", "geometries" : [ { "type" : "Point", "coordinates" : [ 49.919557076185100186, 3.2183492365574917216 ] } ] }, "representatif" : false }, { "nom" : "Z2", "geometries" : { "type" : "GeometryCollection", "geometries" : [ { "type" : "Point", "coordinates" : [ 49.920703773148623839, 3.2208812418675503153 ] } ] }, "representatif" : false }, { "nom" : "Z3", "geometries" : { "type" : "GeometryCollection", "geometries" : [ { "type" : "Point", "coordinates" : [ 49.921753559244905318, 3.2226691222563275119 ] } ] }, "representatif" : false },',ToAddJson,']}}'))
+      #            ,paste0('{"$set":{"localites":[{ "nom" : "Z1", "geometries" : { "type" : "GeometryCollection", "geometries" : [ { "type" : "Point", "coordinates" : [ 49.919557076185100186, 3.2183492365574917216 ] } ] }, "representatif" : false }, { "nom" : "Z2", "geometries" : { "type" : "GeometryCollection", "geometries" : [ { "type" : "Point", "coordinates" : [ 49.920703773148623839, 3.2208812418675503153 ] } ] }, "representatif" : false }, { "nom" : "Z3", "geometries" : { "type" : "GeometryCollection", "geometries" : [ { "type" : "Point", "coordinates" : [ 49.921753559244905318, 3.2226691222563275119 ] } ] }, "representatif" : false },',ToAddJson,']}}'))
       
-       #,upsert=T)
+      #,upsert=T)
       
       
       #Carrei$localites[[1]]=ToAdd
@@ -407,8 +429,12 @@ for (i in 1:nrow(NewCoordL2E))
       sites$insert(NewData)
       sites$update(paste0('{"titre":"Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
                    , paste0('{"$set":{"protocole":{ "$oid" : "54bd090f1d41c8103bad6252" }}}')) #protocole
-      
+      if(!is.na(ParticipanteSpecified)){
+        Obsi=users$find(query=paste0('{"email":"',ParticipanteSpecified,'"}'),fields='{}')
+        
+      }else{
       Obsi=users$find(query=paste0('{"email":"',NewCoord$Email[i],'"}'),fields='{}')
+      }
       id_observateur= Obsi$'_id'
       
       sites$update(paste0('{"titre":"Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
@@ -451,4 +477,16 @@ for (i in 1:nrow(NewCoordL2E))
   #SiteLoc$nom[1]=NewCoord$Point[i]
   
 }
+
+Existing$Carre=gsub("Vigiechiro - Point Fixe-","",Existing$titre)
+Existing$titre=NULL
+
+NewPoints=rbind(Existing,NewCoord)
+Tag=Sys.time()
+Tag=gsub(" ","_",Tag)
+Tag=gsub(":","_",Tag)
+
+NewData=merge(NewPoints,MetadataBMRE,by.x=c("X","Y"),by.y=CoordNames)
+
+fwrite(NewData,paste0("NewPoints_",Tag,".csv"),sep=";")
 
