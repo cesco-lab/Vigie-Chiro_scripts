@@ -16,7 +16,7 @@ test=F #T si base de test, F si base de prod
 #MetadataBMRE=fread("MissingPoints2022-07-19.csv") #table avec les points à créer
 MetadataBMRE=fread("C:/Users/yvesb/Downloads/Fiche_terrain_COS_WGS84_pourVigieChiro.csv") #table avec les points à créer
 ParticipanteSpecified="tiphainedevaux@gmail.com"
-ToleranceDoublon=20
+ToleranceDoublon=40
 
 CoordNames=c("X","Y")
 CoordNames=c("xcoord","ycoord")
