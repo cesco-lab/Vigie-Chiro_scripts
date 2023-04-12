@@ -103,17 +103,22 @@ for (j in 1:length(PartSel$'_id'))
   Obsj<-donnee_obs$find(query=paste0('{"participation":{"$oid":"',PartSel$'_id'[j],'"}}'))
   ListObs=list()
   ListDetail=list()
+  l=0
   if(nrow(Obsj)>0){
     for (k in 1:nrow(Obsj)){
       if(length(Obsj$observations[[k]])>0){
         if(nrow(Obsj$observations[[k]])>0){
           #stop()
           if(DetailProba){
-            ListDetail[[k]]=Obsj$observations[[k]]$tadarida_taxon_autre[[1]]
-            ListDetail[[k]][nrow(ListDetail[[k]])+1,]=c(Obsj$observations[[k]]$tadarida_taxon
-                                                        ,Obsj$observations[[k]]$tadarida_probabilite)
-            ListDetail[[k]]$donnee=Obsj$titre[[k]]
-            
+            for (m in 1:length(Obsj$observations[[k]]$tadarida_taxon_autre)){
+              l=l+1
+            ListDetail[[l]]=Obsj$observations[[k]]$tadarida_taxon_autre[[m]]
+            ListDetail[[l]][nrow(ListDetail[[l]])+1,]=c(Obsj$observations[[k]]$tadarida_taxon[m]
+                                               ,Obsj$observations[[k]]$tadarida_probabilite[m])
+            ListDetail[[l]]$donnee=Obsj$titre[[k]]
+            ListDetail[[l]]$tadarida_taxon=Obsj$observations[[k]]$tadarida_taxon[m]
+            #if(ListDetail[[k]]$donnee[1]=="Car660580-2021-Pass1-Z2-QUIL_1_20210805_200550_000"){stop()}
+            }
           }
           ListObs[[k]]=Obsj$observations[[k]]
           ListObs[[k]]$tadarida_taxon_autre=NULL
@@ -152,12 +157,19 @@ DetailAll=rbindlist(DetailAlllist,use.names=T,fill=T)
 matchTaxa=match(DetailAll$taxon,alldatataxa$'_id')
 
 summary(matchTaxa)
-test=subset(ObsAll,is.na(matchTaxa))
+test=subset(DetailAll,is.na(matchTaxa))
 
 DetailAll$espece=alldatataxa$libelle_court[matchTaxa]
 
-DetailCast=dcast(DetailAll,donnee~espece,fun.aggregate=function(x) paste(x, collapse="")
+DetailCast=dcast(DetailAll,donnee+tadarida_taxon~espece,fun.aggregate=function(x) as.numeric(paste(x, collapse=""))
                  ,value.var ="probabilite")
+
+test=subset(DetailCast,is.na(DetailCast$Tadten))
+test$donnee
+test2=subset(DetailAll,DetailAll$donnee==test$donnee[1])
+
+#summary(DetailCast)
+
 fwrite(DetailCast,paste0(DirOut,"/Detail_",Tag,"_",Sys.Date(),".csv"),sep=";")
 
 }
