@@ -40,6 +40,9 @@ CCsel$site=alldatapart$site[testP]
 CCsel$point=alldatapart$point[testP]
 CCsel$user=alldatapart$observateur[testP]
 CCsel$date=alldatapart$date_debut[testP]
+CCsel$enregistreur=alldatapart$configuration$detecteur_enregistreur_type[testP]
+CCsel$micro=alldatapart$configuration$micro0_type[testP]
+
   
 CCsel=subset(CCsel,CCsel$user %in% obsopen$'_id')
 
@@ -50,6 +53,8 @@ for (i in 1:nrow(CCsel)){
   CCsel$longitude[i]=Sitei$localites[[1]]$geometries$geometries[[1]]$coordinates[[1]][2]
   CCsel$carre[i]=Sitei$titre
 }
+
+fwrite(CCsel,paste0("CCsel_",Sys.Date(),".csv"),sep=";")
 
 
 
