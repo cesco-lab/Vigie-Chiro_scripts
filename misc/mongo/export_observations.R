@@ -20,6 +20,8 @@ RefSite="57b1f510d7d4b4000df26578"
 TriPoint=T
 ListPoint="Z2"
 TriCoord=F
+TriPart=T #si TriPart est vrai, les autres filtres sont ignorés
+ListPart=c("64e4cca0e8931db0f9ab4b69")
 LongInterval=c(1.76,2.32)
 LatInterval=c(42.40,42.76)
 Tag="pourLucas"
@@ -49,6 +51,10 @@ alldatapart<-participations$find(fields='{}')
 
 alldatataxa<-taxa$find(fields='{}')
 
+
+if(TriPart){
+  PartSel=subset(alldatapart,alldatapart$'_id' %in% ListPart)
+}else{
 
 test=sites$find(query = '{"titre" : "Vigiechiro - Point Fixe-340818"}',fields='{}') 
 
@@ -91,6 +97,8 @@ PartSel=subset(alldatapart,alldatapart$site %in% ListSite)
 if(TriPoint)
 {
   PartSel=subset(PartSel,PartSel$point %in% ListPoint)
+}
+
 }
 
 
