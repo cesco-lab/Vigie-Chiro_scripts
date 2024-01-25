@@ -1,149 +1,184 @@
 library(data.table)
-library(sp)
-library(raster)
+library(sf)
 library(randomForest)
 library(spdep)
-library(readxl)
-FSpDispo=list.files(".",pattern="GI_PrioCoord",full.names=T)
-#FSpDispo=subset(FSpDispo,grepl("PrioCoord",FSpDispo))
-PrioTaxa=fread("DataPriorF_57.csv")
-SpDispo=gsub(".csv","",paste(tstrsplit(FSpDispo,split="_")[[4]]
-              ,tstrsplit(FSpDispo,split="_")[[5]]))
+#library(readxl)
+OccDir="C:/Users/ybas/Documents/VigieChiro/gbifData/RawTest"
 Ncoord=40
-GroupSp=read_excel("GroupeSp.xlsx")
-DateDir="./VigieChiro/gbifData/DateSp"
+GroupSp=fread("C:/Users/ybas/Documents/GroupeSp2.csv")
+Modulo=9
+#dir.create("VigieChiro)
+print(Modulo)
+#dir.create("VigieChiro/ModPred)
+#patternSelF=c("2020-11-","2020-12-")
+#patternSelF2=c("FR","IT","AD","ES","CH")
+#patternSelF2=""
+#DateDir="C:/Users/ybas/Documents/VigieChiro/gbifData/DateSpAll"
+DateData=fread("C:/Users/ybas/Documents/VigieChiro/gbifData/DateSel.csv")
+PhylumList=c("Chordata","Arthropoda","Mollusca","Tracheophyta"
+             ,"Basidiomycota")
+DirOut="C:/Users/ybas/Documents/VigieChiro/gbifData/PredPres"
 
-op <- options(digits.secs = 3)
+dir.create(DirOut)
+
+FSpDispo=list.files(OccDir,pattern="GI_",full.names=T,recursive=T)
+
 
 LGI=list()
+Summ=list()
 for (h in 1:length(FSpDispo))
 {
   LGI[[h]]=fread(FSpDispo[h])
+  Zoneh=gsub("GI_","",basename(FSpDispo[h]))
+  Zoneh=gsub("_simplified_shortened.csv","",Zoneh)
+  LGI[[h]]$zone=Zoneh
+  Summh=gsub("GI_","",FSpDispo[h])
+  Summh=gsub("_shortened.csv","_summary.csv",Summh)
+  Summ[[h]]=fread(Summh)
+  Summ[[h]]$zone=Zoneh
 }
 GI=rbindlist(LGI,use.names=T,fill=T)
-sum(is.na(GI))
-GI[is.na(GI)]=0
+Summaries=rbindlist(Summ,use.names=T,fill=T)
 
-test=match(SpDispo,PrioTaxa$ListSpValide)
-End=max(test)
+SummStrata=paste(Summaries$zone,Summaries$Group.1,Summaries$Group.2,Summaries$Group.3
+                 ,"0")
 
-for (i in 1:End)
+
+print(sum(is.na(GI)))
+GI$yday=as.numeric(substr(GI$eventDate,9,10))+
+  (as.numeric(substr(GI$eventDate,6,7))-1)*30
+GI2_FirstMonth=subset(GI,GI$yday<31)
+GI2_FirstMonth$yday=GI2_FirstMonth$yday+360
+GI=rbind(GI,GI2_FirstMonth)
+GIsave=GI
+ListSpGI=unique(GI$species)
+DateData=subset(DateData,DateData$ListSpValide %in% ListSpGI)
+DateData=DateData[order(DateData$Order),]
+#for (i in seq(from=55690+Modulo,to=End,by=10))
+#for (i in seq(from=1,to=End,by=1))
+for (i in 1:nrow(DateData))
 {
-  GroupName=PrioTaxa$Group[i]
-  DateF=fread(paste0(DateDir,"/DateSp_",PrioTaxa$Group[i],".csv"))
-  DateSp=subset(DateF,DateF$ListSpValide==PrioTaxa$ListSpValide[i])
+  SpTarget=DateData$ListSpValide[i]
+  print(SpTarget)
+  Datei=DateData$PicSp[i]
   
-  SpTarget=PrioTaxa$ListSpValide[i]
-  print(paste(SpTarget,GroupName))
+  print(paste(i,SpTarget))
   #LimitF="C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp"
-  ListGroup=list.files("./VigieChiro/gbifData/DataGroup",pattern=GroupName
-                       ,full.names=T,recursive=T)
+  GI=GIsave
+  DataSpi=subset(GI,GI$species==SpTarget)
+  Phylumi=DataSpi$phylum[1]
+  print(Phylumi)
+  GI=subset(GI,GI$phylum==Phylumi)
+  GI=subset(GI,GI$yday>Datei-30)
+  GI=subset(GI,GI$yday<Datei+30)
+  GI$presence=as.numeric(GI$species==SpTarget)
+  summary(GI$presence)
+  test=subset(GI,GI$countryCode=="IQ")
+  DataMod=unique(GI,by=c("decimalLongitude","decimalLatitude"
+                         ,"presence"))
+  DataMod$precision=ceiling(log(DataMod$coordinateUncertaintyInMeters,10))
+  DataMod$precision=pmin(4,DataMod$precision)
+  DataMod$precision=pmax(1,DataMod$precision)
+  DataMod$precision=ifelse(is.na(DataMod$precision),5,DataMod$precision)
+  table(DataMod$precision)
+  test=subset(DataMod,DataMod$countryCode=="IQ")
   
-  GroupC=subset(GroupSp,GroupSp$Group==GroupName)
-if(!is.na(GroupC$Complement))
-{
-    ListGroupC=list.files("./VigieChiro/gbifData/DataGroup"
-                          ,pattern=GroupC$Complement
-                        ,full.names=T)
-ListGroup=c(ListGroup,ListGroupC)
+  #AggPrec1=aggregate(DataMod$phylum,DataMod$precision)
+  
+  #DataMod=merge(DataMod,GI,by=c("decimalLongitude","decimalLatitude"))
+  summary(DataMod$presence)
+  if(max(DataMod$presence)==1)
+  {
+    #add several rotated coordinates
+    CoordDS=as.matrix(cbind(as.data.frame(DataMod$decimalLongitude)
+                            ,as.data.frame(DataMod$decimalLatitude)))
+    for (a in 0:(Ncoord-1))
+    {
+      Coordi=Rotation(CoordDS,angle=pi*a/Ncoord)
+      #print(plot(Coordi[,1],CoordDS[,1],main=as.character(a)))
+      #print(plot(Coordi[,1],CoordDS[,2],main=as.character(a)))
+      DataMod=cbind(DataMod,Coordi[,1])
+      names(DataMod)[ncol(DataMod)]=paste0("SpCoord",a)
     }
-  
-  my.data=list()
-  for (j in 1:length(ListGroup))
-  {
-    my.data[[j]]=fread(ListGroup[j])
-  }
-  
-  DataGroup=rbindlist(my.data,fill=T,use.names=T)
-  
-  DataGroup$presence=as.numeric(DataGroup$name==SpTarget)
-  
-  DataGroup=subset(DataGroup,DataGroup$yday>DateSp$PicSp[1]-30)
-  DataGroup=subset(DataGroup,DataGroup$yday<DateSp$PicSp[1]+30)
-  
-  DataMod=unique(DataGroup,by=c("decimalLongitude","decimalLatitude","presence"))
-  
-  DataGI=merge(DataMod,GI,by=c("decimalLongitude","decimalLatitude"))
-  summary(DataGI$presence)
-  if(max(DataGI$presence)==1)
-  {
-  #add several rotated coordinates
-  CoordDS=as.matrix(cbind(as.data.frame(DataGI$decimalLongitude)
-                          ,as.data.frame(DataGI$decimalLatitude)))
-  for (a in 0:(Ncoord-1))
-  {
-    Coordi=Rotation(CoordDS,angle=pi*a/Ncoord)
-    #print(plot(Coordi[,1],CoordDS[,1],main=as.character(a)))
-    #print(plot(Coordi[,1],CoordDS[,2],main=as.character(a)))
-    DataGI=cbind(DataGI,Coordi[,1])
-    names(DataGI)[ncol(DataGI)]=paste0("SpCoord",a)
-  }
-  
-  testPred=(substr(names(DataGI),1,2)=="Sp")
-  Prednames=names(DataGI)[testPred]
-  Predictors=DataGI[,..Prednames]
-  
-  
-  testNA=apply(Predictors,MARGIN=2,FUN=function(x) sum(is.na(x)))
-  print(summary(testNA))
-  print(nrow(DataGI))
-  
-  #Npos=sum(DataGI$presence)
-  #DownSample=max(Npos,1000)
-  NumSample=as.vector(table(DataGI$presence))
-  DownSample=pmin(NumSample,1000)
-  DownSample2=pmax(round(DownSample/2),1)
-  
-  #Sys.time()
-  #ModRFNW=randomForest(x=Predictors,y=as.factor(DataGI$presence)
-   #                    ,replace=T
+    
+    testPred=(substr(names(DataMod),1,2)=="Sp")
+    Prednames=names(DataMod)[testPred]
+    Predictors=DataMod[,..Prednames]
+    Predictors[is.na(Predictors)]=0
+    
+    testNA=apply(Predictors,MARGIN=2,FUN=function(x) sum(is.na(x)))
+    print(summary(testNA))
+    print(nrow(DataMod))
+    
+    #Npos=sum(DataMod$presence)
+    #DownSample=max(Npos,1000)
+    Strata=paste(DataMod$zone,Phylumi,DataMod$countryCode
+                 ,DataMod$precision,DataMod$presence)
+    table(Strata)
+    NumSample=aggregate(DataMod$presence,by=list(Strata),length)
+    # ListStrata=colnames(table(DataMod$presence,Strata))
+    # ListStrata=subset(ListStrata,substr(ListStrata,nchar(ListStrata)
+    #                                       ,nchar(ListStrata))=="0")
+    test117=match(NumSample$Group.1,SummStrata)
+    MaxStrata=Summaries$x[test117]
+    MaxStrata[is.na(MaxStrata)]=10000
+    DownSample=pmin(NumSample$x,MaxStrata)
+    DownSample2=pmax(round(DownSample/2),1)
+    
+    #Sys.time()
+    #ModRFNW=randomForest(x=Predictors,y=as.factor(DataMod$presence)
+    #                    ,replace=T
     #                   ,importance=T
-     #                  ,ntree=500) #0.1 sec / tree
-  #Sys.time()
-  
-  #Sys.time()
-  #ModRF=randomForest(x=Predictors,y=as.factor(DataGI$presence)
-   #                  ,replace=T
+    #                  ,ntree=500) #0.1 sec / tree
+    #Sys.time()
+    
+    #Sys.time()
+    #ModRF=randomForest(x=Predictors,y=as.factor(DataMod$presence)
+    #                  ,replace=T
     #                 ,importance=T
-     #                ,sampsize=DownSample
-      #               ,ntree=500) #0.1 sec / tree
-  Sys.time()
-  ModRF_morebootstrap=randomForest(x=Predictors,y=as.factor(DataGI$presence)
-                                   ,replace=T
-                                   ,importance=F
-                                   ,sampsize=DownSample2
-                                   ,ntree=500
-                                   ) #0.1 sec / tree
-  Sys.time()
+    #                ,sampsize=DownSample
+    #               ,ntree=500) #0.1 sec / tree
+    if(!is.na(sd(DataMod$presence))){
+      if(sd(DataMod$presence)>0)
+      {
+        Sys.time()
+        ModRF_morebootstrap=randomForest(x=Predictors,y=as.factor(DataMod$presence)
+                                         ,replace=T
+                                         ,importance=F
+                                         ,strata=as.factor(Strata)
+                                         ,sampsize=DownSample
+                                         ,ntree=100) #0.1 sec / tree
+        Sys.time()
+        
+        
+        #varImpPlot(ModRF_morebootstrap,cex=0.5,main=paste("Presence",SpTarget))
+        #print(paste("TxErreur: ",ModRFNW$confusion[2,3]))
+        #varImpPlot(ModRF,cex=0.5,main=paste("Presence",SpTarget))
+        #print(paste("TxErreur: ",ModRF$confusion[2,3]))
+        #ModRF$confusion
+        # varImpPlot(ModRF_morebootstrap,cex=0.5,main=paste("Presence",SpTarget))
+        # print(paste("TxErreur: ",ModRF_morebootstrap$confusion[2,3]))
+        # ModRF_morebootstrap$confusion
+        # 
+        #coordinates(DataMod) <- c("Group.1", "Group.2")
+        #proj4string(DataMod) <- CRS("+init=epsg:4326") # WGS 84
+        #DataMod$pred=ModRF$predicted
+        #print(spplot(DataMod,zcol="pred",main=SpTarget))  
+        
+        
+        #save (ModRFNW,file=paste0("./VigieChiro/ModPred/ModRFPresence_",SpTarget,"_"
+        #                         ,GroupName,"_"
+        #                        ,"Raw.learner")) 
+        #save (ModRF,file=paste0("./VigieChiro/ModPred/ModRFPresence_",SpTarget,"_"
+        #                       ,GroupName,"_"
+        #                      ,"DSnorm.learner")) 
+        save (ModRF_morebootstrap,file=paste0(DirOut,"/ModRFPresence_"
+                                              ,SpTarget,"_"
+                                              ,Phylumi,"_"
+                                              ,"DS1.learner")) 
+      }
+    }
+  }
   
   
-  #varImpPlot(ModRFNW,cex=0.5,main=paste("Presence",SpTarget))
-  #print(paste("TxErreur: ",ModRFNW$confusion[2,3]))
-  #varImpPlot(ModRF,cex=0.5,main=paste("Presence",SpTarget))
-  #print(paste("TxErreur: ",ModRF$confusion[2,3]))
-  #ModRF$confusion
-  varImpPlot(ModRF_morebootstrap,cex=0.5,main=paste("Presence",SpTarget))
-  print(paste("TxErreur: ",ModRF_morebootstrap$confusion[2,3]))
-  ModRF_morebootstrap$confusion
-  
-  #coordinates(DataGI) <- c("Group.1", "Group.2")
-  #proj4string(DataGI) <- CRS("+init=epsg:4326") # WGS 84
-  #DataGI$pred=ModRF$predicted
-  #print(spplot(DataGI,zcol="pred",main=SpTarget))  
-  
-  
-  #save (ModRFNW,file=paste0("./VigieChiro/ModPred/ModRFPresence_",SpTarget,"_"
-   #                         ,GroupName,"_"
-    #                        ,"Raw.learner")) 
-  #save (ModRF,file=paste0("./VigieChiro/ModPred/ModRFPresence_",SpTarget,"_"
-   #                       ,GroupName,"_"
-    #                      ,"DSnorm.learner")) 
-  save (ModRF_morebootstrap,file=paste0("./VigieChiro/ModPred/ModRFPresence_"
-                                        ,SpTarget,"_"
-                                        ,GroupName,"_"
-                                        ,"DS2.learner")) 
-  
-  
-}
-
 }

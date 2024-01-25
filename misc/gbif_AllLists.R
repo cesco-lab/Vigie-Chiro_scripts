@@ -3,7 +3,7 @@ library(data.table)
 f_gbif_listsp="E:/DataGroup/gbif_listsp.R"
 GroupList=read_excel("C:/Users/admin/Desktop/GroupeSp.xlsx")
 Renew=T
-CountryList=c("Germany","Austria","Belgium","Netherlands","Luxembourg")
+CountryList=c("France","Spain")
 
 if(!Renew)
 {

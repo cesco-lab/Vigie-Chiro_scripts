@@ -1,19 +1,22 @@
 library(data.table)
 library(Hmisc)
 
-Tag="1017"
-Data=fread("./VigieChiro/Exports/_Veolia_1017_SL.csv")
-Particip=fread("C:/wamp64/www/p_export.csv")
-SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
+Tag="1001"
+Data=fread("C:/Users/yvesb/Downloads/1001_2021_Id.csv")
+#Particip=fread("C:/wamp64/www/p_export.csv")
+#SiteLoc=fread("C:/wamp64/www/sites_localites.txt")
+Latitude=48.977646
+Longitude=1.66639
 MoisPeak=c("06","07","08","09")
-SLpred="./VigieChiro/gbifData/SL"
-SpeciesList=fread("SpeciesList.csv")
-Referentiel=fread("./VigieChiro/Referentiels/refPF_Total_2020-04-10.csv")
-ReferentielReg=fread("./VigieChiro/Referentiels/refPF_Ile-de-France_2020-04-10.csv")
-DirPred="./VigieChiro/ModPred/Veolia/3107"
-HabitatTraits=fread("./VigieChiro/Traits/HabitatTraitsSpecies.csv")
-RefIndicateurs=fread("RefIndicators2021-01-19.csv")
+SLpred="C:/Users/yvesb/Documents/VigieChiro/gbifData/SL"
+SpeciesList=fread("C:/Users/yvesb/Documents/Tadarida/Tadarida-C/tadaridaC_src/other_inputs/SpeciesList.csv")
+Referentiel=fread("C:/Users/yvesb/Documents//VigieChiro/Referentiels/refPF_Total_2020-04-10.csv")
+ReferentielReg=fread("C:/Users/yvesb/Documents/VigieChiro/Referentiels/refPF_Ile-de-France_2020-04-10.csv")
+DirPred="C:/Users/yvesb/Documents/VigieChiro/ModPred/Veolia/3107"
+HabitatTraits=fread("C:/Users/yvesb/Documents/VigieChiro/Traits/HabitatTraitsSpecies.csv")
+RefIndicateurs=fread("C:/Users/yvesb/Documents/vrac_md_dell2021/RefIndicators2021-01-19.csv")
 #SpeciesToExclude="Rhihip"
+SpeciesToExclude=""
 
 f2pPF <- function(x) #get date-time data from recording file names
 {

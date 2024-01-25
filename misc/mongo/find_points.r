@@ -2,9 +2,7 @@ library(mongolite)
 library(data.table)
 library(beepr)
 library(raster)
-library(rgdal)
-library(maptools)
-library(rgeos)
+library(sf)
 library(uuid)
 library(jsonlite)
 library(rjson)
@@ -14,12 +12,12 @@ mongo=fread("mongos.txt",sep="$",h=F) #hack
 test=F #T si base de test, F si base de prod
 #MetadataBMRE=fread("C:/Users/yvesb/Downloads/Thomas_Busschaert_Metadata_table.csv")
 #MetadataBMRE=fread("MissingPoints2022-07-19.csv") #table avec les points à créer
-MetadataBMRE=fread("C:/Users/yvesb/Downloads/Fiche_terrain_COS_WGS84_pourVigieChiro.csv") #table avec les points à créer
-ParticipanteSpecified="tiphainedevaux@gmail.com"
+MetadataBMRE=fread("C:/Users/ybas/Downloads/Disque_terrain_9.csv") #table avec les points à créer
+ParticipanteSpecified="florence.matutini@ofb.gouv.fr"
 ToleranceDoublon=40
 
 CoordNames=c("X","Y")
-CoordNames=c("xcoord","ycoord")
+#CoordNames=c("xcoord","ycoord")
 
 
 if(test){
@@ -59,11 +57,12 @@ SiteLoc=rbindlist(sllist,use.names=T,fill=T)
 Sys.time()
 
 SiteLocGI=SiteLoc
-coordinates(SiteLocGI)=c("longitude","latitude")
-proj4string(SiteLocGI) <- CRS("+init=epsg:4326")
-SiteLocL2E=spTransform(SiteLocGI,CRS("+init=epsg:27572"))
+# coordinates(SiteLocGI)=c("longitude","latitude")
+# proj4string(SiteLocGI) <- CRS("+init=epsg:4326")
+# SiteLocL2E=spTransform(SiteLocGI,CRS("+init=epsg:27572"))
 
-
+SiteLocGI <- st_as_sf(SiteLocGI, coords = c("longitude", "latitude"), crs = "+init=epsg:4326")
+SiteLocL2E <- st_transform(SiteLocGI, crs = "+init=epsg:27572")
 
 alldatagrid<-grille$find(fields='{}')
 Sys.time() #~1min /4e5 squares
@@ -78,51 +77,103 @@ allcoordst$numero=alldatagrid$numero
 allcoordst$id=alldatagrid$'_id'
 
 #r?cup?rer les nouvelles coordonn?es
+testC=match(CoordNames,names(MetadataBMRE))
+names(MetadataBMRE)[testC[1]]="X"
+names(MetadataBMRE)[testC[2]]="Y"
+MetadataBMRE$X=gsub(",",".",MetadataBMRE$X)
+MetadataBMRE$Y=gsub(",",".",MetadataBMRE$Y)
 NewCoord=unique(MetadataBMRE,by=CoordNames)
 testC=match(CoordNames,names(NewCoord))
 names(NewCoord)[testC[1]]="X"
 names(NewCoord)[testC[2]]="Y"
+NewCoord$X=gsub(",",".",NewCoord$X)
+NewCoord$Y=gsub(",",".",NewCoord$Y)
+
 CoordOnly=subset(NewCoord,select=c("X","Y"))
 if(ncol(CoordOnly)!=2){stop("bad coord names")}
 
 
 #FILTRER la grille autour des sites
 summary(CoordOnly)
-allcoordst=subset(allcoordst,(allcoordst$longitude>(min(CoordOnly[,1])-0.1))
-                  &(allcoordst$longitude<(max(CoordOnly[,1])+0.1))
-                  &(allcoordst$latitude>(min(CoordOnly[,2])-0.1))
-                  &(allcoordst$latitude<(max(CoordOnly[,2])+0.1)))
+# allcoordst=subset(allcoordst,(allcoordst$longitude>(min(CoordOnly[,1])-0.1))
+#                   &(allcoordst$longitude<(max(CoordOnly[,1])+0.1))
+#                   &(allcoordst$latitude>(min(CoordOnly[,2])-0.1))
+#                   &(allcoordst$latitude<(max(CoordOnly[,2])+0.1)))
+
+if(!("Y" %in% names(CoordOnly))){stop("pb entete de colonne coordonnees")}
+allcoordst=subset(allcoordst,(allcoordst$longitude>(min(as.numeric(CoordOnly$X))-0.1))
+                  &(allcoordst$longitude<(max(as.numeric(CoordOnly$X))+0.1))
+                  &(allcoordst$latitude>(min(as.numeric(CoordOnly$Y))-0.1))
+                  &(allcoordst$latitude<(max(as.numeric(CoordOnly$Y))+0.1)))
 
 
-coordinates(allcoordst)=c("longitude","latitude")
-proj4string(allcoordst) <- CRS("+init=epsg:4326")
-CentroidsStoc=spTransform(allcoordst,CRS("+init=epsg:27572")) #L2E
+# coordinates(allcoordst)=c("longitude","latitude")
+# proj4string(allcoordst) <- CRS("+init=epsg:4326")
+# CentroidsStoc=spTransform(allcoordst,CRS("+init=epsg:27572")) #L2E
+
+allcoordst_sf <- st_as_sf(allcoordst, coords = c("longitude", "latitude"), crs = 4326)
+CentroidsStoc <- st_transform(allcoordst_sf, crs = 27572)
 
 #cr?er les grilles de points repr?sentatifs
-StocA1=elide(CentroidsStoc, shift=c(-750,750))
-StocA2=elide(CentroidsStoc, shift=c(-250,750))
-StocB1=elide(CentroidsStoc, shift=c(250,750))
-StocB2=elide(CentroidsStoc, shift=c(750,750))
-StocC1=elide(CentroidsStoc, shift=c(-250,250))
-StocC2=elide(CentroidsStoc, shift=c(-750,250))
-StocD1=elide(CentroidsStoc, shift=c(750,250))
-StocD2=elide(CentroidsStoc, shift=c(250,250))
-StocE1=elide(CentroidsStoc, shift=c(-750,-250))
-StocE2=elide(CentroidsStoc, shift=c(-250,-250))
-StocF1=elide(CentroidsStoc, shift=c(250,-250))
-StocF2=elide(CentroidsStoc, shift=c(750,-250))
-StocG1=elide(CentroidsStoc, shift=c(-250,-750))
-StocG2=elide(CentroidsStoc, shift=c(-750,-750))
-StocH1=elide(CentroidsStoc, shift=c(750,-750))
-StocH2=elide(CentroidsStoc, shift=c(250,-750))
+# StocA1=elide(CentroidsStoc, shift=c(-750,750))
+# StocA2=elide(CentroidsStoc, shift=c(-250,750))
+# StocB1=elide(CentroidsStoc, shift=c(250,750))
+# StocB2=elide(CentroidsStoc, shift=c(750,750))
+# StocC1=elide(CentroidsStoc, shift=c(-250,250))
+# StocC2=elide(CentroidsStoc, shift=c(-750,250))
+# StocD1=elide(CentroidsStoc, shift=c(750,250))
+# StocD2=elide(CentroidsStoc, shift=c(250,250))
+# StocE1=elide(CentroidsStoc, shift=c(-750,-250))
+# StocE2=elide(CentroidsStoc, shift=c(-250,-250))
+# StocF1=elide(CentroidsStoc, shift=c(250,-250))
+# StocF2=elide(CentroidsStoc, shift=c(750,-250))
+# StocG1=elide(CentroidsStoc, shift=c(-250,-750))
+# StocG2=elide(CentroidsStoc, shift=c(-750,-750))
+# StocH1=elide(CentroidsStoc, shift=c(750,-750))
+# StocH2=elide(CentroidsStoc, shift=c(250,-750))
 
+StocA1 <- CentroidsStoc 
+StocA2 <- CentroidsStoc 
+StocB1 <- CentroidsStoc 
+StocB2 <- CentroidsStoc 
+StocC1 <- CentroidsStoc 
+StocC2 <- CentroidsStoc 
+StocD1 <- CentroidsStoc 
+StocD2 <- CentroidsStoc 
+StocE1 <- CentroidsStoc 
+StocE2 <- CentroidsStoc 
+StocF1 <- CentroidsStoc 
+StocF2 <- CentroidsStoc 
+StocG1 <- CentroidsStoc 
+StocG2 <- CentroidsStoc 
+StocH1 <- CentroidsStoc 
+StocH2 <- CentroidsStoc 
+
+StocA1$geometry <- sf::st_geometry(StocA1) + c(-750, 750)
+StocA2$geometry <- sf::st_geometry(StocA2) + c(-250, 750)
+StocB1$geometry <- sf::st_geometry(StocB1) + c(250, 750)
+StocB2$geometry <- sf::st_geometry(StocB2) + c(750, 750)
+StocC1$geometry <- sf::st_geometry(StocC1) + c(-250, 250)
+StocC2$geometry <- sf::st_geometry(StocC2) + c(-750, 250)
+StocD1$geometry <- sf::st_geometry(StocD1) + c(750, 250)
+StocD2$geometry <- sf::st_geometry(StocD2) + c(250, 250)
+StocE1$geometry <- sf::st_geometry(StocE1) + c(-750, -250)
+StocE2$geometry <- sf::st_geometry(StocE2) + c(-250, -250)
+StocF1$geometry <- sf::st_geometry(StocF1) + c(250, -250)
+StocF2$geometry <- sf::st_geometry(StocF2) + c(750, -250)
+StocG1$geometry <- sf::st_geometry(StocG1) + c(-250, -750)
+StocG2$geometry <- sf::st_geometry(StocG2) + c(-750, -750)
+StocH1$geometry <- sf::st_geometry(StocH1) + c(750, -750)
+StocH2$geometry <- sf::st_geometry(StocH2) + c(250, -750)
 
 
 NewCoordGI=NewCoord
-coordinates(NewCoordGI)=c("X","Y")
-proj4string(NewCoordGI) <- CRS("+init=epsg:4326")
-NewCoordL2E=spTransform(NewCoordGI,CRS("+init=epsg:27572"))
+# coordinates(NewCoordGI)=c("X","Y")
+# proj4string(NewCoordGI) <- CRS("+init=epsg:4326")
+# NewCoordL2E=spTransform(NewCoordGI,CRS("+init=epsg:27572"))
 
+NewCoordGI <- st_as_sf(NewCoordGI, coords = c("X", "Y"), crs = 4326)
+NewCoordL2E <- st_transform(NewCoordGI, crs = 27572)
 Sys.time()
 #SiteLoc=as.data.frame(do.call(rbind,alldatasites$localites))
 
@@ -132,9 +183,10 @@ Sys.time()
 
 
 #test 0 : points trop proches dans NewCoord ?
-test=gDistance(NewCoordL2E, NewCoordL2E,byid=TRUE)  
+# test=gDistance(NewCoordL2E, NewCoordL2E,byid=TRUE)  
+test <- st_distance(NewCoordL2E, NewCoordL2E, by_element = F)
 testSansDiag=test[-seq(1,(nrow(test)^2),nrow(test)+1)]
-Closest=min(testSansDiag)
+Closest=as.numeric(min(min(testSansDiag)))
 print(Closest)
 if(Closest<ToleranceDoublon){
   AllDoublons=subset(testSansDiag,testSansDiag<ToleranceDoublon)
@@ -150,7 +202,8 @@ if(Closest<ToleranceDoublon){
 
  
 #test 1 : point existant ? A RECODER EN UTILISANT coord en WGS84
-test=gDistance(NewCoordL2E, SiteLocL2E,byid=TRUE)  
+#test=gDistance(NewCoordL2E, SiteLocL2E,byid=TRUE)  
+test <- st_distance(SiteLocL2E,NewCoordL2E, by_element = F)
 Closest=apply(test,2,min)
 summary(Closest)
 
@@ -170,9 +223,12 @@ if(min(Closest)<=ToleranceDoublon)
   Existing=NewCoordL2E[0,]
 }
 
-test2=gDistance(NewCoordL2E,NewCoordL2E,byid=TRUE)  
+#test2=gDistance(NewCoordL2E,NewCoordL2E,byid=TRUE)  
+test2 <- st_distance(NewCoordL2E, NewCoordL2E, by_element = F)
+test2=as.numeric(test2)
 test2[test2==0]=999999
-ClosestY=apply(test2,2,min)
+#ClosestY=apply(test2,2,min)
+ClosestY=min(test2)
 summary(ClosestY)
 
 
@@ -182,18 +238,22 @@ if(min(ClosestY)<=ToleranceDoublon)
 }
 
 Sys.time()
-testNN=gDistance(NewCoordL2E,CentroidsStoc,byid=TRUE) # 1 sec / 6e3 squares
+#testNN=gDistance(NewCoordL2E,CentroidsStoc,byid=TRUE) # 1 sec / 6e3 squares
+testNN <- st_distance(NewCoordL2E, CentroidsStoc, by_element = F)
+
 Sys.time()
 
-ClosestN=apply(testNN,2,min)
+#ClosestN=apply(testNN,2,min)
+ClosestN=min(testNN)
 summary(ClosestN)
-NumNN=apply(testNN,2,which.min)
+NumNN=apply(testNN,1,which.min)
 
 #NewCarre=as.character(sprintf("%06d",GridStoc$NUMNAT[NumNN]))
 NewCarre=ifelse(nchar(CentroidsStoc$numero[NumNN])==5
                 ,paste0("0",CentroidsStoc$numero[NumNN])
                 ,as.character(CentroidsStoc$numero[NumNN]))
 #table(NewCarre)
+if(is.null(NewCarre)){stop("pb NewCarre")}
 NewCoord$Carre=NewCarre
 
 table(NewCoord$Carre)
@@ -209,14 +269,17 @@ NewSq=vector()
 TemplateAddData=alldatasites[1,]
 TemplateAddData$'_id'=NULL
 #tester la grille repr?sentative
-for (i in 4:nrow(NewCoordL2E))
+for (i in 1:nrow(NewCoordL2E))
 {
   print(i)
   #coordinates(NewCoordL2E[i,])
   Dist=vector()
   for (j in 1:length(RefList))
   {
-    distj=gDistance(NewCoordL2E[i,],RefList[[j]][NumNN[i],])
+    st_crs(RefList[[j]])=st_crs(NewCoordL2E)
+    #stop("a recoder")
+    #distj=gDistance(NewCoordL2E[i,],RefList[[j]][NumNN[i],])
+    distj <- st_distance(NewCoordL2E[i,], RefList[[j]][NumNN[i],])
     Dist=c(Dist,distj)
   }
   if(min(Dist)<30)
@@ -259,7 +322,13 @@ for (i in 4:nrow(NewCoordL2E))
       sites$update(query = paste0('{"titre" : "Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
                    ,paste0('{"$set":{',NewJson,']}}'))
       TimeUpdated=gsub(" ","T",Sys.time())
+      if(nchar(TimeUpdated)>19)#with ms
+      {
+        TimeUpdated=paste0(substr(TimeUpdated,1,23),"Z")
+      }else{
+        
       TimeUpdated=paste0(TimeUpdated,".000Z")
+      }
       sites$update(query = paste0('{"titre" : "Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
                    ,paste0('{"$set":{"_updated" : { "$date" : "',TimeUpdated,'" }}}'))
       
@@ -298,6 +367,7 @@ for (i in 4:nrow(NewCoordL2E))
       NewData$protocole="54bd090f1d41c8103bad6252" #Point Fixe
       NewData$'_updated'=Sys.time()
       Obsi=users$find(query=paste0('{"email":"',NewCoord$Email[i],'"}'),fields='{}')
+      if(nrow(Obsi)!=1){stop("observateur-rice manquant-e ou doublon")}
       id_observateur= Obsi$'_id'
       NewData$observateur=id_observateur
       NewData$titre=paste0("Vigiechiro - Point Fixe-",NewCoord$Carre[i])
@@ -321,6 +391,7 @@ for (i in 4:nrow(NewCoordL2E))
                    , paste0('{"$set":{"protocole":{ "$oid" : "54bd090f1d41c8103bad6252" }}}')) #protocole
       
       Obsi=users$find(query=paste0('{"email":"',NewCoord$Email[i],'"}'),fields='{}')
+      if(nrow(Obsi)!=1){stop("observateur-rice manquant-e ou doublon")}
       id_observateur= Obsi$'_id'
       
       sites$update(paste0('{"titre":"Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
@@ -380,7 +451,14 @@ for (i in 4:nrow(NewCoordL2E))
                    ,paste0('{"$set":{',NewJson,']}}'))
       
       TimeUpdated=gsub(" ","T",Sys.time())
-      TimeUpdated=paste0(TimeUpdated,".000Z")
+      if(nchar(TimeUpdated)>19)#with ms
+      {
+        TimeUpdated=paste0(substr(TimeUpdated,1,23),"Z")
+      }else{
+        
+        TimeUpdated=paste0(TimeUpdated,".000Z")
+      }
+      
       sites$update(query = paste0('{"titre" : "Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
                    ,paste0('{"$set":{"_updated" : { "$date" : "',TimeUpdated,'" }}}'))
       
@@ -478,15 +556,22 @@ for (i in 4:nrow(NewCoordL2E))
   
 }
 
+if(nrow(Existing)>0){
 Existing$Carre=gsub("Vigiechiro - Point Fixe-","",Existing$titre)
 Existing$titre=NULL
+Existing$geometry=NULL
 
 NewPoints=rbind(Existing,NewCoord)
+}else{
+  NewPoints=NewCoord
+}
 Tag=Sys.time()
 Tag=gsub(" ","_",Tag)
 Tag=gsub(":","_",Tag)
+Tag=tstrsplit(Tag,split="\\.")[[1]]
 
-NewData=merge(NewPoints,MetadataBMRE,by.x=c("X","Y"),by.y=CoordNames)
+#NewData=merge(NewPoints,MetadataBMRE,by.x=c("X","Y"),by.y=CoordNames)
+NewData=NewPoints
 
 fwrite(NewData,paste0("NewPoints_",Tag,".csv"),sep=";")
 

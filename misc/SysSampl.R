@@ -5,12 +5,12 @@ library(sf)
 library(rgeos)
 #Zone="C:/Users/Yves Bas/Documents/natura/jasses/domaine.shp"
 #Zone="C:/Users/Yves Bas/Documents/VigieChiro/GIS/SMPNR_AdminExpress.shp"
-#Zone="C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp"
-Zone="C:/Users/Yves Bas/Documents/SIG/Countries/World_L93.shp"
-Sample=200000
+Zone="C:/Users/yvesb/Documents/SIG/Limite_administrative/France_dep_L93.shp"
+#Zone="C:/Users/Yves Bas/Documents/SIG/Countries/World_L93.shp"
+Sample=849906
 SelDep=F
 Dep=c("France","Spain","Switzerland","Italy","Andorra")
-#Dep=c("France","Italy")
+Dep=c("France")
 #Dep=c("34","30","13","12","48")
 #Dep=c("2A","2B") #corsica
 #Dep=c("09","12","31","32","46","65","81","82") #midipy
@@ -33,10 +33,10 @@ Dep=c("France","Spain","Switzerland","Italy","Andorra")
 #   ,"16","33","40","47","64","24") #grand sud
 #Dep=c("30","34")
 #Dep=c("75")
-Dep=c("75","77","78","91","92","93","94","95") #idf
+#Dep=c("75","77","78","91","92","93","94","95") #idf
 #Dep=c("75","77","78","91","92","93","94","95","76","60","02","51","10","89"
 #      ,"45","28","27") #idf + 1 epaisseur
-SelDepExcl=T
+SelDepExcl=F
 DepExcl=c("Antarctica")
 
 Rand=F
@@ -45,7 +45,7 @@ LatMin=4000000
 LatMax=8000000
 LongMin=-2000000
 LongMax=3000000
-SelBuffer=T
+SelBuffer=F
 LatOrigin=6303000 #nddl 
 LongOrigin=762000
 #LatOrigin=6306000 #toscane
@@ -96,7 +96,7 @@ if(SelDep)
     FranceD=subset(FranceD,FranceD$NAME_ENGL %in% Dep)
     
   }else{
-    FranceD=subset(FranceD,FranceD$DépARTEM0 %in% Dep)
+    FranceD=subset(FranceD,FranceD$D?pARTEM0 %in% Dep)
   }
   for (i in 1:length(Dep))
   {
@@ -112,7 +112,7 @@ if(SelDepExcl)
     FranceD=subset(FranceD,!FranceD$NAME_ENGL %in% DepExcl)
     
   }else{
-    FranceD=subset(FranceD,!FranceD$DépARTEM0 %in% DepExcl)
+    FranceD=subset(FranceD,!FranceD$D?pARTEM0 %in% DepExcl)
   }
 }
 
@@ -208,10 +208,10 @@ for (b in 1:length(Radius))
   
   if(Rand)
   {
-    fwrite(CoordSG,paste0("./VigieChiro/GIS/RandPts_",substr(basename(Zone),1,nchar(basename(Zone))-4)
+    fwrite(CoordSG,paste0("RandPts_",substr(basename(Zone),1,nchar(basename(Zone))-4)
                           ,Suffix,"_",Sample,".csv"))
   }else{
-    fwrite(CoordSG,paste0("./VigieChiro/GIS/SysGrid_",Suffix,"_",Sample,".csv"))
+    fwrite(CoordSG,paste0("SysGrid_",Suffix,"_",Sample,".csv"))
   }
   
 }

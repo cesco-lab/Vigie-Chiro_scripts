@@ -2,15 +2,15 @@ library(data.table)
 library(R.utils)
 options(digits.secs=6)
 
-FPart="ParSelShifts2021-09-27.csv"
-PrefRequest="pscp -pw !Eudoxe20210628 dbas@cca.in2p3.fr:/sps/mnhn/vigiechiro/vigiechiro-prod-datastore/tcz/"
-BBScorr=fread("./vrac_md_dell2021/BBScorr.csv")
-NperPart=1 #N+1
-Particip=fread("./www/p_export_forLinux.csv",encoding="UTF-8")
+FPart="ParSelShifts2022-04-07.csv"
+PrefRequest="pscp -pw PghgEESz1718! ybas@cca.in2p3.fr:/sps/mnhn/vigiechiro/vigiechiro-prod-datastore/tcz/"
+BBScorr=fread("C:/Users/yvesb/Documents/vrac_md_dell2021/BBScorr.csv")
+NperPart=1 #N
+Particip=fread("C:/Users/yvesb/Documents/www/p_export_forLinux.csv",encoding="UTF-8")
 RP=F
 #RP=grepl("RP",FPart)
 #OutDir="C:/wamp64/www/tcz/"
-OutDir="./www/tcz/"
+OutDir="C:/Users/yvesb/Documents/www/tcz/"
 
 PartMissingSp=fread(FPart)
 

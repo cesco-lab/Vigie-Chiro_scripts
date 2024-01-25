@@ -2,18 +2,16 @@ library(mongolite)
 library(data.table)
 library(beepr)
 library(raster)
-library(rgdal)
-library(maptools)
-library(rgeos)
 library(uuid)
 library(jsonlite)
+library(sf)
 
 ############ A CODER ABSOLUMENT : commentaire config quand différente de Vigie !!!
 
 
 mongo=fread("mongos.txt",sep="$",h=F)
 test=F #T si base de test, F si base de prod
-FileBMRE="C:/Users/yvesb/Downloads/Thomas_Busschaert_Metadata_table_bis.csv"
+FileBMRE="NewPoints_2024-01-10_15_31_28.csv"
 CorrRecorders=fread("Recorders_BMRE_VC.csv")
 CorrMics=fread("Mics_BMRE_VC.csv")
 CoordNames=c("X","Y")
@@ -78,6 +76,8 @@ test=subset(SiteLoc,grepl("620981",SiteLoc$titre))
 Sys.time()
 
 SiteLocGI=SiteLoc
+SiteLocGI$longitude=as.numeric(SiteLocGI$longitude)
+SiteLocGI$latitude=as.numeric(SiteLocGI$latitude)
 coordinates(SiteLocGI)=c("longitude","latitude")
 proj4string(SiteLocGI) <- CRS("+init=epsg:4326")
 SiteLocL2E=spTransform(SiteLocGI,CRS("+init=epsg:27572"))
@@ -86,10 +86,12 @@ SiteLocL2E=spTransform(SiteLocGI,CRS("+init=epsg:27572"))
 
 
 Sys.time()
-testNN=gDistance(NewCoordL2E,SiteLocL2E,byid=TRUE) # 1 sec / 6e3 squares
+#testNN=gDistance(NewCoordL2E,SiteLocL2E,byid=TRUE) # 1 sec / 6e3 squares
+testNN <- st_distance(st_as_sf(NewCoordL2E),st_as_sf(SiteLocL2E), by_element = F)
+
 Sys.time()
 
-ClosestN=apply(testNN,2,min)
+ClosestN=apply(testNN,1,min)
 summary(ClosestN)
 MissingPoints=subset(MetadataBMRE,ClosestN>30)
 if(max(ClosestN)>30){
@@ -98,7 +100,7 @@ if(max(ClosestN)>30){
 }
 
 
-NumNN=apply(testNN,2,which.min)
+NumNN=apply(testNN,1,which.min)
 
 #NewCarre=as.character(sprintf("%06d",GridStoc$NUMNAT[NumNN]))
 NewCarre=SiteLoc$titre[NumNN]

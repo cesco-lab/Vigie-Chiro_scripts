@@ -1,7 +1,7 @@
 library(data.table)
 library(raster)
-FDataSelRare="C:/Users/yvesb/Documents/VigieChiro/gbifData/DataSelDate/DataSelRare_Plant_56.csv"
-Radius=9
+FDataSelRare="C:/Users/yvesb/Documents/VigieChiro/gbifData/DataSelDate/DataSelRare_Vocal_311.csv"
+Radius=232
 #lou deves
 LongOrigin=3.7671
 LatOrigin=43.8231
@@ -33,8 +33,8 @@ for (i in 1:nlevels(as.factor(DataSelRare$Group)))
     DataGroup=subset(DataGroup,!is.na(DataGroup$decimalLongitude))
     coordinates(DataGroup)=c("decimalLongitude","decimalLatitude")
     crs(DataGroup)="+proj=lcc +lat_1=48 +lat_2=33 +lon_0=-100 +ellps=WGS84"
-    DataCrop=crop(DataGroup,pBuffer)
-    if(!is.null(DataCrop))
+    DataCrop=try(crop(DataGroup,pBuffer))
+    if(class(DataCrop)!="try-error")
     {
       SpGroup=subset(DataSelRare
                      ,DataSelRare$Group==levels(as.factor(DataSelRare$Group))[i])  
@@ -58,6 +58,9 @@ for (i in 1:nlevels(as.factor(DataSelRare$Group)))
 }
 plot(nsp,ngp)
 DF=data.frame(sp,gp,datepic,nsp,ngp)
+
+DF$ratio=DF$nsp/DF$ngp
+DF=DF[order(DF$ratio,decreasing = T),]
 
 NewF=paste0(gsub(".csv","",FDataSelRare),"_",Radius,".csv")
 fwrite(DF,NewF,sep=";")

@@ -1,11 +1,11 @@
 library(data.table)
 library(raster)
 
-GI=fread("C:/wamp64/www/GI_sites_localites.csv")
-NomenclatureOSO=fread("NomenclatureOSO.csv")
+GI=fread("GI_FR_sites_localites_PF.csv")
+NomenclatureOSO=fread("C:/Users/yvesb/Documents/vrac_md_dell2021/NomenclatureOSO.csv")
 #HabitatToExclude=c("eau","autres","surfaces routes")
-Biogeo=shapefile("./SIG/BiogeoRegions2016.shp")
-Regions=shapefile("./SIG/Limite_administrative/contours-geographiques-des-nouvelles-regions-metropole"
+Biogeo=shapefile("C:/Users/yvesb/Documents/SIG/BioGeoFr.shp")
+Regions=shapefile("C:/Users/yvesb/Documents/SIG/Limite_administrative/contours-geographiques-des-nouvelles-regions-metropole.shp"
                   ,encoding="UTF-8",use_iconv=TRUE)
 
 Urbain=c(1,2,3)
@@ -18,6 +18,7 @@ NamesOSOS=subset(NamesOSO,substr(NamesOSO,nchar(NamesOSO),nchar(NamesOSO))=="S")
 GI_OSO=subset(GI,select=NamesOSOS)
 test=apply(GI_OSO,MARGIN=1,which.max)
 GIcoord=subset(GI,select=c("longitude","latitude"))
+
 
 Habitat=vector()
 CoordH=GIcoord[0,]

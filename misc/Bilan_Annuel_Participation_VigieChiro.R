@@ -14,7 +14,7 @@ SelDep=F
 Sys.time()
 FranceD= shapefile("C:/Users/yvesb/Documents/SIG/Limite_administrative/France_dep_L93.shp")
 Sys.time()
-StartYear=2011
+StartYear=2006
 EndYear=2021
 
 
@@ -123,3 +123,4 @@ barplot(YNights$x,names.arg=YNights$Group.1,xlab="Year",ylab="n nights")
 UProtP=aggregate(Particip$Proto333,by=c(list(Particip$Proto333),list(Particip$observateur)),FUN=length)
 UProtP2=aggregate(UProtP$Group.1,by=list(UProtP$Group.1),length)
 UProtP2
+

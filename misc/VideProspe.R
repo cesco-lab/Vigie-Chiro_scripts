@@ -3,12 +3,12 @@ library(raster)
 library(rgdal)
 library(FNN)
 
-PartSelG=fread("PartSelG.csv")
-Zone="C:/Users/Yves Bas/Documents/SIG/Limite_administrative/France_dep_L93.shp"
+PartSelG=fread("C:/Users/yvesb/Documents/Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/PartSelG.csv")
+Zone="C:/Users/yvesb/Documents/SIG/Limite_administrative/France_dep_L93.shp"
 Sample=10000
 SelDep=T
 Dep=c("11","30","34","48","66") #LR
-ExclDep=T
+ExclDep=F
 DepE=c("76","14","50","61","27","29","56","22","35","59","62","08","10","51"
        ,"52","54","55","57","88")
 #Normandie+Bretagne+NPDC+CA+Lorraine
@@ -19,12 +19,12 @@ SelMois=c(4,5,6)
 FranceD= shapefile(Zone)
 if(SelDep)
 {
-  FranceD=subset(FranceD,FranceD$DépARTEM0 %in% Dep)
+  FranceD=subset(FranceD,FranceD$DÃ©pARTEM0 %in% Dep)
 }
 
 if(ExclDep)
 {
-  FranceD=subset(FranceD,!FranceD$DépARTEM0 %in% DepE)
+  FranceD=subset(FranceD,!FranceD$D?pARTEM0 %in% DepE)
 }
 
 SysGrid=spsample(FranceD,Sample,type="regular")
@@ -35,7 +35,6 @@ CoordSG=as.data.frame(SysG84)
 names(CoordSG)=c("Group.1","Group.2")
 CoordSG$x=1
 CoordSG$id=c(1:nrow(CoordSG))
-spplot(PointEch,zcol="Mois")
 
 
 PointEch=subset(PartSelG,PartSelG$Mois %in% SelMois)

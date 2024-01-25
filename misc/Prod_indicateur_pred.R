@@ -9,7 +9,7 @@ if(length(args)==0){
   #q()
 }
 TC_path=args[1]
-Ref_coef=fread("./vrac_md_dell2021/RefPF_Coef (5).csv")
+Ref_coef=fread("C:/Users/yvesb/Documents/vrac_md_dell2021/RefPF_Coef (5).csv")
 DataCalibr=fread("./vrac_md_dell2021/DataCalibr.csv")
 
 alogit <- function(x) 
@@ -30,7 +30,7 @@ for(f in 1:length(idlist)) {
 Idtot=as.data.frame(rbindlist(my.data))
 
 Index0=c(1:nrow(Idtot))
-test=subset(Idtot,Index0%%6==1)
+#test=subset(Idtot,Index0%%6==1)
 
 test=match(Ref_coef$Code,levels(as.factor(Idtot$species)))
 
@@ -47,7 +47,7 @@ for (i in 1:nlevels(as.factor(Idtot$species)))
 {
   if((!is.na(test2[i]))&(Sub_Ref_coef$Moy[test2[i]]!=0)){
     Datasub=subset(Idtot,Idtot$species==levels(as.factor(Idtot$species))[i])
-    
+    Datasub$pred=(10^Datasub$pred)-1
     Ind_S=Datasub$pred/Sub_Ref_coef$Moy[test2[i]]*Sub_Ref_coef$SSIZ[test2[i]]
     Ind_L=-Datasub$pred/Sub_Ref_coef$Moy[test2[i]]*Sub_Ref_coef$ReponseLum[test2[i]]
     Ind_A=Datasub$pred/Sub_Ref_coef$Moy[test2[i]]*Sub_Ref_coef$ReponseArb[test2[i]]

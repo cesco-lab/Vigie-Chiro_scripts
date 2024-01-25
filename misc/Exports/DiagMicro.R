@@ -4,8 +4,8 @@ library(data.table)
 if(!exists("FRaw"))
 {
   args=""
-  args[4]="./VigieChiro/Raw/DataLP_PF_export_55f.csv"
-  args[10]="./VigieChiro/Raw/" #output dir
+  args[4]="C:/Users/yvesb/Documents/VigieChiro/Raw/DataLP_PF_export_5ff.csv"
+  args[10]="C:/Users/yvesb/Documents/VigieChiro/Raw/" #output dir
 }
 
 
@@ -27,6 +27,11 @@ Sys.time()
 if(nrow(DataPip)>0)
 {
   DurSeq=DataPip$temps_fin-DataPip$temps_debut
+  Mois=substr(DataPip$donnee,nchar(DataPip$donnee)-14,nchar(DataPip$donnee)-13)
+  table(Mois)
+  boxplot(DurSeq~Mois,ylim=c(0,5))
+  hist(DurSeq,xlim=c(0,5))
+  
   Q90Pip=aggregate(DurSeq,by=list(DataPip$participation,DataPip$DataMicFinal)
                    ,FUN=function(x) quantile(x,0.9))
   Sys.time()

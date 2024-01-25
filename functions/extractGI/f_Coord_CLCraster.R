@@ -10,11 +10,12 @@ Coord_CLCraster=function(points,names_coord,bm,bl,layer)
   library(maptools)
   FOccSL=points
   OccSL=fread(paste0(FOccSL,".csv"))
+  test=fread(paste0(FOccSL,".csv"))
   #OccSL=OccSL[sample.int(nrow(OccSL),10),]
   CoordH=names_coord
   BufferMedium=bm
   BufferLarge=bl
-  #récupération de la couche habitats et de sa nomenclature
+  #r?cup?ration de la couche habitats et de sa nomenclature
   Hab=raster(layer)
   #NomHab=fread("C:/Users/Yves Bas/Downloads/Nom_OSO.csv")
   
@@ -157,6 +158,8 @@ Coord_CLCraster=function(points,names_coord,bm,bl,layer)
   testNC=(nchar(colnames(HabufPropT))==7)
   N3=colnames(HabufPropT)[testNC]
   HabufPropT3l=HabufPropT[,..N3]
+  
+  apply(HabufPropT3l[1:4,],2,sum)[order(names(apply(HabufPropT3l[1:4,],2,sum)))]
   Prop32=as.data.table(table(substr(colnames(HabufPropT3l),1,5)))
   
   if(nrow(Prop32)>0)
@@ -183,10 +186,14 @@ Coord_CLCraster=function(points,names_coord,bm,bl,layer)
   
   
   
-  
-  OccSL_ARajouter=subset(OccSL4,select=grepl("Sp",names(OccSL3)))
+  ARajouter=subset(names(OccSL4),substr(names(OccSL4),1,2)=="Sp")
+  OccSL_ARajouter=subset(OccSL4,select=ARajouter)
+  names(OccSL_ARajouter)
   
   OCS=data.frame(cbind(coordinates(OccSL4),as.data.frame(OccSL_ARajouter)))
+
+  apply(OCS[1:4,],2,sum)[order(names(apply(OCS[1:4,],2,sum)))]
+  
   fwrite(OCS,paste0(FOccSL,"_CLCraster.csv"))
   
   coordinates(OCS) <- CoordH
@@ -201,15 +208,15 @@ if(Test)
 {
   #for test
   Coord_CLCraster(
-    points="donnees_tela240esp_bis" #table giving coordinates in WGS84
+    points="C:/Users/yvesb/Downloads/Indicateurs_CLCraster_L93_5points_26-08" #table giving coordinates in WGS84
     ,
-    names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving 
+    names_coord=c("longitude","latitude") #vector of two values giving 
     ,
     bm=500
     ,
     bl=5000
     ,
-    layer="./SIG/clc2018_clc2018_v2018_20_raster100m/CLC2018_CLC2018_V2018_20.tif"
+    layer="C:/Users/yvesb/Documents/SIG/clc2018_clc2018_v2018_20_raster100m/CLC2018_CLC2018_V2018_20.tif"
   )
   
 }

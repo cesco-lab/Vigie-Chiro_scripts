@@ -1,4 +1,4 @@
-Dir="D:/PVAL_Espousouilles"
+Dir="D:/PVAL_Mejean"
 
 AllFiles=list.files(Dir,full.names=T,recursive=T)
 

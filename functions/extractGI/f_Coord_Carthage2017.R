@@ -1,7 +1,5 @@
 Test=T
-
 if(exists("Pipeline")){Test=F}
-
 Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
 {
   
@@ -17,17 +15,17 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
   BufferSmall=bs
   BufferMedium=bm
   BufferLarge=bl 
-  #récupération des données Carthage (eau)
+  #rï¿½cupï¿½ration des donnï¿½es Carthage (eau)
   Sys.time()
   CarthageP <- shapefile(carthagep)
   CarthageC <- shapefile(carthagec)
   Split=F
   #Start=10001
   #End=20000
-  Start=270001
-  End=280194
+  Start=1
+  End=5 #280194
   
-  
+  print(paste("Carthage",points))
   if(Split)
   {
     OccSL=OccSL[Start:(min(End,nrow(OccSL))),]
@@ -42,14 +40,9 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
   #coordinates(OccSL) <- c("decimalLongitude", "decimalLatitude")
   coordinates(OccSL) <- CoordH
   proj4string(OccSL) <- CRS("+init=epsg:4326") # WGS 84
-  proj4string(CarthageP) <- CRS("+init=epsg:4326") # WGS 84
-  proj4string(CarthageC) <- CRS("+init=epsg:4326") # WGS 84
-  CarthageP=spTransform(CarthageP,CRS("+init=epsg:2154"))
-  CarthageC=spTransform(CarthageC,CRS("+init=epsg:2154"))
-    
+  
   #CRS.new <- CRS(proj4string(CarthageP))
-  #OccSL_L93=spTransform(OccSL,CRS(proj4string(CarthageC)))
-  OccSL_L93=spTransform(OccSL,CRS("+init=epsg:2154"))
+  OccSL_L93=spTransform(OccSL,CRS(proj4string(CarthageC)))
   
   #subset des points d'eau douce
   #CarthagePP=CarthageP[CarthageP$NATURE=="Eau douce permanente",]
@@ -66,7 +59,7 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
   for (h in 1:length(ClassP))
   {
     CarthagePP=CarthageP[CarthageP$Nature==ClassP[h],]
-    
+    print(ClassP[h])
     #buffers of water surface 
     #loop to avoid exceeding memory
     BufferS=gBuffer(OccSL_L93,width=BufferSmall,byid=T)
@@ -89,7 +82,7 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
     if(length(SpPPlistS)>0)
     {
       test=sapply(SpPPlistS,FUN=function(x) !is.null(x))
-    SpPPlistS=subset(SpPPlistS,test)
+      SpPPlistS=subset(SpPPlistS,test)
     }
     SpCarthagePP=do.call(rbind,SpPPlistS) # 0.05 sec / pol
     #plot(SpCarthagePP)
@@ -102,7 +95,7 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
       Sys.time()
       OccSL_L93PP=merge(OccSL_L93PP,AreaAgg,by.x="id",by.y="Group.1",all.x=T)
       OccSL_L93PP$SpWS_S[is.na(OccSL_L93PP$SpWS_S)]=0
-      spplot(OccSL_L93PP,zcol="SpWS_S",col="transparent")
+      #spplot(OccSL_L93PP,zcol="SpWS_S",col="transparent")
       
     }else{
       OccSL_L93PP$SpTemp=0
@@ -136,7 +129,7 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
       Sys.time()
       OccSL_L93PP=merge(OccSL_L93PP,AreaAgg,by.x="id",by.y="Group.1",all.x=T)
       OccSL_L93PP$SpWS_M[is.na(OccSL_L93PP$SpWS_M)]=0
-      spplot(OccSL_L93PP,zcol="SpWS_M",col="transparent")
+      #spplot(OccSL_L93PP,zcol="SpWS_M",col="transparent")
     }else{
       OccSL_L93PP$SpWS_M=0
     }
@@ -168,7 +161,7 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
       names(AreaAgg)[ncol(AreaAgg)]="SpWS_L"
       OccSL_L93PP=merge(OccSL_L93PP,AreaAgg,by.x="id",by.y="Group.1",all.x=T)
       OccSL_L93PP$SpWS_L[is.na(OccSL_L93PP$SpWS_L)]=0
-      spplot(OccSL_L93PP,zcol="SpWS_L",col="transparent")
+      #spplot(OccSL_L93PP,zcol="SpWS_L",col="transparent")
     }else{
       OccSL_L93PP$SpWS_L=0
     }
@@ -186,105 +179,105 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
   {
     CarthageCP=CarthageC[CarthageC$Etat==ClassC[h],]
     
-  
-  SpPClistS=list()
-  Sys.time()
-  for (k in 1:ceiling(nrow(OccSL_L93)/1000))
-  {
-    SpPClistS[[k]]=intersect(CarthageCP,BufferS[((k-1)*1000+1)
-                                                :(min(k*1000,nrow(OccSL_L93))),]) # 0.05 sec / pol
-    print(paste(k,Sys.time()))
-  }
-  if(length(SpPClistS)>0)
-  {
-    test=sapply(SpPClistS,FUN=function(x) !is.null(x))
-    SpPClistS=subset(SpPClistS,test)
-  }
-  SpCarthagePC=do.call(rbind,SpPClistS) # 0.05 sec / pol
-  Sys.time()
-  #buftemp=intersect(CarthageCP,BufferS) # 0.05 sec / buffer
-  Sys.time()
-  if(is.null(SpCarthagePC))
-  {
-    OccSL_L93PP$SpTemp=0  
-  }else{
+    print(ClassC[h])
+    SpPClistS=list()
+    Sys.time()
+    for (k in 1:ceiling(nrow(OccSL_L93)/1000))
+    {
+      SpPClistS[[k]]=intersect(CarthageCP,BufferS[((k-1)*1000+1)
+                                                  :(min(k*1000,nrow(OccSL_L93))),]) # 0.05 sec / pol
+      print(paste(k,Sys.time()))
+    }
+    if(length(SpPClistS)>0)
+    {
+      test=sapply(SpPClistS,FUN=function(x) !is.null(x))
+      SpPClistS=subset(SpPClistS,test)
+    }
+    SpCarthagePC=do.call(rbind,SpPClistS) # 0.05 sec / pol
+    Sys.time()
+    #buftemp=intersect(CarthageCP,BufferS) # 0.05 sec / buffer
+    Sys.time()
+    if(is.null(SpCarthagePC))
+    {
+      OccSL_L93PP$SpTemp=0  
+    }else{
+      
+      LengthB=gLength(SpCarthagePC,byid=T)
+      Sys.time()
+      PC_50=aggregate(LengthB,by=list(SpCarthagePC$id),FUN=sum)
+      names(PC_50)[ncol(PC_50)]="SpWC_S"
+      OccSL_L93PP=merge(OccSL_L93PP,PC_50,by.x="id",by.y="Group.1",all.x=T)
+      OccSL_L93PP$SpWC_S[is.na(OccSL_L93PP$SpWC_S)]=0
+      #spplot(OccSL_L93PP,zcol="SpWC_S",col="transparent")
+    }
+    names(OccSL_L93PP)[ncol(OccSL_L93PP)]=paste0("SpCC",h,"S")
     
-  LengthB=gLength(SpCarthagePC,byid=T)
-  Sys.time()
-  PC_50=aggregate(LengthB,by=list(SpCarthagePC$id),FUN=sum)
-  names(PC_50)[ncol(PC_50)]="SpWC_S"
-  OccSL_L93PP=merge(OccSL_L93PP,PC_50,by.x="id",by.y="Group.1",all.x=T)
-  OccSL_L93PP$SpWC_S[is.na(OccSL_L93PP$SpWC_S)]=0
-  spplot(OccSL_L93PP,zcol="SpWC_S",col="transparent")
-  }
-  names(OccSL_L93PP)[ncol(OccSL_L93PP)]=paste0("SpCC",h,"S")
-  
-  
-  SpPClistM=list()
-  Sys.time()
-  for (k in 1:ceiling(nrow(OccSL_L93)/1000))
-  {
-    SpPClistM[[k]]=intersect(CarthageCP,BufferM[((k-1)*1000+1)
-                                                :(min(k*1000,nrow(OccSL_L93))),]) # 0.05 sec / pol
-    print(paste(k,Sys.time()))
-  }
-  if(length(SpPClistM)>0)
-  {
-    test=sapply(SpPClistM,FUN=function(x) !is.null(x))
-    SpPClistM=subset(SpPClistM,test)
-  }  
-  SpCarthagePC=do.call(rbind,SpPClistM) # 0.05 sec / pol
-  Sys.time()
-  #buftemp=intersect(CarthageCP,BufferM) # 0.05 sec / buffer
-  Sys.time()
-  if(is.null(SpCarthagePC))
-  {
-    OccSL_L93PP$SpTemp=0  
-  }else{
-    LengthB=gLength(SpCarthagePC,byid=T)
-  Sys.time()
-  PC_50=aggregate(LengthB,by=list(SpCarthagePC$id),FUN=sum)
-  names(PC_50)[ncol(PC_50)]="SpWC_M"
-  OccSL_L93PP=merge(OccSL_L93PP,PC_50,by.x="id",by.y="Group.1",all.x=T)
-  OccSL_L93PP$SpWC_M[is.na(OccSL_L93PP$SpWC_M)]=0
-  spplot(OccSL_L93PP,zcol="SpWC_M",col="transparent")
-  }
-  names(OccSL_L93PP)[ncol(OccSL_L93PP)]=paste0("SpCC",h,"M")
-  
-  
-  
-  SpPClistL=list()
-  Sys.time()
-  for (k in 1:ceiling(nrow(OccSL_L93)/1000))
-  {
-    SpPClistL[[k]]=intersect(CarthageCP,BufferL[((k-1)*1000+1)
-                                                :(min(k*1000,nrow(OccSL_L93))),]) # 0.05 sec / pol
-    print(paste(k,Sys.time()))
-  }
-  
-  if(length(SpPClistL)>0)
-  {
-    test=sapply(SpPClistL,FUN=function(x) !is.null(x))
-    SpPClistL=subset(SpPClistL,test)
-  }    
-  SpCarthagePC=do.call(rbind,SpPClistL) # 0.05 sec / pol
-  Sys.time()
-  #buftemp=intersect(CarthageCP,BufferL) # 0.05 sec / buffer
-  if(is.null(SpCarthagePC))
-  {
-    OccSL_L93PP$SpTemp=0  
-  }else{
     
-  LengthB=gLength(SpCarthagePC,byid=T)
-  Sys.time()
-  PC_50=aggregate(LengthB,by=list(SpCarthagePC$id),FUN=sum)
-  names(PC_50)[ncol(PC_50)]="SpWC_L"
-  OccSL_L93PP=merge(OccSL_L93PP,PC_50,by.x="id",by.y="Group.1",all.x=T)
-  OccSL_L93PP$SpWC_L[is.na(OccSL_L93PP$SpWC_L)]=0
-  spplot(OccSL_L93PP,zcol="SpWC_L",col="transparent")
-  }
-  names(OccSL_L93PP)[ncol(OccSL_L93PP)]=paste0("SpCC",h,"L")
-  
+    SpPClistM=list()
+    Sys.time()
+    for (k in 1:ceiling(nrow(OccSL_L93)/1000))
+    {
+      SpPClistM[[k]]=intersect(CarthageCP,BufferM[((k-1)*1000+1)
+                                                  :(min(k*1000,nrow(OccSL_L93))),]) # 0.05 sec / pol
+      print(paste(k,Sys.time()))
+    }
+    if(length(SpPClistM)>0)
+    {
+      test=sapply(SpPClistM,FUN=function(x) !is.null(x))
+      SpPClistM=subset(SpPClistM,test)
+    }  
+    SpCarthagePC=do.call(rbind,SpPClistM) # 0.05 sec / pol
+    Sys.time()
+    #buftemp=intersect(CarthageCP,BufferM) # 0.05 sec / buffer
+    Sys.time()
+    if(is.null(SpCarthagePC))
+    {
+      OccSL_L93PP$SpTemp=0  
+    }else{
+      LengthB=gLength(SpCarthagePC,byid=T)
+      Sys.time()
+      PC_50=aggregate(LengthB,by=list(SpCarthagePC$id),FUN=sum)
+      names(PC_50)[ncol(PC_50)]="SpWC_M"
+      OccSL_L93PP=merge(OccSL_L93PP,PC_50,by.x="id",by.y="Group.1",all.x=T)
+      OccSL_L93PP$SpWC_M[is.na(OccSL_L93PP$SpWC_M)]=0
+      #spplot(OccSL_L93PP,zcol="SpWC_M",col="transparent")
+    }
+    names(OccSL_L93PP)[ncol(OccSL_L93PP)]=paste0("SpCC",h,"M")
+    
+    
+    
+    SpPClistL=list()
+    Sys.time()
+    for (k in 1:ceiling(nrow(OccSL_L93)/1000))
+    {
+      SpPClistL[[k]]=intersect(CarthageCP,BufferL[((k-1)*1000+1)
+                                                  :(min(k*1000,nrow(OccSL_L93))),]) # 0.05 sec / pol
+      print(paste(k,Sys.time()))
+    }
+    
+    if(length(SpPClistL)>0)
+    {
+      test=sapply(SpPClistL,FUN=function(x) !is.null(x))
+      SpPClistL=subset(SpPClistL,test)
+    }    
+    SpCarthagePC=do.call(rbind,SpPClistL) # 0.05 sec / pol
+    Sys.time()
+    #buftemp=intersect(CarthageCP,BufferL) # 0.05 sec / buffer
+    if(is.null(SpCarthagePC))
+    {
+      OccSL_L93PP$SpTemp=0  
+    }else{
+      
+      LengthB=gLength(SpCarthagePC,byid=T)
+      Sys.time()
+      PC_50=aggregate(LengthB,by=list(SpCarthagePC$id),FUN=sum)
+      names(PC_50)[ncol(PC_50)]="SpWC_L"
+      OccSL_L93PP=merge(OccSL_L93PP,PC_50,by.x="id",by.y="Group.1",all.x=T)
+      OccSL_L93PP$SpWC_L[is.na(OccSL_L93PP$SpWC_L)]=0
+      #spplot(OccSL_L93PP,zcol="SpWC_L",col="transparent")
+    }
+    names(OccSL_L93PP)[ncol(OccSL_L93PP)]=paste0("SpCC",h,"L")
+    
   }
   OccSL_ARajouter=subset(OccSL_L93PP,select=grepl("Sp",names(OccSL_L93PP)))
   
@@ -302,7 +295,7 @@ Coord_Carthage=function(points,names_coord,bs,bm,bl,carthagep,carthagec)
   coordinates(Carthage) <- CoordH
   
   SelCol=sample(names(OccSL_ARajouter),1)
-  spplot(Carthage,zcol=SelCol,main=SelCol)
+  #spplot(Carthage,zcol=SelCol,main=SelCol)
   
 }
 
@@ -311,11 +304,10 @@ if(Test)
   #for testing
   Coord_Carthage(
     #points="./Vigiechiro/GIS/SysGrid__3e+05" #table giving coordinates in WGS84
-    points="C:/wamp64/www/sites_localites" #table giving coordinates in WGS84
+    points="C:/Users/yvesb/Downloads/Indicateurs_CLCraster_L93_5points_26-08" #table giving coordinates in WGS84
     ,
-    #  names_coord=c("decimalLongitude","decimalLatitude") #vector of two values giving 
-    #names_coord=c("Group.1","Group.2") #vector of two values giving 
     names_coord=c("longitude","latitude") #vector of two values giving 
+    #names_coord=c("Group.1","Group.2") #vector of two values giving 
     
     ,
     bs=50
@@ -325,10 +317,10 @@ if(Test)
     bl=5000
     ,
     #carthagep="C:/wamp64/www/CARTHAGE_PLAN/HYDROGRAPHIE_SURFACIQUE.shp"
-    carthagep="C:/wamp64/www/CARTHAGE_PLAN/EltHydroSurface_FXX.shp"
+    carthagep="D:/c-BD Carthage_Plans d_eau/EltHydroSurface-shp/EltHydroSurface_FXX.shp"
     ,
     #  carthagec="C:/wamp64/www/CARTHAGE_COURS/TRONCON_HYDROGRAPHIQUE.shp"
-    carthagec="C:/wamp64/www/CARTHAGE_COURS/TronconHydrograElt_FXX.shp"
+    carthagec="D:/d-BD Carthage_Cours d_eau/TronconHydrograElt-shp/TronconHydrograElt_FXX.shp"
     
   )
 }

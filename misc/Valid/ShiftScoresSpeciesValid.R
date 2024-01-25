@@ -3,16 +3,17 @@ library(raster)
 library(sf)
 library(lubridate)
 
-SpeciesList=fread("SpeciesList.csv")
-ValidData=fread("./www/export_validtot210408.txt")
-ListPartWavArchiv=fread("./www/wavarchivees.txt")
-Particip=fread("./www/p_export.csv",encoding="UTF-8")
-SiteLocF="./www/sites_localites.csv"
+SpeciesList=fread("C:/Users/yvesb/Documents/Tadarida/Tadarida-C/tadaridaC_src/other_inputs/SpeciesList.csv")
+ValidData=fread("C:/Users/yvesb/Downloads/export_validtot220305.txt")
+ListPartWavArchiv=fread("C:/Users/yvesb/Documents/www/wavarchivees2.txt")
+Particip=fread("C:/Users/yvesb/Documents/www/p_export_forLinux.csv",encoding="UTF-8")
+SiteLocF="C:/Users/yvesb/Documents/www/sites_localites.csv"
 Zone="C:/Users/yvesb/Documents/SIG/Limite_administrative/France_dep_L93.shp"
-SLpred="./VigieChiro/gbifData/SL"
-DateSp="./VigieChiro/gbifData/DateSp/"
-Nsel=10 #compter un ratio de 1.4 pour obtenir n fichiers
-SpIdTot=fread("./www/SpNuit2_0_DataLP_PF_exportTot.csv")
+SLpred="C:/Users/yvesb/Documents/VigieChiro/gbifData/SL"
+DateSp="C:/Users/yvesb/Documents/VigieChiro/gbifData/DateSp/"
+UseDate=F
+Nsel=90 #per species, compter un ratio de 0.7 pour obtenir n fichiers
+SpIdTot=fread("C:/Users/yvesb/Documents/www/SpNuit2Valid_DI_0_DataLP_PF_exportTot.csv")
 #SpIdTot=fread("DataRP_SpSecteur_0.csv")
 RP=F
 SelSp=c("Tetvir"
@@ -89,6 +90,8 @@ SelSp=c("Myodau"
         ,"Myoema"
         ,"MyoGT","Myocap","Myobec","Pipnat","Eptser","Eptnil","Vesmur","Nyclei","Nycnoc","Nyclas","Rhihip","Rhieur"
         ,"Minsch")
+SelSp=c("MyoGT","Eptser","Eptnil","Vesmur","Nyclei","Nycnoc","Nyclas","Tadten"
+        ,"Pleaus","Plemac","Pleaur")
 
 
 
@@ -260,8 +263,12 @@ for (i in 1:round(nrow(ParSelFPSpecies)/2))
     Datei$ListSpValide[1]=Spi$`Scientific name`[1]
     Datei$PicSp[1]=sample(c(16:374),1)
   }
+  if(UseDate){
   Parti=subset(Partdispo,(Partdispo$yday>Datei$PicSp[1]-30)
                &(Partdispo$yday<Datei$PicSp[1]+30))
+  }else{
+    Parti=Partdispo
+  }
   #Parti=Partdispo
   if(RP){
     SL_u=unique(SL_FR,by="site")
@@ -336,9 +343,12 @@ for (i in (round(nrow(ParSelFPSpecies)/2)+1):nrow(ParSelFPSpecies))
     Datei$ListSpValide[1]=Spi$`Scientific name`[1]
     Datei$PicSp[1]=sample(c(16:374),1)
   }
+  if(UseDate){
   Parti=subset(Partdispo,(Partdispo$yday>Datei$PicSp[1]-30)
                &(Partdispo$yday<Datei$PicSp[1]+30))
-  #Parti=Partdispo
+  }else{
+  Parti=Partdispo
+  }
   if(RP){
     SL_u=unique(SL_FR,by="site")
     PartSLi=merge(Parti,SL_u,by=c("site"))

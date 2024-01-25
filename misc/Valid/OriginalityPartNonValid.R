@@ -4,7 +4,7 @@ library(sf)
 library(lubridate)
 library(FNN)
 
-ListPartWavArchiv=fread("C:/wamp64/www/wavarchivees.txt")
+ListPartWavArchiv=fread("C:/wamp64/www/wavarchivees2.txt")
 ListValid=fread("ValidDataPart.csv")
 Particip=fread("C:/wamp64/www/p_export.csv")
 SiteLoc=fread("C:/wamp64/www/sites_localites.txt")

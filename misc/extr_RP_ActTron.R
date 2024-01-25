@@ -1,19 +1,19 @@
 library(data.table)
-SeuilFiable=0 #à éditer 
+SeuilFiable=0 #? ?diter 
 Sectorized=T
 #SeuilFiable=""
 #ETAPE 0 - IMPORT DES TABLES
-#bien renommer les chemins en fonction de l'ordi utilisé
-#table "données"
+#bien renommer les chemins en fonction de l'ordi utilis?
+#table "donn?es"
 Sys.time()
-DataLP=fread("DataLP_RP_Sectorized_Valid.csv")
+DataLP=fread("E:/RP/DataLP_RP_Sectorized_Valid.csv")
 Sys.time()
 #table "seuils"
 #RefSeuils=fread("Referentiel_seuils_ProbEspHF_1510_Cir.csv")
 
-#table "espèces"
+#table "esp?ces"
 #GroupList_prev=fread("GroupList_HF.csv") 
-GroupList=fread("SpeciesList.csv") 
+GroupList=fread("C:/Users/yvesb/Tadarida/Tadarida-C/tadaridaC_src/other_inputs/SpeciesList.csv") 
 
 LatMin=0
 LatMax=90
@@ -27,7 +27,7 @@ op <- options(digits.secs=3)
 #options(op)
 
 
-#ETAPE 0b - tri des participations foireuses (durée séquence Pip + proba Pip : A AFFINER!!!!)
+#ETAPE 0b - tri des participations foireuses (dur?e s?quence Pip + proba Pip : A AFFINER!!!!)
 #A FAIRE : tri sur le sampling rate
 Sys.time()
 DataPip=subset(DataLP,substr(DataLP$espece,1,3)=="Pip") #3 sec
@@ -54,7 +54,7 @@ Sys.time()
 if(exists("RefSeuils"))
 {
   #ETAPE 1 - formattage des tables et de leurs attributs
-  #merge avec espèce pour tri selon seuil
+  #merge avec esp?ce pour tri selon seuil
   #simplifie la table groupe pour ne pas alourdir la grosse table Data...
   GroupSimpl=data.frame(espece=GroupList$Esp,nom=GroupList$`Scientific name`
                         ,groupe=GroupList$Group)

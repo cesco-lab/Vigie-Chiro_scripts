@@ -5,17 +5,19 @@ library(maptools)
 library(rgeos)
 library(readxl)
 
-Table="C:/Users/yvesb/Downloads/BDD_SM2_PourYves.xlsx"
+Table="C:/Users/yvesb/Downloads/Thomas_Busschaert_Metadata_table.csv"
 
 
 #NewPart=fread("./VigieChiro/PartImport/GMB_2015_2020_MIG14_15_16.csv",dec=",")
 #NewPart=fread("./VigieChiro/PartImport/Retransmission_3.csv",dec=",")
 
-SiteLoc=fread("./www/sites_localites.csv")
-GridStoc=shapefile("./SIG/carrenat.shp")
-outDir="./www/"
-id_observateur="55e73d07ee3874000d22d9a4" #Raph Colombo
-CoordNames=c("X_WGS84","Y_WGS84")
+SiteLoc=fread("C:/Users/yvesb/Documents/www/sites_localites.csv")
+GridStoc=shapefile("C:/Users/yvesb/Documents/SIG/carrenat.shp")
+outDir="C:/Users/yvesb/Documents/www/"
+#id_observateur="55e73d07ee3874000d22d9a4" #Raph Colombo
+id_observateur="5e9886c590250e001113d95d" #VC mnhn
+#CoordNames=c("X_WGS84","Y_WGS84")
+CoordNames=c("X","Y")
 
 proj4string(GridStoc) <- CRS("+init=epsg:27572")
 
@@ -32,11 +34,11 @@ if(grepl(".csv",Table))
 SiteLoc=subset(SiteLoc,SiteLoc$protocole=="POINT_FIXE")
 
 
-#récupérer les centroides
+#r?cup?rer les centroides
 CentroidsStoc = gCentroid(GridStoc,byid=TRUE)
 CentroidsWGS84 = spTransform(CentroidsStoc,CRS("+init=epsg:4326"))
 
-#créer les grilles de points représentatifs
+#cr?er les grilles de points repr?sentatifs
 StocA1=elide(CentroidsStoc, shift=c(-750,750))
 StocA2=elide(CentroidsStoc, shift=c(-250,750))
 StocB1=elide(CentroidsStoc, shift=c(250,750))
@@ -54,7 +56,7 @@ StocG2=elide(CentroidsStoc, shift=c(-750,-750))
 StocH1=elide(CentroidsStoc, shift=c(750,-750))
 StocH2=elide(CentroidsStoc, shift=c(250,-750))
 
-#récupérer les nouvelles coordonnées
+#r?cup?rer les nouvelles coordonn?es
 NewCoord=unique(NewPart,by=CoordNames)
 
 NewCoordGI=NewCoord
@@ -74,9 +76,10 @@ Closest=apply(test,2,min)
 summary(Closest)
 
 
+
 if(min(Closest)<=40)
 {
-  #stop("coder point déjà existant")
+  #stop("coder point d?j? existant")
   Existing=subset(NewCoord,Closest<40)
   dim(Existing)
   Wclosest=apply(test,2,which.min)
@@ -118,7 +121,7 @@ NameList=c("A1","A2","B1","B2","C1","C2","D1","D2"
 
 
 NewSq=vector()
-#tester la grille représentative
+#tester la grille repr?sentative
 for (i in 1:nrow(NewCoordL2E))
 {
   print(i)
@@ -191,7 +194,7 @@ PourImportSites=unique(PourImportSites)
 fwrite(PourImportSites,paste0(outDir,"/PourImportSites",Sys.Date()
                               ,".csv"),sep=";")
 
-#remettre les références carrés et points dans la table participation
+#remettre les r?f?rences carr?s et points dans la table participation
 NPcoord=subset(NewPart,select=CoordNames)
 names(NPcoord)=c("longitude","latitude")
 

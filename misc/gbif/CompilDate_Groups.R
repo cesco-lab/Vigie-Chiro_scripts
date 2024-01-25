@@ -1,18 +1,18 @@
 library(data.table)
 
 Datedir="C:/Users/yvesb/Documents/VigieChiro/gbifData/DateSp"
-GroupSel=c("Geometridae"
-           ,"Sphingidae"
-           ,"Saturniidae",
-           "Bombycidae",
-           "Lasiocampidae"
-           ,"Drepanidae"
-           ,"Noctuidae","Erebidae"
-           #,"Euteliidae"
-           ,"Notodontidae")
-Probas=fread("C:/Users/yvesb/Downloads/PTall_MacroHeteroAll.csv")
-#ThresP=0.1
-OutF="Dates_MacroHeteroAll.csv"
+#GroupSel=c("Geometridae"
+ #          ,"Sphingidae"
+  #         ,"Saturniidae",
+   #        "Bombycidae",
+    #       "Lasiocampidae"
+     #      ,"Drepanidae"
+      #     ,"Noctuidae","Erebidae"
+       #    #,"Euteliidae"
+        #   ,"Notodontidae")
+GroupSel="Syrphidae"
+Probas=fread("C:/Users/yvesb/Downloads/PTall_SyrphidAll.csv")
+OutF="Dates_SyrphidAll.csv"
 
 
 PTfiles=vector()

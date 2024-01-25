@@ -5,3 +5,4 @@ LW=list.files(DirW,pattern=".wav$",full.names=T,recursive=T)
 NewName=paste0(dirname(dirname(LW)),"/",basename(LW))
 
 file.rename(from=LW,to=NewName)
+

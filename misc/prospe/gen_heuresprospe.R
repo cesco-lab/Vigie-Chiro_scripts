@@ -8,7 +8,7 @@ NbHeure=subset(NbHeure,NbHeure>0)
 Sel=vector()
 for (i in 1:(4*24))
 {
-  Proba=1/168
+  Proba=1/168/4
   Rand=sample(10000,1)
   #print(Rand)
   if(Rand<Proba*10000)
@@ -19,7 +19,7 @@ for (i in 1:(4*24))
 print(Sel)
 for (i in ((4*24)+1):(7*24))
 {
-  Proba=1/168+1/72
+  Proba=1/168/4+1/72/4
   Rand=sample(10000,1)
   #print(Rand)
   if(Rand<Proba*10000)
@@ -38,7 +38,7 @@ Selj=vector()
 for (j in 1:24)
 {
   {
-    Proba=1/72
+    Proba=1/72/2
     Rand=sample(10000,1)
     #print(Rand)
     if(Rand<Proba*10000)

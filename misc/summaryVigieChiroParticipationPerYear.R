@@ -1,16 +1,20 @@
 library(data.table)
 library(ggplot2)
 library(lubridate)
+library(sf)
 
-SpNuit=fread("C:/Users/yvesb/Documents/www/SpNuit2_0_DataLP_PF_exportTot.csv")
-SpeciesList=fread("C:/Users/yvesb/Documents/SpeciesList.csv")
-DataRP=fread("C:/Users/yvesb/Documents/vrac_md_dell2021/DataRP_SpSecteur_0.csv")
-Particip=fread("C:/Users/yvesb/Documents/www/p_export_forLinux.csv")
-SiteLoc=fread("C:/Users/yvesb/Documents/www/sites_localites.txt")
-Sites=fread("C:/Users/yvesb/Documents/www/sites.txt")
+SpNuit=fread("C:/Users/ybas/Documents/www/SpNuit2Valid_50_PG.csv")
+SpeciesList=fread("C:/Users/ybas/Documents/SpeciesList.csv")
+DataRP=fread("C:/Users/ybas/Documents/www/DataRP_SpTron_woS_0.csv")
+Particip=fread("p_export.csv")
+SiteLoc=fread("C:/Users/ybas/Documents/www/sites_localites.txt")
+Sites=fread("C:/Users/ybas/Documents/www/sites.txt")
 ListVar=c("participation","nb_contacts")
-ArchiveW=fread("C:/Users/yvesb/Documents/www/archivees_wav.txt",h=F)
-ArchiveT=fread("C:/Users/yvesb/Documents/www/archivees_ta.txt",h=F)
+ArchiveW=fread("C:/Users/ybas/Documents/www/archivees_wav.txt",h=F)
+ArchiveT=fread("C:/Users/ybas/Documents/www/archivees_ta.txt",h=F)
+YearLimits=c(2006:2023)
+Regions=st_read("C:/Users/ybas/Documents/SIG/regions-20180101.shp"
+                )
 
 BatList=subset(SpeciesList,SpeciesList$Group=="bat")
 BatNuit=subset(SpNuit,SpNuit$espece %in% BatList$Esp)
@@ -21,11 +25,12 @@ BNs=subset(BatNuit,select=ListVar)
 BRs=subset(BatRP,select=ListVar)
 BatTot=rbind(BNs,BRs)
 BatTot2=merge(BatTot,Particip,by="participation")
-BatTot2$year=substr(BatTot2$date_debut,7,10)
+BatTot2$year=substr(BatTot2$date_debut,1,4)
+BatTot2=subset(BatTot2,BatTot2$year %in% YearLimits)
 table(BatTot2$year)
 SumBat=aggregate(BatTot2$nb_contacts,by=list(BatTot2$year),FUN=sum)
 barplot(SumBat$x/1e6,names.arg=SumBat$Group.1,las=2
-        ,main="Bat passes recorded in Vigie-Chiro (in millions/year)")
+        ,main="Bat passes recorded in Vigie-Chiro (in millions)")
 sum(SumBat$x)
 
 #bush-crickets
@@ -38,7 +43,7 @@ BNs=subset(BatNuit,select=ListVar)
 BRs=subset(BatRP,select=ListVar)
 BatTot=rbind(BNs,BRs)
 BatTot2=merge(BatTot,Particip,by="participation")
-BatTot2$year=substr(BatTot2$date_debut,7,10)
+BatTot2$year=substr(BatTot2$date_debut,1,4)
 table(BatTot2$year)
 SumBat=aggregate(BatTot2$nb_contacts,by=list(BatTot2$year),FUN=sum)
 barplot(SumBat$x/1e6,names.arg=SumBat$Group.1,las=2
@@ -58,7 +63,7 @@ ANs=subset(SpNuit,select=ListVar)
 ARs=subset(DataRP,select=ListVar)
 BiodivTot=rbind(ANs,ARs)
 BatTot2=merge(BiodivTot,Particip,by="participation")
-BatTot2$year=substr(BatTot2$date_debut,7,10)
+BatTot2$year=substr(BatTot2$date_debut,1,4)
 table(BatTot2$year)
 SumAll=aggregate(BatTot2$nb_contacts,by=list(BatTot2$year),FUN=sum)
 barplot(SumAll$x/1e6,names.arg=SumAll$Group.1,las=2
@@ -76,15 +81,46 @@ print(table(grepl("Routier",NsRP$site)))
 
 NlocPF=subset(SiteLoc,grepl("Fixe",SiteLoc$site))
 print(nrow(NlocPF))
+
+#nb sites par région
+SL_sf <- st_as_sf(NlocPF, coords = c("longitude", "latitude"))
+SL_sf <- st_set_crs(SL_sf, 4326)
+SL_Regions <- st_intersection(SL_sf, Regions)
+table(SL_Regions$nom.1)
+NbParticipantes=aggregate(SL_Regions$num.site
+                          ,by=c(list(SL_Regions$nom.1)
+                                ,list(SL_Regions$id_observateur)),length)
+NbParticipantesPerRegion=aggregate(NbParticipantes$Group.2
+                                   ,by=list(NbParticipantes$Group.1),length)
+
+NlocR=subset(SiteLoc,grepl("Routier",SiteLoc$site))
+print(length(unique(NlocR$site)))
+
+NlocP=subset(SiteLoc,grepl("destre",SiteLoc$site))
+print(length(unique(NlocP$site)))
+
 #test=unique(Sites,by="site")
 test=subset(Sites,Sites$site %in% Particip$site)
 
-Particip$year=substr(Particip$date_debut,7,10)
+Particip$year=substr(Particip$date_debut,1,4)
+test107=(Particip$year %in% YearLimits) 
+summary(test107)  
+Particip=subset(Particip,test107)
+barplot(table(Particip$year),las=2)
+
+
 ParticipUS=unique(Particip,by=c("site","year"))
 data.frame((table(ParticipUS$year)))
-ParticipU=unique(Particip,by=c("idobservateur","year"))
-data.frame((table(ParticipU$year)))
 
+Particip_wdata=subset(Particip,Particip$nb_obs>0)
+ParticipU=unique(Particip_wdata,by=c("idobservateur","year"))
+data.frame((table(ParticipU$year)))
+print(length(unique(ParticipU$idobservateur)))
+
+ParticipPF=subset(Particip,grepl("Fixe",Particip$site))
+ParticipUSP=unique(ParticipPF,by=c("site","point"))
+ParticipPF_wdata=subset(ParticipPF,ParticipPF$nb_obs>0)
+ParticipUSP_wdata=unique(ParticipPF_wdata,by=c("site","point"))
 
 
 #Number of points-transects
@@ -143,10 +179,12 @@ Particip$protocole=ifelse(grepl("Fixe",Particip$site)
                                              ,"Car transects"
                                              ,"Walk transects"))
 table(Particip$protocole)
-Particip$StartDate=dmy_hm(Particip$date_debut)
-Particip$EndDate=dmy_hm(Particip$date_fin)
-
+#Particip$StartDate=ifelse(is.POSIXct(Particip$date_debut),Particip$date_debut,dmy_hm(Particip$date_debut))
+Particip$StartDate=Particip$date_debut
+#Particip$EndDate=ifelse(is.POSIXct(Particip$date_fin),Particip$date_fin,dmy_hm(Particip$date_fin))
+Particip$EndDate=Particip$date_fin
 Particip$Nnight=ceiling((Particip$EndDate-Particip$StartDate)/24/3600)
+#Particip$Nnight=ceiling((Particip$EndDate-Particip$StartDate))
 Particip$Nnight=as.numeric(Particip$Nnight)
 Particip$Nnight[is.na(Particip$Nnight)]=1
 Particip$Nnight[Particip$Nnight<1]=1
@@ -180,7 +218,9 @@ pGPF=subset(pGPF,pGPF$Group.2>2013)
 p4<-ggplot(data=pGPF, aes(x=Group.2, y=x,group=protocole)) +
   labs(title="Nb stations*nights per year") +
   geom_line(color="palegreen4")+
-  geom_point(color="palegreen4")
+  geom_point(color="palegreen4")+
+  xlab("")+
+  ylab("")
 p4
 #mod=glm(pGPF$x~as.numeric(pGPF$Group.2),family="poisson")
 #summary(mod)

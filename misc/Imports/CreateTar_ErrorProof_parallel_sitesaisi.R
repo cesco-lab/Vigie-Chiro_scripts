@@ -2,13 +2,15 @@ library(data.table)
 library(tools)
 library(foreach)
 
-ParDir="G:/PI_Cassandre"
-OutputDir="G:/upload_ready"
+ParDir="E:/FEDER ripisylves Protocole 1/sons traites kal et tadarida" #dossier où sont les répertoires des sites contenant les répertoires des participations contenant les waves découpés/expansés (issu de Kaleidoscope)
+OutputDir="D:/upload231207"
 #irodsDir="C:\\wamp64\\www\\.icommands"
-#SiteLoc=fread("C:/Users/Arthur/kDrive/Shared/BOITE A OUTIL/TADARIDA/sites_localites.txt")
+#SiteLoc=fread("./www/sites_localites.txt")
 #irodsDest="/ccin2p3/home/ybas/transferts"
 
 #FACTORISATION A PREVOIR
+
+if(grepl(" ",ParDir)){stop("espace dans le chemin d'accès de ParDir")}
 
 ListSite=dir(ParDir,full.names=T)
 dir.create(OutputDir,showWarnings = F)
@@ -56,7 +58,7 @@ for (h in 1:length(ListSite))
         {
           #case -1A : blocks all created
           if(length(ListWtot)==0)
-            {
+          {
             for (z in 1:length(ListBloc))
             {
               Wavz=list.files(ListBloc[z],full.names=T)
@@ -73,7 +75,7 @@ for (h in 1:length(ListSite))
                 print(Sys.time())
                 system(paste0("7z a -ttar ",TarName," ",ListBloc[z]
                               ,"/*.*")) #65 secondes
-                Sys.time()
+                print(Sys.time())
               }else{
                 stop("rare case not coded yet: empty block")
               }
@@ -106,7 +108,7 @@ for (h in 1:length(ListSite))
           
           #case 1 : block uncomplete
           if((length(LlB)<1000)&(length(ListWtot)>0))
-            {
+          {
             NumGet=1000-length(LlB)
             WaveGet=ListWtot[1:NumGet]
             WaveDest=paste0(LastBloc,"/",basename(WaveGet))
@@ -196,7 +198,7 @@ for (h in 1:length(ListSite))
           print(Sys.time())
           test=file.rename(from=Listj,to=Newj) #6 sec
           if(mean(test)!=1){stop(paste("ERREUR : copie fichier wave non permise"))}
-          print(Sys.time())
+          Sys.time()
           #ecriture liste.txt
           TarName=paste0(OutputDir,"/",DirSite,"/",basename(ListPar[i])
                          ,"/wav/"
@@ -232,5 +234,6 @@ for (h in 1:length(ListSite))
 #suppression des *.tar
 #ListTar=list.files(OutputDir,pattern=".tar$",recursive=T,full.names=T)
 #file.remove(ListTar)
+
 
 

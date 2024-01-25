@@ -2,9 +2,12 @@ library(data.table)
 
 DataL=fread("C:/Users/yvesb/Downloads/DataL2021-12-14.csv")
 SpeciesList=fread("C:/Users/yvesb/Documents/SpeciesList.csv")
-Nfiles=180
-SelSp=c("Pipkuh","Pipnat","Rhihip","Rhieur","Nyclas","Tadten")
-
+Nfiles=120
+#SelSp=c("Pipkuh","Pipnat","Rhihip","Rhieur","Nyclas","Tadten"
+ #       ,"Pippip","Pippyg","Minsch","Barbar","Eptser","Nyclei","Nycnoc"
+  #      ,"Myodau","Myomys","Myonat","MyoGT","Pleaus","Pleaur","Plemac"
+   #   ,"Hypsav","Rhifer","Vesmur","Eptnil","Myoalc","Myobec","Myoema")
+SelSp=NA
 
 BatList=subset(SpeciesList,SpeciesList$Group=="bat")
 
@@ -12,7 +15,7 @@ DataBat=subset(DataL,DataL$espece %in% BatList$Esp)
 names(DataBat)[10]="temps_fin"
 DataBat$duree=DataBat$temps_fin-DataBat$temps_debut
 
-if(!is.na(SelSp)){
+if(!is.na(SelSp[1])){
   DataBat=subset(DataBat,DataBat$espece %in% SelSp)
 }
 
