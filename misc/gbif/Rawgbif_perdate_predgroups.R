@@ -5,17 +5,17 @@ library(raster)
 #library(readxl)
 library(sf)
 
-DataAll=fread("C:/Users/ybas/Documents/VigieChiro/gbifData/Raw/Mtp0031884-230530130749713.csv")
-#DataAll=fread("C:/Users/ybas/Documents/VigieChiro/gbifData/Raw/Paris_0257474-230224095556074.csv")
+#DataAll=fread("C:/Users/ybas/Documents/VigieChiro/gbifData/Raw/Mtp0031884-230530130749713.csv")
+DataAll=fread("C:/Users/ybas/Documents/VigieChiro/gbifData/Raw/Paris_0257474-230224095556074.csv")
 #DataAll=fread("C:/Users/ybas/Documents/VigieChiro/gbifData/Raw/DigoinRoanne0141294-230530130749713.csv")
-#DataAll=fread("C:/Users/ybas/Documents/VigieChiro/gbifData/Raw/Camargue0032167-231120084113126.csv")
+#DataAll=fread("C:/Users/ybas/Documents/VigieChiro/gbifData/Raw/Bourges0016085-231002084531237.csv")
 #SelPol=shapefile("./SIG/R12.shp")
 #ListTargets=fread("./VigieChiro/gbifData/DataSelDate/DataSelRare__260.csv")
 #DirDG="./VigieChiro/gbifData/DataGroup"
 #Suffix="Catalogne"
-OutputName="C:/Users/ybas/Documents/www/Raw37"
+OutputName="C:/Users/ybas/Documents/www/Raw57Paris"
 #Groupes=read_xlsx("GroupeSp.xlsx")
-Date=37
+Date=57
 SpeciesAll=fread("SpeciesAll.csv",h=T,sep=";")
 #PhylumList=c("Chordata","Arthropoda","Tracheophyta","Mollusca")
 #HeureEte=T

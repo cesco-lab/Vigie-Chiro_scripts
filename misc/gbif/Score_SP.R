@@ -4,7 +4,7 @@ library(Hmisc)
 library("sp")
 library(sf)
 
-Scores=fread("ScoreTab15_local.csv")
+Scores=fread("ScoreTab45_local.csv")
 #takeout="C:/Users/yvesb/Downloads/takeout-20230303T080947Z-001.zip"
 Spexport <- st_read("C:/Users/ybas/Documents/SP2023-03-05.kml")
 CoordO=c(43.83,3.77) # LD

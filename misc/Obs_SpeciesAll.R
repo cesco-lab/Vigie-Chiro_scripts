@@ -1,7 +1,7 @@
 library(data.table)
 library(readxl)
 library(rgbif)
-Download="C:/Users/yvesb/Downloads"
+Download="C:/Users/ybas/Downloads"
 Doublons=c("Microcarbo pygmeus","Dendrocopos medius","Larus ridibundus"
            ,"Saxicola torquatus","Schoeniclus schoeniclus"
            ,"Felis domesticus","Anser cygnoid","Erythronium dens-canis"
@@ -20,7 +20,8 @@ Doublons=c("Microcarbo pygmeus","Dendrocopos medius","Larus ridibundus"
            ,"Polygonia c-album","Echinochloa crus-galli","Trifolium infamia-ponertii"
            ,"Massylaea vermiculata","Achnatherum miliaceum","Ophrys virescens","Lysimachia linum-stellatum"
            ,"Cynoglossum cheirifolium","Rhaphiolepis loquata"
-           ,"Anacamptis fragrans","Dianthus godronianus")
+           ,"Anacamptis fragrans","Dianthus godronianus"
+           ,"Microthlaspi perfoliatum","Anas clypeata","Anas strepera")
 
 Species=vector()
 Inat=list.files(Download,pattern="observations-",full.names=T)

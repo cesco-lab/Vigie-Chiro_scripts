@@ -3,22 +3,23 @@ library(data.table)
 
 ListAll=fread("C:/Users/ybas/Downloads/DataListAll.csv")
 DateSel=fread("C:/Users/ybas/Downloads/DateSel.csv")
-Date=15
+Date=45
 PhylumSel=c("Tracheophyta","Basidiomycota")
-PhylumSel=NA
+#PhylumSel=NA
 ClassSel=c("Aves","Mammalia","Amphibia")
-OrderSel=c("Orthoptera")
-FamilySel=c("Cicadidae")
+OrderSel=c("Orthoptera","Coleoptera","Diptera","Hemiptera")
+#FamilySel=c("Cicadidae")
 
 DateAll=merge(ListAll,DateSel,by.x="species",by.y="ListSpValide")
 
 
-if(is.na(PhylumSel)){
+if(is.na(PhylumSel[1])){
   table(DateAll$class)
   DateAll1=subset(DateAll,DateAll$class %in% ClassSel)
   DateAll2=subset(DateAll,DateAll$order %in% OrderSel)
-  DateAll3=subset(DateAll,DateAll$family %in% FamilySel)
-  DateAll=rbindlist(list(DateAll1,DateAll2,DateAll3))
+  #DateAll3=subset(DateAll,DateAll$family %in% FamilySel)
+  DateAll=rbindlist(list(DateAll1,DateAll2))
+  #,DateAll3))
   }else{
     DateAll=subset(DateAll,DateAll$phylum %in% PhylumSel)
 }

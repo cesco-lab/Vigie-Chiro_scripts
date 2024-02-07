@@ -12,10 +12,10 @@ DirDG="C:/Users/ybas/Documents/natura/siflore/HERAULT/DBF"
 Data30=fread("C:/Users/ybas/Documents/SIG/cbn30.csv")
 #DataF=fread("C:/Users/ybas/Documents/natura/siflore/HERAULT/DBF/all.csv",sep="µ")
 #Suffix="FR"
-OutputName="C:/Users/ybas/Documents/www/Raw22"
+OutputName="C:/Users/ybas/Documents/www/Raw67"
 #Groupes=read_xlsx("GroupeSp.xlsx")
 SpeciesAll=fread("SpeciesAll.csv",sep=";")
-Date=22
+Date=67
 SpSel=c("Aristolochia rotunda","Aristolochia pistolochia")
 SpSel=NA
 dir.create(OutputName)

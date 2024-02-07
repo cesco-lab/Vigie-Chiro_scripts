@@ -5,13 +5,13 @@ library(sf)
 
 SpeciesAll=fread("SpeciesAll.csv",sep=";")
 EsPro=fread("C:/Users/ybas/Documents/natura/especes_protegees.csv",sep=";")
-PredTabNum=30
-SelPol=shapefile("C:/Users/ybas/Documents/SIG/CamargueW.shp")
+PredTabNum=45
+#SelPol=shapefile("C:/Users/ybas/Documents/SIG/CamargueW.shp")
 #SelPol=shapefile("C:/Users/ybas/Documents/SIG/figeac12.shp")
-#SelPol=shapefile("C:/Users/ybas/Documents/SIG/PuechEstrous.shp")
+SelPol=shapefile("C:/Users/ybas/Documents/SIG/Aigoual.shp")
 #SelPol=shapefile("C:/Users/ybas/Documents/SIG/lmsj12.shp")
-SelPol=shapefile("C:/Users/ybas/Documents/SIG/R12.shp")
-OutputName="C:/Users/ybas/Documents/www/PT30"
+#SelPol=shapefile("C:/Users/ybas/Documents/SIG/R12.shp")
+OutputName="C:/Users/ybas/Documents/www/PT45Aigoual"
 FSA=T #SpeciesAll sinon Espro
 FMaj=F
 MinPT=1

@@ -9,7 +9,7 @@ DirPT="C:/Users/ybas/Downloads"
 DirPTunzip="C:/Users/ybas/Downloads/temp"
 FPT=list.files(DirPT,pattern="PredTab_",full.names=T,recursive=T)
 ListDay=unique(tstrsplit(basename(FPT),split="_")[[2]])
-ListDay="15"
+ListDay="45"
 DataListAll=fread("C:/Users/ybas/Downloads/DataListAll.csv")
 
 

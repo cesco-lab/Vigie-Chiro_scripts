@@ -1,13 +1,13 @@
 library(data.table)
 
-PT_pattern="15"
+PT_pattern="45"
 PTdir="C:/Users/ybas/Downloads/"
 #DSD=fread("C:/Users/yvesb/Documents/VigieChiro/gbifData/DataSelDate/DataSelRare_Vocal_311_232.csv")
 DSD=fread("DataDate.csv")
 Pos=F
 AddSpecies="Bubo scandiacus"
 MaxPT=1
-Thres=0.4
+Thres=0
 
 PTf=list.files(PTdir,pattern=paste0("PredTab_",PT_pattern),full.names=T,recursive=T)
 
