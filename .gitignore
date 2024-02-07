@@ -59,6 +59,7 @@ Vigie-Chiro*.csv
 */launch_participations.R
 */launch_participations_inerror.R
 
+misc/mongo_old/*
 
 *.rmd~
 *.r~
