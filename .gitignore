@@ -50,14 +50,14 @@ tableIndicators*.csv
 ToSuppress*.csv
 Vigie-Chiro*.csv
 
-Check_CheatKal.R
-correct_participations.R
-find_files.r
-find_points_test.r
-find_rarespecies.R
-get_participations_inerror.R
-launch_participations.R
-launch_participations_inerror.R
+*/Check_CheatKal.R
+*/correct_participations.R
+*/find_files.r
+*/find_points_test.r
+*/find_rarespecies.R
+*/get_participations_inerror.R
+*/launch_participations.R
+*/launch_participations_inerror.R
 
 
 *.rmd~
