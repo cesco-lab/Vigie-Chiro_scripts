@@ -50,7 +50,7 @@ tableIndicators*.csv
 ToSuppress*.csv
 Vigie-Chiro*.csv
 
-misc/mongo/Check_CheatKal.R
+*/Check_CheatKal.R
 */correct_participations.R
 */find_files.r
 */find_points_test.r
