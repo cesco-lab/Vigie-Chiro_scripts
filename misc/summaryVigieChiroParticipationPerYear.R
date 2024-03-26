@@ -3,24 +3,49 @@ library(ggplot2)
 library(lubridate)
 library(sf)
 
-SpNuit=fread("C:/Users/ybas/Documents/www/SpNuit2Valid_50_PG.csv")
+SpNuit=fread("C:/Users/ybas/Downloads/SpNuit2Valid_50_PG.csv")
 SpeciesList=fread("C:/Users/ybas/Documents/SpeciesList.csv")
-DataRP=fread("C:/Users/ybas/Documents/www/DataRP_SpTron_woS_0.csv")
+DataRP=fread("C:/Users/ybas/Downloads/DataRP_SpTron_woS_0.csv")
 Particip=fread("p_export.csv")
-SiteLoc=fread("C:/Users/ybas/Documents/www/sites_localites.txt")
-Sites=fread("C:/Users/ybas/Documents/www/sites.txt")
+SiteLoc=fread("C:/Users/ybas/Downloads/sites_localites.txt")
+Sites=fread("C:/Users/ybas/Downloads/sites.txt")
 ListVar=c("participation","nb_contacts")
-ArchiveW=fread("C:/Users/ybas/Documents/www/archivees_wav.txt",h=F)
-ArchiveT=fread("C:/Users/ybas/Documents/www/archivees_ta.txt",h=F)
-YearLimits=c(2006:2023)
+ArchiveW=fread("C:/Users/ybas/Documents/www/archivees_wav.txt",h=F) #pas à jour !!
+ArchiveT=fread("C:/Users/ybas/Documents/www/archivees_ta.txt",h=F) #pas à jour !!
+YearLimits=c(2006:2024)
 Regions=st_read("C:/Users/ybas/Documents/SIG/regions-20180101.shp"
                 )
+SitesRepetes=fread("C:/Users/ybas/Downloads/CalculsTendance/data/processed/Sites Repetes/toupload/data03_SR_TP_idManual_2024-02-29_103530.csv"
+                   ,encoding = "Latin-1")
 
 BatList=subset(SpeciesList,SpeciesList$Group=="bat")
 BatNuit=subset(SpNuit,SpNuit$espece %in% BatList$Esp)
-sum(BatNuit$nb_contact)
+sum(BatNuit$nb_contacts)
 BatRP=subset(DataRP,DataRP$espece %in% BatList$Esp)
-sum(BatRP$nb_contact)
+sum(BatRP$nb_contacts)
+BNs=subset(BatNuit,select=ListVar)
+BRs=subset(BatRP,select=ListVar)
+BatTot=rbind(BNs,BRs)
+BatTot2=merge(BatTot,Particip,by="participation")
+BatTot2$year=substr(BatTot2$date_debut,1,4)
+BatTot2=subset(BatTot2,BatTot2$year %in% YearLimits)
+table(BatTot2$year)
+SumBat=aggregate(BatTot2$nb_contacts,by=list(BatTot2$year),FUN=sum)
+# barplot(SumBat$x/1e6,names.arg=SumBat$Group.1,las=2
+#         ,main="Bat passes recorded in Vigie-Chiro (in millions)")
+ggplot(SumBat, aes(x = Group.1, y = x/1e6)) +
+  geom_bar(stat = "identity", fill = "skyblue", width = 0.7) +
+  labs(title = "Bat passes recorded in Vigie-Chiro (in millions)", x = "", y = "Bat Passes (Millions)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+sum(SumBat$x)
+
+#bush-crickets
+BatList=subset(SpeciesList,SpeciesList$Group=="bush-cricket")
+BatNuit=subset(SpNuit,SpNuit$espece %in% BatList$Esp)
+sum(BatNuit$nb_contacts)
+BatRP=subset(DataRP,DataRP$espece %in% BatList$Esp)
+sum(BatRP$nb_contacts)
 BNs=subset(BatNuit,select=ListVar)
 BRs=subset(BatRP,select=ListVar)
 BatTot=rbind(BNs,BRs)
@@ -30,25 +55,15 @@ BatTot2=subset(BatTot2,BatTot2$year %in% YearLimits)
 table(BatTot2$year)
 SumBat=aggregate(BatTot2$nb_contacts,by=list(BatTot2$year),FUN=sum)
 barplot(SumBat$x/1e6,names.arg=SumBat$Group.1,las=2
-        ,main="Bat passes recorded in Vigie-Chiro (in millions)")
+        ,main="Bush-cricket 5-sec files in Vigie-Chiro (in millions/year)")
+ggplot(SumBat, aes(x = Group.1, y = x/1e6)) +
+  geom_bar(stat = "identity", fill = "skyblue", width = 0.7) +
+  labs(title = "Bush-cricket 5-sec files recorded in Vigie-Chiro (in millions)", x = "", y = "Bat Passes (Millions)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 sum(SumBat$x)
 
-#bush-crickets
-BatList=subset(SpeciesList,SpeciesList$Group=="bush-cricket")
-BatNuit=subset(SpNuit,SpNuit$espece %in% BatList$Esp)
-sum(BatNuit$nb_contact)
-BatRP=subset(DataRP,DataRP$espece %in% BatList$Esp)
-sum(BatRP$nb_contact)
-BNs=subset(BatNuit,select=ListVar)
-BRs=subset(BatRP,select=ListVar)
-BatTot=rbind(BNs,BRs)
-BatTot2=merge(BatTot,Particip,by="participation")
-BatTot2$year=substr(BatTot2$date_debut,1,4)
-table(BatTot2$year)
-SumBat=aggregate(BatTot2$nb_contacts,by=list(BatTot2$year),FUN=sum)
-barplot(SumBat$x/1e6,names.arg=SumBat$Group.1,las=2
-        ,main="Bush-cricket 5-sec files in Vigie-Chiro (in millions/year)")
-sum(SumBat$x)
+
 
 
 
@@ -56,7 +71,7 @@ sum(SumBat$x)
 #non-noise
 BiodivList=subset(SpeciesList,SpeciesList$Nesp2!="noise")
 SpNuit=subset(SpNuit,SpNuit$espece %in% BiodivList$Esp)
-sum(SpNuit$nb_contact)
+sum(SpNuit$nb_contacts)
 DataRP=subset(DataRP,DataRP$espece %in% BiodivList$Esp)
 
 ANs=subset(SpNuit,select=ListVar)
@@ -78,6 +93,45 @@ sum(SumAll$x)
 #Number of sites
 NsRP=subset(Sites,!grepl("Fixe",Sites$site))
 print(table(grepl("Routier",NsRP$site)))
+table(SiteLoc$protocole
+)
+
+
+
+# SL_sf <- st_as_sf(SiteLoc, coords = c("longitude", "latitude"))
+# SL_sf <- st_set_crs(SL_sf, 4326)
+# SL_sf$protocole <- factor(SL_sf$protocole)
+# table(SL_sf$protocole)
+SiteLoc$protocole[SiteLoc$protocole=="CARRE"]="PEDESTRE"
+
+color_palette <- colorRampPalette(c("green", "darkgreen"))
+
+# Select a specific shade from the palette (e.g., the 5th shade)
+intermediate_color <- color_palette(10)[5]
+
+ggplot() +
+  geom_sf(data = Regions, fill = "lightblue") +
+  geom_point(data = SiteLoc[SiteLoc$protocole == "POINT_FIXE", ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
+  geom_point(data = SiteLoc[SiteLoc$protocole %in% c("PEDESTRE", "ROUTIER"), ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
+  scale_color_manual(values = c("ROUTIER" = "red", "PEDESTRE" = "blue", "POINT_FIXE" = intermediate_color)) + # Assuming 3 different values
+  theme_minimal() +
+  coord_sf(xlim = c(-6, 10), ylim = c(41, 51))
+
+SiteRepU=unique(SitesRepetes$site)
+PartRepU=unique(SitesRepetes$participation)
+IdSiteRepU=unique(subset(Particip$idsite,Particip$participation %in% PartRepU))
+
+SLRepU=subset(SiteLoc,SiteLoc$id_site %in% IdSiteRepU)
+table(SLRepU$protocole)
+
+ggplot() +
+  geom_sf(data = Regions, fill = "lightblue") +
+  geom_point(data = SLRepU[SLRepU$protocole == "POINT_FIXE", ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
+  geom_point(data = SLRepU[SLRepU$protocole %in% c("PEDESTRE", "ROUTIER"), ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
+  scale_color_manual(values = c("ROUTIER" = "red", "PEDESTRE" = "blue", "POINT_FIXE" = intermediate_color)) + # Assuming 3 different values
+  theme_minimal() +
+  coord_sf(xlim = c(-6, 10), ylim = c(41, 51))
+
 
 NlocPF=subset(SiteLoc,grepl("Fixe",SiteLoc$site))
 print(nrow(NlocPF))
@@ -86,6 +140,9 @@ print(nrow(NlocPF))
 SL_sf <- st_as_sf(NlocPF, coords = c("longitude", "latitude"))
 SL_sf <- st_set_crs(SL_sf, 4326)
 SL_Regions <- st_intersection(SL_sf, Regions)
+
+
+
 table(SL_Regions$nom.1)
 NbParticipantes=aggregate(SL_Regions$num.site
                           ,by=c(list(SL_Regions$nom.1)
@@ -192,6 +249,7 @@ Particip$Nnight[Particip$Nnight>30]=1
 Particip$Nnight[Particip$protocole=="Car transects"]=1
 Particip$Nnight[Particip$protocole=="Walk transects"]=1
 hist(Particip$Nnight,breaks=30)
+sum(Particip$Nnight)
 Particip=subset(Particip,Particip$year>2005)
 Particip=subset(Particip,Particip$year<year(Sys.Date()))
 
@@ -217,6 +275,14 @@ pGPF=subset(pGPF,pGPF$Group.2>2013)
 
 p4<-ggplot(data=pGPF, aes(x=Group.2, y=x,group=protocole)) +
   labs(title="Nb stations*nights per year") +
+  geom_line(color="palegreen4")+
+  geom_point(color="palegreen4")+
+  xlab("")+
+  ylab("")
+p4
+
+p4<-ggplot(data=pGPF, aes(x=Group.2, y=x,group=protocole)) +
+  labs(title="Nb nuits") +
   geom_line(color="palegreen4")+
   geom_point(color="palegreen4")+
   xlab("")+
@@ -248,6 +314,22 @@ p5<-ggplot(data=pG_spU, aes(x=x.y, y=x.x)) +
   scale_x_log10()+
   scale_y_log10()
 p5
+p5<-ggplot(data=pG_spU, aes(x=x.y, y=x.x)) +
+  geom_point()+
+  xlab("Nombre de carrés/circuits")+
+  ylab("Nombre de nuits")+
+  scale_x_log10()+
+  scale_y_log10()
+p5
+
+Obs1000N=subset(pG_spU,pG_spU$x.x>1000)
+Obs100N=subset(pG_spU,pG_spU$x.x>100&pG_spU$x.x<=1000)
+nrow(Obs1000N)/nrow(pG_spU)
+nrow(Obs100N)/nrow(pG_spU)
+sum(Obs1000N$x.x)/sum(pG_spU$x.x)
+sum(Obs100N$x.x)/sum(pG_spU$x.x)
+Obs1000N
+
 
 print(length(unique(Particip$observateur)))
 Urandom=pG_spU[sample(nrow(pG_spU)),]
