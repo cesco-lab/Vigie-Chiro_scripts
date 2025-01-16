@@ -170,7 +170,36 @@ table(alldataobs$pseudo[test])
 
 print(min(datapartP$traitement$date_planification))
 
+#summary traitements
+
+p_export$yearTraitement=year(p_export$trait_debut)
+p_export$moisTraitement=month(p_export$trait_debut)
+table(p_export$moisTraitement)
+table(p_export$yearTraitement,is.na(p_export$duree_traitement))
+p_export=subset(p_export,!is.na(p_export$duree_traitement))
+
+table(p_export$yearTraitement)
+ConsoParAn=aggregate(p_export$duree_traitement
+                     ,by=list(p_export$yearTraitement),sum)
+
+
+ConsoParAn$Heure=ConsoParAn$x/3600
+ConsoParAn
+
+
+ConsoParmois=aggregate(p_export$duree_traitement
+                     ,by=c(list(p_export$moisTraitement)
+                           ,list(p_export$yearTraitement)),sum)
+
+
+ConsoParmois$Heure=ConsoParmois$x/3600
+ConsoParmois
 
 
 
+DataParAn=aggregate(p_export$nb_obs
+                     ,by=list(p_export$yearTraitement),sum)
+DataParAn
 
+p_export$year=year(p_export$date_debut)
+as.data.frame(table(p_export$year))
