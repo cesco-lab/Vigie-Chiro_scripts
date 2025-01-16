@@ -4,14 +4,21 @@ library(readxl)
 
 mongo=fread("mongos.txt",sep="$",h=F) #hack
 test=F #T si base de test, F si base de prod
-OutF="C:/Users/ybas/Documents/www/utilisateurs_raw.csv"
+OutF="utilisateurs_raw.csv"
 #OutF="C:/Users/yvesb/Documents/www/utilisateurs_test.csv"
-Embargo=read_xlsx("C:/Users/ybas/Downloads/Nouvelle Charte avec Embargo.xlsx")
+DirEmbargo="C:/Users/ybas/Downloads/"
+PatternEmbargo="Nouvelle Charte avec Embargo"
 Var=c("_id","donnees_publiques","email","google_id" 
       ,"pseudo",             "role",                  "professionnel"
       ,"nom"             ,   "prenom"        ,     "adresse"          ,  "telephone"        ,  "organisation"   ,    "charte_acceptee"   
       ,"facebook_id" ,       "commentaire"  )
 
+
+FileEmbargo=list.files(DirEmbargo,PatternEmbargo,full.names=T)
+FileEmbargoI=file.info(FileEmbargo)
+FileEmbargo=FileEmbargo[order(FileEmbargoI$ctime)]
+FileEmbargoSel=FileEmbargo[length(FileEmbargo)]
+Embargo=read_xlsx(FileEmbargoSel)
 
 
 if(test){
@@ -44,5 +51,6 @@ summary(AllDataS$Embargo)
   
 fwrite(AllDataS,OutF,sep=";")
 
-
+test=subset(AllDataS,grepl("marion",AllDataS$email))
+test$email
 
