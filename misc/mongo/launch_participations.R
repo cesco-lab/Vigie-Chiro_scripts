@@ -10,7 +10,7 @@ library(lubridate)
 mongo=fread("mongos.txt",sep="$",h=F)
 test=F #T si base de test, F si baase de prod
 FileBMRE="Relance241011.csv"
-TempsPause=60
+TempsPause=1 # si souci de retraitement, ne pas hésiter à augmenter à 60
 
 if(test){
   connection_string=mongo$V1[2]
