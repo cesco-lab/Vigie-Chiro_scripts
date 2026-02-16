@@ -12,12 +12,16 @@ mongo=fread("mongos.txt",sep="$",h=F) #hack
 test=F #T si base de test, F si base de prod
 #MetadataBMRE=fread("C:/Users/yvesb/Downloads/Thomas_Busschaert_Metadata_table.csv")
 #MetadataBMRE=fread("MissingPoints2022-07-19.csv") #table avec les points à créer
-MetadataBMRE=fread("C:/Users/ybas/Downloads/Disque_terrain_9.csv") #table avec les points à créer
+MetadataBMRE=fread("C:/Users/ybas/Downloads/Metadata_OFB_envoi_Yves_29-01-2026.csv") #table avec les points à créer
 ParticipanteSpecified="florence.matutini@ofb.gouv.fr"
-ToleranceDoublon=40
+ToleranceDoublon=15
 
-CoordNames=c("X","Y")
+CoordNames=c("X_WGS84","Y_WGS84")
 #CoordNames=c("xcoord","ycoord")
+
+print(names(MetadataBMRE))
+if(ncol(MetadataBMRE)>38){MetadataBMRE=MetadataBMRE[,1:35]}
+
 
 
 if(test){
@@ -40,29 +44,62 @@ Sys.time()
 alldatasites <- sites$find(query=paste0('{"protocole" : {"$oid":"54bd090f1d41c8103bad6252"}}'),fields='{}') #protocole PF
 Sys.time() #~1sec / 1e3 sites
 
-test=sites$find(query = '{"titre" : "Vigiechiro - Point Fixe-340818"}',fields='{}') 
+test=sites$find(query = '{"titre" : "Vigiechiro - Point Fixe-340818"}',fields='{}')
 sllist=list()
 for (i in 1:nrow(alldatasites)){
   if(!is.null(alldatasites$localites[[i]])){
     sllist[[i]]=as.data.table(alldatasites$localites[[i]])
-    sllist[[i]]$longitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][2]
-    sllist[[i]]$latitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][1]
+    if(alldatasites$protocole[i]=="54bd08ba1d41c8103bad6251"){ #cas particulier pour routier
+      #      stop()
+      
+      Lats=vector()
+      Longs=vector()
+      for (j in 1:nrow(sllist[[i]])){
+        Lats[j]=mean(alldatasites$localites[[i]]$geometries$geometries[[j]]$coordinates[[1]][,1])
+        Longs[j]=mean(alldatasites$localites[[i]]$geometries$geometries[[j]]$coordinates[[1]][,2])
+      }
+      sllist[[i]]$longitude=Longs
+      sllist[[i]]$latitude=Lats
+    }else{
+      for (x in 1:nrow(sllist[[i]])){
+        sllist[[i]]$longitude[x]=alldatasites$localites[[i]]$geometries$geometries[[x]]$coordinates[[1]][2]
+        sllist[[i]]$latitude[x]=alldatasites$localites[[i]]$geometries$geometries[[x]]$coordinates[[1]][1]
+      }
+    }
+    
     sllist[[i]]$titre=alldatasites$titre[i]
+    sllist[[i]]$protocole=alldatasites$protocole[i]
+    sllist[[i]]$'_id'=alldatasites$'_id'[i]
+    sllist[[i]]$commentaire=alldatasites$commentaire[i]
+    sllist[[i]]$'_created'=alldatasites$'`_created'[i]
     row.names(sllist[[i]])=c()
     print(i)
   }
 }
 SiteLoc=rbindlist(sllist,use.names=T,fill=T)
+SiteLoc=rbindlist(sllist,use.names=T,fill=T)
 
 Sys.time()
 
+
 SiteLocGI=SiteLoc
+
+test236=subset(SiteLocGI,SiteLocGI$titre=="Vigiechiro - Point Fixe-720344")
+which(SiteLocGI$titre=="Vigiechiro - Point Fixe-720344")
+test236
+
+
 # coordinates(SiteLocGI)=c("longitude","latitude")
 # proj4string(SiteLocGI) <- CRS("+init=epsg:4326")
 # SiteLocL2E=spTransform(SiteLocGI,CRS("+init=epsg:27572"))
 
 SiteLocGI <- st_as_sf(SiteLocGI, coords = c("longitude", "latitude"), crs = "+init=epsg:4326")
-SiteLocL2E <- st_transform(SiteLocGI, crs = "+init=epsg:27572")
+SiteLocL2E <- st_transform(SiteLocGI, crs = 27572)
+
+test236=subset(SiteLocL2E,SiteLocL2E$titre=="Vigiechiro - Point Fixe-720344")
+which(SiteLocL2E$titre=="Vigiechiro - Point Fixe-720344")
+test236
+
 
 alldatagrid<-grille$find(fields='{}')
 Sys.time() #~1min /4e5 squares
@@ -82,7 +119,7 @@ names(MetadataBMRE)[testC[1]]="X"
 names(MetadataBMRE)[testC[2]]="Y"
 MetadataBMRE$X=gsub(",",".",MetadataBMRE$X)
 MetadataBMRE$Y=gsub(",",".",MetadataBMRE$Y)
-NewCoord=unique(MetadataBMRE,by=CoordNames)
+NewCoord=unique(MetadataBMRE,by=c("X","Y"))
 testC=match(CoordNames,names(NewCoord))
 names(NewCoord)[testC[1]]="X"
 names(NewCoord)[testC[2]]="Y"
@@ -94,7 +131,9 @@ if(ncol(CoordOnly)!=2){stop("bad coord names")}
 
 
 #FILTRER la grille autour des sites
-summary(CoordOnly)
+summary(as.numeric(CoordOnly$X))
+summary(as.numeric(CoordOnly$Y))
+
 # allcoordst=subset(allcoordst,(allcoordst$longitude>(min(CoordOnly[,1])-0.1))
 #                   &(allcoordst$longitude<(max(CoordOnly[,1])+0.1))
 #                   &(allcoordst$latitude>(min(CoordOnly[,2])-0.1))
@@ -172,6 +211,13 @@ NewCoordGI=NewCoord
 # proj4string(NewCoordGI) <- CRS("+init=epsg:4326")
 # NewCoordL2E=spTransform(NewCoordGI,CRS("+init=epsg:27572"))
 
+if(is.character(NewCoordGI$X)){
+  NewCoordGI$X=as.numeric(NewCoordGI$X)
+  NewCoordGI$Y=as.numeric(NewCoordGI$Y)
+  
+}
+table(is.na(NewCoordGI$X))
+which(is.na(NewCoordGI$X))
 NewCoordGI <- st_as_sf(NewCoordGI, coords = c("X", "Y"), crs = 4326)
 NewCoordL2E <- st_transform(NewCoordGI, crs = 27572)
 Sys.time()
@@ -189,17 +235,30 @@ testSansDiag=test[-seq(1,(nrow(test)^2),nrow(test)+1)]
 Closest=as.numeric(min(min(testSansDiag)))
 print(Closest)
 if(Closest<ToleranceDoublon){
-  AllDoublons=subset(testSansDiag,testSansDiag<ToleranceDoublon)
+  AllDoublons=subset(testSansDiag,as.numeric(testSansDiag)<ToleranceDoublon)
   ValU=unique(AllDoublons)
   for (z in 1:length(ValU))
   {
+    print(ValU[z])
     Doublon1=which(test==ValU[z],arr.ind=TRUE)
-    PointsDoublon=as.data.frame(MetadataBMRE)[Doublon1,]
+    PointsDoublon=as.data.frame(NewCoordGI)[Doublon1[,1],]
     print(PointsDoublon)
+    NewCoord$X[Doublon1[,1]]=NewCoord$X[Doublon1[,1]][1]
+    NewCoord$Y[Doublon1[,1]]=NewCoord$Y[Doublon1[,1]][1]
   }
-  stop("points doublons dans input table")
+  
+  #stop("points doublons dans input table")
 }
 
+
+NewCoordGI=NewCoord
+# coordinates(NewCoordGI)=c("X","Y")
+# proj4string(NewCoordGI) <- CRS("+init=epsg:4326")
+# NewCoordL2E=spTransform(NewCoordGI,CRS("+init=epsg:27572"))
+
+NewCoordGI <- st_as_sf(NewCoordGI, coords = c("X", "Y"), crs = 4326)
+NewCoordL2E <- st_transform(NewCoordGI, crs = 27572)
+Sys.time()
  
 #test 1 : point existant ? A RECODER EN UTILISANT coord en WGS84
 #test=gDistance(NewCoordL2E, SiteLocL2E,byid=TRUE)  
@@ -207,6 +266,9 @@ test <- st_distance(SiteLocL2E,NewCoordL2E, by_element = F)
 Closest=apply(test,2,min)
 summary(Closest)
 
+test236=subset(SiteLocL2E,SiteLocL2E$titre=="Vigiechiro - Point Fixe-720344")
+which(SiteLocL2E$titre=="Vigiechiro - Point Fixe-720344")
+test236
 
 if(min(Closest)<=ToleranceDoublon)
 {
@@ -232,14 +294,15 @@ ClosestY=min(test2)
 summary(ClosestY)
 
 
-if(min(ClosestY)<=ToleranceDoublon)
-{
-  stop("coder points doublons")
-}
+# if(min(ClosestY)<=ToleranceDoublon)
+# {
+#   stop("coder points doublons")
+# }
 
 Sys.time()
 #testNN=gDistance(NewCoordL2E,CentroidsStoc,byid=TRUE) # 1 sec / 6e3 squares
 testNN <- st_distance(NewCoordL2E, CentroidsStoc, by_element = F)
+
 
 Sys.time()
 
@@ -504,15 +567,18 @@ for (i in 1:nrow(NewCoordL2E))
       NewData$generee_aleatoirement=F
       NewData$justification_non_aleatoire=NA
       print(NewData$titre)
-      sites$insert(NewData)
-      sites$update(paste0('{"titre":"Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
-                   , paste0('{"$set":{"protocole":{ "$oid" : "54bd090f1d41c8103bad6252" }}}')) #protocole
       if(!is.na(ParticipanteSpecified)){
         Obsi=users$find(query=paste0('{"email":"',ParticipanteSpecified,'"}'),fields='{}')
         
       }else{
-      Obsi=users$find(query=paste0('{"email":"',NewCoord$Email[i],'"}'),fields='{}')
+        Obsi=users$find(query=paste0('{"email":"',NewCoord$Email[i],'"}'),fields='{}')
       }
+      if(nrow(Obsi)!=1){stop("observateur-rice manquant-e ou doublon")}
+      
+      sites$insert(NewData)
+      sites$update(paste0('{"titre":"Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
+                   , paste0('{"$set":{"protocole":{ "$oid" : "54bd090f1d41c8103bad6252" }}}')) #protocole
+    
       id_observateur= Obsi$'_id'
       
       sites$update(paste0('{"titre":"Vigiechiro - Point Fixe-',NewCoord$Carre[i],'"}')
