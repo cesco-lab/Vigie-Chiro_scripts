@@ -9,7 +9,7 @@ library(lubridate)
 
 mongo=fread("mongos.txt",sep="$",h=F)
 test=F #T si base de test, F si baase de prod
-FileBMRE="Relance241011.csv"
+FileBMRE="ListPartEall2026-10-15.csv"
 TempsPause=1 # si souci de retraitement, ne pas hésiter à augmenter à 60
 
 if(test){
@@ -41,7 +41,7 @@ Sys.time()
 #Sys.time() #~1sec / 1e3 sites
 
 DataBMRE=fread(FileBMRE)
-ListPart=DataBMRE$idparticipation
+ListPart=DataBMRE$ListPartEall
 #ListPart="630cdd61cf100000e7007c9b"
 
 ListPart=subset(ListPart,ListPart!="")
