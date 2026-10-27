@@ -7,15 +7,15 @@ SpNuit=fread("C:/Users/ybas/Downloads/SpNuit2Valid_50_PG.csv")
 SpeciesList=fread("C:/Users/ybas/Documents/SpeciesList.csv")
 DataRP=fread("C:/Users/ybas/Downloads/DataRP_SpTron_woS_0.csv")
 Particip=fread("p_export.csv")
-SiteLoc=fread("C:/Users/ybas/Downloads/sites_localites.txt")
-Sites=fread("C:/Users/ybas/Downloads/sites.txt")
+SiteLoc=fread("sites_localites.txt")
+#Sites=fread("C:/Users/ybas/Downloads/sites.txt")
 ListVar=c("participation","nb_contacts")
 ArchiveW=fread("C:/Users/ybas/Documents/www/archivees_wav.txt",h=F) #pas à jour !!
 ArchiveT=fread("C:/Users/ybas/Documents/www/archivees_ta.txt",h=F) #pas à jour !!
-YearLimits=c(2006:2024)
+YearLimits=c(2006:2025)
 Regions=st_read("C:/Users/ybas/Documents/SIG/regions-20180101.shp"
                 )
-SitesRepetes=fread("C:/Users/ybas/Downloads/CalculsTendance/data/processed/Sites Repetes/toupload/data03_SR_TP_idManual_2024-02-29_103530.csv"
+SitesRepetes=fread("C:/Users/ybas/Downloads/CalculsTendance/data/processed/Sites Repetes/data03_SR_TP_idManual_2024-03-13_151440.csv"
                    ,encoding = "Latin-1")
 
 BatList=subset(SpeciesList,SpeciesList$Group=="bat")
@@ -91,8 +91,8 @@ barplot(SumAll$x/1e3,names.arg=SumAll$Group.1,las=2
 sum(SumAll$x)
 
 #Number of sites
-NsRP=subset(Sites,!grepl("Fixe",Sites$site))
-print(table(grepl("Routier",NsRP$site)))
+# NsRP=subset(Sites,!grepl("Fixe",Sites$site))
+# print(table(grepl("Routier",NsRP$site)))
 table(SiteLoc$protocole
 )
 
@@ -111,8 +111,8 @@ intermediate_color <- color_palette(10)[5]
 
 ggplot() +
   geom_sf(data = Regions, fill = "lightblue") +
-  geom_point(data = SiteLoc[SiteLoc$protocole == "POINT_FIXE", ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
-  geom_point(data = SiteLoc[SiteLoc$protocole %in% c("PEDESTRE", "ROUTIER"), ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
+  geom_point(data = SiteLoc[SiteLoc$protocole == "POINT_FIXE", ], aes(x = longitude, y = latitude, color = protocole), size = 1) +
+  geom_point(data = SiteLoc[SiteLoc$protocole %in% c("PEDESTRE", "ROUTIER"), ], aes(x = longitude, y = latitude, color = protocole), size = 1) +
   scale_color_manual(values = c("ROUTIER" = "red", "PEDESTRE" = "blue", "POINT_FIXE" = intermediate_color)) + # Assuming 3 different values
   theme_minimal() +
   coord_sf(xlim = c(-6, 10), ylim = c(41, 51))
@@ -121,16 +121,16 @@ SiteRepU=unique(SitesRepetes$site)
 PartRepU=unique(SitesRepetes$participation)
 IdSiteRepU=unique(subset(Particip$idsite,Particip$participation %in% PartRepU))
 
-SLRepU=subset(SiteLoc,SiteLoc$id_site %in% IdSiteRepU)
-table(SLRepU$protocole)
+#SLRepU=subset(SiteLoc,SiteLoc$id_site %in% IdSiteRepU) #bug !!! récupère les points non répétés d'un carré dès qu'un point est répété dans le carré
+#table(SLRepU$protocole)
 
-ggplot() +
-  geom_sf(data = Regions, fill = "lightblue") +
-  geom_point(data = SLRepU[SLRepU$protocole == "POINT_FIXE", ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
-  geom_point(data = SLRepU[SLRepU$protocole %in% c("PEDESTRE", "ROUTIER"), ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
-  scale_color_manual(values = c("ROUTIER" = "red", "PEDESTRE" = "blue", "POINT_FIXE" = intermediate_color)) + # Assuming 3 different values
-  theme_minimal() +
-  coord_sf(xlim = c(-6, 10), ylim = c(41, 51))
+# ggplot() +
+#   geom_sf(data = Regions, fill = "lightblue") +
+#   geom_point(data = SLRepU[SLRepU$protocole == "POINT_FIXE", ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
+#   geom_point(data = SLRepU[SLRepU$protocole %in% c("PEDESTRE", "ROUTIER"), ], aes(x = longitude, y = latitude, color = protocole), size = 2) +
+#   scale_color_manual(values = c("ROUTIER" = "red", "PEDESTRE" = "blue", "POINT_FIXE" = intermediate_color)) + # Assuming 3 different values
+#   theme_minimal() +
+#   coord_sf(xlim = c(-6, 10), ylim = c(41, 51))
 
 
 NlocPF=subset(SiteLoc,grepl("Fixe",SiteLoc$site))
@@ -144,12 +144,12 @@ SL_Regions <- st_intersection(SL_sf, Regions)
 
 
 table(SL_Regions$nom.1)
-NbParticipantes=aggregate(SL_Regions$num.site
-                          ,by=c(list(SL_Regions$nom.1)
-                                ,list(SL_Regions$id_observateur)),length)
-NbParticipantesPerRegion=aggregate(NbParticipantes$Group.2
-                                   ,by=list(NbParticipantes$Group.1),length)
-
+# NbParticipantes=aggregate(SL_Regions$num.site
+#                           ,by=c(list(SL_Regions$nom.1)
+#                                 ,list(SL_Regions$id_observateur)),length)
+# NbParticipantesPerRegion=aggregate(NbParticipantes$Group.2
+#                                    ,by=list(NbParticipantes$Group.1),length)
+# 
 NlocR=subset(SiteLoc,grepl("Routier",SiteLoc$site))
 print(length(unique(NlocR$site)))
 
@@ -157,7 +157,7 @@ NlocP=subset(SiteLoc,grepl("destre",SiteLoc$site))
 print(length(unique(NlocP$site)))
 
 #test=unique(Sites,by="site")
-test=subset(Sites,Sites$site %in% Particip$site)
+# test=subset(Sites,Sites$site %in% Particip$site)
 
 Particip$year=substr(Particip$date_debut,1,4)
 test107=(Particip$year %in% YearLimits) 
@@ -329,6 +329,7 @@ nrow(Obs100N)/nrow(pG_spU)
 sum(Obs1000N$x.x)/sum(pG_spU$x.x)
 sum(Obs100N$x.x)/sum(pG_spU$x.x)
 Obs1000N
+Obs1000N[order(Obs1000N$x.x),]
 
 
 print(length(unique(Particip$observateur)))
