@@ -1,32 +1,29 @@
 library(mongolite)
 library(data.table)
 library(beepr)
-library(raster)
-library(rgdal)
-library(maptools)
-library(rgeos)
 library(uuid)
 library(jsonlite)
 library(rjson)
 
 
-mongo=fread("C:/Users/yvesb/Documents/Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/mongos.txt"
+mongo=fread("C:/Users/ybas/Documents/Tadarida/Vigie-Chiro_scripts/Vigie-Chiro_scripts/mongos.txt"
             ,sep="$",h=F)
 test=F #T si base de test, F si base de prod
 #id_observateur="5e9886c590250e001113d95d" #VC mnhn
 #id_observateur="558acd059dcbdc000e0793ee" #Yves Bas
-TriSite=T
+TriSite=F 
 RefSite="57b1f510d7d4b4000df26578"
-TriPoint=T
+TriPoint=F
 ListPoint="Z2"
-TriCoord=F
 TriPart=T #si TriPart est vrai, les autres filtres sont ignorés
-ListPart=c("64e4cca0e8931db0f9ab4b69")
+ListPart=c("5d8357ecb0910f000eb3f7d6")
+TriCoord=F
 LongInterval=c(1.76,2.32)
 LatInterval=c(42.40,42.76)
-Tag="pourLucas"
-DirOut="C:/Users/yvesb/Documents/VigieChiro/Exports/"
-DetailProba=T #T if you want detailed probability of each class/species
+
+Tag="PbCalculAct5d8357ecb0910f000eb3f7d6"
+DirOut="C:/Users/ybas/Documents/VigieChiro/Exports/"
+DetailProba=F #T if you want detailed probability of each class/species
 
 
 if(test){
@@ -55,50 +52,50 @@ alldatataxa<-taxa$find(fields='{}')
 if(TriPart){
   PartSel=subset(alldatapart,alldatapart$'_id' %in% ListPart)
 }else{
-
-test=sites$find(query = '{"titre" : "Vigiechiro - Point Fixe-340818"}',fields='{}') 
-
-
-sllist=list()
-for (i in 1:nrow(alldatasites)){
-  if(!is.null(alldatasites$localites[[i]])){
-    sllist[[i]]=as.data.table(alldatasites$localites[[i]])
-    sllist[[i]]$longitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][2]
-    sllist[[i]]$latitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][1]
-    sllist[[i]]$titre=alldatasites$titre[i]
-    row.names(sllist[[i]])=c()
-    print(i)
-    sllist[[i]]$idsite=alldatasites$'_id'[i]
+  
+  test=sites$find(query = '{"titre" : "Vigiechiro - Point Fixe-340818"}',fields='{}') 
+  
+  
+  sllist=list()
+  for (i in 1:nrow(alldatasites)){
+    if(!is.null(alldatasites$localites[[i]])){
+      sllist[[i]]=as.data.table(alldatasites$localites[[i]])
+      sllist[[i]]$longitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][2]
+      sllist[[i]]$latitude=alldatasites$localites[[i]]$geometries$geometries[[1]]$coordinates[[1]][1]
+      sllist[[i]]$titre=alldatasites$titre[i]
+      row.names(sllist[[i]])=c()
+      print(i)
+      sllist[[i]]$idsite=alldatasites$'_id'[i]
+    }
   }
-}
-SiteLoc=rbindlist(sllist,use.names=T,fill=T)
-
-Sys.time()
-
-if(TriCoord)
-{
-  SiteLoc=subset(SiteLoc,(SiteLoc$longitude>LongInterval[1])
-                 &(SiteLoc$longitude<LongInterval[2])
-                 &(SiteLoc$latitude>LatInterval[1])
-                 &(SiteLoc$latitude<LatInterval[2]))
-}
-
-
-if(TriSite)
-{
-  SiteLoc=subset(SiteLoc,SiteLoc$idsite %in% RefSite)
-}
-
-
-ListSite=unique(SiteLoc$idsite)
-
-PartSel=subset(alldatapart,alldatapart$site %in% ListSite)
-
-if(TriPoint)
-{
-  PartSel=subset(PartSel,PartSel$point %in% ListPoint)
-}
-
+  SiteLoc=rbindlist(sllist,use.names=T,fill=T)
+  
+  Sys.time()
+  
+  if(TriCoord)
+  {
+    SiteLoc=subset(SiteLoc,(SiteLoc$longitude>LongInterval[1])
+                   &(SiteLoc$longitude<LongInterval[2])
+                   &(SiteLoc$latitude>LatInterval[1])
+                   &(SiteLoc$latitude<LatInterval[2]))
+  }
+  
+  
+  if(TriSite)
+  {
+    SiteLoc=subset(SiteLoc,SiteLoc$idsite %in% RefSite)
+  }
+  
+  
+  ListSite=unique(SiteLoc$idsite)
+  
+  PartSel=subset(alldatapart,alldatapart$site %in% ListSite)
+  
+  if(TriPoint)
+  {
+    PartSel=subset(PartSel,PartSel$point %in% ListPoint)
+  }
+  
 }
 
 
@@ -120,12 +117,12 @@ for (j in 1:length(PartSel$'_id'))
           if(DetailProba){
             for (m in 1:length(Obsj$observations[[k]]$tadarida_taxon_autre)){
               l=l+1
-            ListDetail[[l]]=Obsj$observations[[k]]$tadarida_taxon_autre[[m]]
-            ListDetail[[l]][nrow(ListDetail[[l]])+1,]=c(Obsj$observations[[k]]$tadarida_taxon[m]
-                                               ,Obsj$observations[[k]]$tadarida_probabilite[m])
-            ListDetail[[l]]$donnee=Obsj$titre[[k]]
-            ListDetail[[l]]$tadarida_taxon=Obsj$observations[[k]]$tadarida_taxon[m]
-            #if(ListDetail[[k]]$donnee[1]=="Car660580-2021-Pass1-Z2-QUIL_1_20210805_200550_000"){stop()}
+              ListDetail[[l]]=Obsj$observations[[k]]$tadarida_taxon_autre[[m]]
+              ListDetail[[l]][nrow(ListDetail[[l]])+1,]=c(Obsj$observations[[k]]$tadarida_taxon[m]
+                                                          ,Obsj$observations[[k]]$tadarida_probabilite[m])
+              ListDetail[[l]]$donnee=Obsj$titre[[k]]
+              ListDetail[[l]]$tadarida_taxon=Obsj$observations[[k]]$tadarida_taxon[m]
+              #if(ListDetail[[k]]$donnee[1]=="Car660580-2021-Pass1-Z2-QUIL_1_20210805_200550_000"){stop()}
             }
           }
           ListObs[[k]]=Obsj$observations[[k]]
@@ -147,6 +144,10 @@ for (j in 1:length(PartSel$'_id'))
 
 ObsAll=rbindlist(ObsAlllist,use.names=T,fill=T)
 
+#ObsAll=ObsAll[order(ObsAll$donnee),]
+head(ObsAll)
+beep()
+
 matchTaxa=match(ObsAll$tadarida_taxon,alldatataxa$'_id')
 
 summary(matchTaxa)
@@ -158,28 +159,56 @@ print(length(Missing))
 
 table(ObsAll$espece)
 
+names(ObsAll)
+
+#si validateur_taxon
+if("validateur_taxon" %in% names(ObsAll)){
+  matchTaxa=match(ObsAll$validateur_taxon,alldatataxa$'_id')
+  
+  summary(matchTaxa)
+  
+  ObsAll$validateur_taxon=alldatataxa$libelle_court[matchTaxa]
+  ObsAll$validateur_taxon=ifelse(is.na(ObsAll$validateur_taxon),"",ObsAll$validateur_taxon)
+  table(ObsAll$validateur_taxon)
+  
+}
+
+#si observateur_taxon
+if("observateur_taxon" %in% names(ObsAll)){
+  matchTaxa=match(ObsAll$observateur_taxon,alldatataxa$'_id')
+  
+  summary(matchTaxa)
+  
+  ObsAll$observateur_taxon=alldatataxa$libelle_court[matchTaxa]
+  ObsAll$observateur_taxon=ifelse(is.na(ObsAll$observateur_taxon),"",ObsAll$observateur_taxon)
+  table(ObsAll$observateur_taxon)
+  
+}
+
+
+
 fwrite(ObsAll,paste0(DirOut,"/Obs_",Tag,"_",Sys.Date(),".csv"),sep=";")
 
 if(DetailProba){
-DetailAll=rbindlist(DetailAlllist,use.names=T,fill=T)
-matchTaxa=match(DetailAll$taxon,alldatataxa$'_id')
-
-summary(matchTaxa)
-test=subset(DetailAll,is.na(matchTaxa))
-
-DetailAll$espece=alldatataxa$libelle_court[matchTaxa]
-
-DetailCast=dcast(DetailAll,donnee+tadarida_taxon~espece,fun.aggregate=function(x) as.numeric(paste(x, collapse=""))
-                 ,value.var ="probabilite")
-
-test=subset(DetailCast,is.na(DetailCast$Tadten))
-test$donnee
-test2=subset(DetailAll,DetailAll$donnee==test$donnee[1])
-
-#summary(DetailCast)
-
-fwrite(DetailCast,paste0(DirOut,"/Detail_",Tag,"_",Sys.Date(),".csv"),sep=";")
-
+  DetailAll=rbindlist(DetailAlllist,use.names=T,fill=T)
+  matchTaxa=match(DetailAll$taxon,alldatataxa$'_id')
+  
+  summary(matchTaxa)
+  test=subset(DetailAll,is.na(matchTaxa))
+  
+  DetailAll$espece=alldatataxa$libelle_court[matchTaxa]
+  
+  DetailCast=dcast(DetailAll,donnee+tadarida_taxon~espece,fun.aggregate=function(x) as.numeric(paste(x, collapse=""))
+                   ,value.var ="probabilite")
+  
+  test=subset(DetailCast,is.na(DetailCast$Tadten))
+  test$donnee
+  test2=subset(DetailAll,DetailAll$donnee==test$donnee[1])
+  
+  #summary(DetailCast)
+  
+  fwrite(DetailCast,paste0(DirOut,"/Detail_",Tag,"_",Sys.Date(),".csv"),sep=";")
+  
 }
 
 
