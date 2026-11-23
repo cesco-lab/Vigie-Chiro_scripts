@@ -345,3 +345,5 @@ tail(alldatapart$`_created`)
 sum(p_export$nb_obs) #nb obs
 sum(p_export$nb_obs)/2 #nb files estimated
 
+PartE=subset(p_export,p_export$participation %in% ListPartEall$ListPartEall)
+table(PartE$observateur)
