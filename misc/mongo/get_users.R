@@ -11,7 +11,7 @@ PatternEmbargo="Nouvelle Charte avec Embargo"
 Var=c("_id","donnees_publiques","email","google_id" 
       ,"pseudo",             "role",                  "professionnel"
       ,"nom"             ,   "prenom"        ,     "adresse"          ,  "telephone"        ,  "organisation"   ,    "charte_acceptee"   
-      ,"facebook_id" ,       "commentaire"  )
+      ,"facebook_id" ,       "commentaire" ,"_created" )
 
 
 FileEmbargo=list.files(DirEmbargo,PatternEmbargo,full.names=T)
@@ -51,6 +51,6 @@ summary(AllDataS$Embargo)
   
 fwrite(AllDataS,OutF,sep=";")
 
-test=subset(AllDataS,grepl("marion",AllDataS$email))
+test=subset(AllDataS,grepl("runeau",AllDataS$email))
 test$email
-
+test
