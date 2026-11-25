@@ -79,7 +79,7 @@ SiteLoc$geometries.type=NULL
 SiteLoc$geometries.geometries=NULL
 
 SiteLoc=subset(SiteLoc,!is.na(as.numeric(SiteLoc$longitude)))
-fwrite(SiteLoc,"sites_localites.txt",sep=";")
+
 #fwrite(SiteLoc,"sites_localites.csv",sep=";")
 
 Sys.time()
@@ -93,6 +93,8 @@ Gite=mapply(function(x,y)
 
 summary(Gite)
 
+SiteLoc$Gite=Gite
+fwrite(SiteLoc,"sites_localites.txt",sep=";")
 SiteLocPF=subset(SiteLoc,SiteLoc$protocole=="POINT_FIXE")
 SiteLocRP=subset(SiteLoc,SiteLoc$protocole!="POINT_FIXE")
 SiteLocRP=subset(SiteLocRP,(!grepl("T",SiteLocRP$nom))|grepl("3",SiteLocRP$nom))
